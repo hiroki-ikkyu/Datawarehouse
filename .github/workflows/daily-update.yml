@@ -29,6 +29,9 @@ jobs:
       - name: Fetch Fear & Greed Index
         run: python Scripts/fetch_fear_greed.py
 
+      - name: Fetch Crypto Fear & Greed Index
+        run: python Scripts/fetch_crypto_fear_greed.py
+
       - name: Commit and push if changed
         run: |
           git config user.name "github-actions[bot]"
