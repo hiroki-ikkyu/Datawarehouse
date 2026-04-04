@@ -24,7 +24,7 @@ jobs:
           python-version: "3.12"
 
       - name: Install dependencies
-        run: pip install requests
+        run: pip install requests yfinance pandas
 
       - name: Fetch Fear & Greed Index
         run: python infrastructure/scripts/fetch_fear_greed.py
@@ -32,11 +32,14 @@ jobs:
       - name: Fetch Crypto Fear & Greed Index
         run: python infrastructure/scripts/fetch_crypto_fear_greed.py
 
+      - name: Fetch commodity prices
+        run: python infrastructure/scripts/fetch_commodities.py
+
       - name: Commit and push if changed
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add data/
+          git add -A
           if git diff --cached --quiet; then
             echo "No changes to commit."
           else
