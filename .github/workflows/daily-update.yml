@@ -24,7 +24,7 @@ jobs:
           python-version: "3.12"
 
       - name: Install dependencies
-        run: pip install requests yfinance pandas
+        run: pip install requests yfinance pandas anthropic
 
       - name: Fetch Fear & Greed Index
         run: python infrastructure/scripts/fetch_fear_greed.py
@@ -40,6 +40,11 @@ jobs:
 
       - name: Calculate spreads
         run: python analysts/materials/spreads/calc_spreads.py
+
+      - name: Generate morning comment
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: python public-relations/morning-brief/generate_comment.py
 
       - name: Commit and push if changed
         run: |
