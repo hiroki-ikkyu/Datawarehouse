@@ -53,4 +53,4 @@ jobs:
           git add -A
           git diff --cached --quiet || git commit -m "data: update $(date -u +%Y-%m-%d)"
           git pull --rebase origin main
-          git push
+          git push --force-with-lease
