@@ -1,8 +1,8 @@
-name: Daily Fear & Greed Update
+name: Ikkyu Capital Daily Pipeline
 
 on:
   schedule:
-    - cron: "30 21 * * 0-4"  # UTC 21:30 = JST 翌6:30（月〜金）
+    - cron: "30 21 * * *"  # UTC 21:30 = JST 翌6:30（毎日）
   workflow_dispatch:
 
 permissions:
