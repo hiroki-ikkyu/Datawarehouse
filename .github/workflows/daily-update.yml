@@ -38,6 +38,9 @@ jobs:
       - name: Generate alerts
         run: python infrastructure/scripts/generate_alerts.py
 
+      - name: Calculate spreads
+        run: python analysts/materials/spreads/calc_spreads.py
+
       - name: Commit and push if changed
         run: |
           git config user.name "github-actions[bot]"
