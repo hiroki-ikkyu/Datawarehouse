@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>素材セクター入門 #6 — ガラス・セメント（Glass & Cement）</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:#f5f5f7;--card:#ffffff;--text:#1d1d1f;--sub:#6e6e73;
+    --accent:#2c2c2e;--radius:16px;
+    --shadow:0 1px 3px rgba(0,0,0,0.04);
+    --shadow-lg:0 4px 20px rgba(0,0,0,0.08);
+    --gc-gradient:linear-gradient(135deg,#495057 0%,#868e96 50%,#adb5bd 100%);
+    --glass:#5c7cfa;--cement:#e8590c;--spec:#ae3ec9;
+    --red:#c92a2a;--orange:#e8590c;--green:#2b8a3e;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{font-family:'DM Sans','Noto Sans JP',sans-serif;background:var(--bg);color:var(--text);line-height:1.7;padding:24px 16px 60px;max-width:800px;margin:0 auto;}
+
+  .header{text-align:center;margin-bottom:40px;padding:32px 20px;background:var(--gc-gradient);border-radius:var(--radius);color:#fff;position:relative;overflow:hidden;}
+  .header::before{content:'🏗';position:absolute;font-size:120px;opacity:0.06;top:-10px;right:-10px;}
+  .header .series-tag{display:inline-block;background:rgba(255,255,255,0.15);padding:4px 14px;border-radius:20px;font-size:12px;letter-spacing:1px;text-transform:uppercase;margin-bottom:12px;}
+  .header h1{font-size:26px;font-weight:700;margin-bottom:8px;}
+  .header p{font-size:14px;opacity:0.7;}
+
+  .section{margin-bottom:32px;}
+  .section-title{font-size:18px;font-weight:700;margin-bottom:16px;display:flex;align-items:center;gap:8px;}
+  .section-title .icon{width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;}
+  .card{background:var(--card);border-radius:var(--radius);padding:20px;box-shadow:var(--shadow);margin-bottom:12px;}
+  .card p{font-size:14px;color:var(--sub);}
+  .card p strong{color:var(--text);}
+
+  .chain-container{overflow-x:auto;padding:8px 0;}
+  .chain{display:flex;align-items:stretch;gap:0;min-width:650px;}
+  .chain-step{flex:1;text-align:center;}
+  .chain-box{border-radius:12px;padding:14px 8px;box-shadow:var(--shadow);min-height:90px;display:flex;flex-direction:column;align-items:center;justify-content:center;border:2px solid transparent;}
+  .chain-box .emoji{font-size:22px;margin-bottom:4px;}
+  .chain-box .label{font-size:11px;font-weight:700;}
+  .chain-box .sub-label{font-size:9px;color:var(--sub);margin-top:2px;}
+  .chain-box.gl{border-color:var(--glass);background:#edf2ff;}
+  .chain-box.cm{border-color:var(--cement);background:#fff4e6;}
+  .chain-arrow{display:flex;align-items:center;justify-content:center;width:24px;flex-shrink:0;color:var(--sub);font-size:14px;}
+
+  /* Two-column split */
+  .split{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  .split-full{grid-column:1/-1;}
+
+  .tab-bar{display:flex;gap:4px;margin-bottom:16px;background:#e9ecef;border-radius:10px;padding:3px;overflow-x:auto;}
+  .tab-btn{flex:1;padding:8px 4px;border:none;background:transparent;border-radius:8px;font-family:inherit;font-size:11px;font-weight:600;color:var(--sub);cursor:pointer;transition:all 0.2s;white-space:nowrap;min-width:55px;}
+  .tab-btn.active{background:var(--card);color:var(--text);box-shadow:0 1px 3px rgba(0,0,0,0.08);}
+  .tab-content{display:none;}
+  .tab-content.active{display:block;}
+
+  .prod-profile{background:var(--card);border-radius:var(--radius);padding:20px;box-shadow:var(--shadow);border-top:4px solid;margin-bottom:12px;}
+  .prod-header{display:flex;align-items:center;gap:10px;margin-bottom:12px;}
+  .prod-badge{padding:4px 10px;border-radius:8px;font-size:11px;font-weight:700;color:#fff;}
+  .prod-profile h3{font-size:16px;font-weight:700;}
+  .prod-profile .prod-desc{font-size:13px;color:var(--sub);line-height:1.8;margin-bottom:12px;}
+  .prod-stats{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+  .stat-item{background:#f8f9fa;border-radius:8px;padding:10px;}
+  .stat-label{font-size:10px;color:var(--sub);font-weight:600;text-transform:uppercase;letter-spacing:0.5px;}
+  .stat-value{font-size:15px;font-weight:700;margin-top:2px;}
+  .stat-note{font-size:10px;color:var(--sub);margin-top:2px;}
+
+  .formula-box{background:var(--gc-gradient);border-radius:var(--radius);padding:24px;color:#fff;text-align:center;margin-bottom:12px;}
+  .formula-box .formula{font-size:15px;font-weight:700;margin-bottom:8px;}
+  .formula-box .formula .var{color:#d0bfff;}
+  .formula-box .formula .op{color:#ffd43b;margin:0 4px;}
+  .formula-box .note{font-size:12px;opacity:0.6;}
+
+  .spread-visual{background:var(--card);border-radius:var(--radius);padding:24px;box-shadow:var(--shadow);margin-bottom:12px;}
+  .spread-bar-container{margin:12px 0;}
+  .spread-bar{display:flex;height:40px;border-radius:10px;overflow:hidden;font-size:10px;font-weight:600;color:#fff;}
+  .spread-seg{display:flex;align-items:center;justify-content:center;padding:0 4px;white-space:nowrap;}
+  .spread-label{display:flex;justify-content:space-between;font-size:11px;color:var(--sub);margin-top:6px;}
+  .spread-annotation{font-size:13px;color:var(--sub);text-align:center;margin-top:16px;padding-top:16px;border-top:1px solid #f1f3f5;line-height:1.8;}
+
+  .kpi-table{width:100%;border-collapse:collapse;font-size:13px;}
+  .kpi-table th{text-align:left;padding:10px 12px;background:#f1f3f5;font-weight:600;}
+  .kpi-table td{padding:10px 12px;border-bottom:1px solid #f1f3f5;}
+  .kpi-table tr:last-child td{border-bottom:none;}
+  .kpi-table .kpi-name{font-weight:600;}
+  .kpi-table .kpi-why{color:var(--sub);font-size:12px;}
+
+  .risk-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+  .risk-item{background:var(--card);border-radius:12px;padding:14px;box-shadow:var(--shadow);border-left:4px solid;}
+  .risk-item.high{border-color:var(--red);}
+  .risk-item.mid{border-color:var(--orange);}
+  .risk-item.low{border-color:var(--green);}
+  .risk-item .risk-name{font-weight:700;font-size:13px;margin-bottom:4px;}
+  .risk-item .risk-desc{font-size:11px;color:var(--sub);}
+
+  .cov-table{width:100%;border-collapse:collapse;font-size:12px;background:var(--card);border-radius:12px;overflow:hidden;box-shadow:var(--shadow);}
+  .cov-table th{text-align:left;padding:10px 12px;background:#f1f3f5;font-weight:600;font-size:11px;}
+  .cov-table td{padding:10px 12px;border-bottom:1px solid #f1f3f5;}
+  .cov-table tr:last-child td{border-bottom:none;}
+
+  details{background:var(--card);border-radius:12px;padding:16px;box-shadow:var(--shadow);margin-bottom:10px;}
+  details summary{font-weight:700;font-size:14px;cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center;}
+  details summary::after{content:'▸';transition:transform 0.2s;}
+  details[open] summary::after{transform:rotate(90deg);}
+  details .detail-body{margin-top:12px;font-size:13px;color:var(--sub);line-height:1.8;}
+
+  .callout-box{border-radius:var(--radius);padding:24px;color:#fff;margin-bottom:12px;}
+  .callout-box h3{font-size:17px;font-weight:700;margin-bottom:10px;}
+  .callout-box p{font-size:13px;opacity:0.9;line-height:1.8;}
+
+  .footnote{margin-top:40px;text-align:center;font-size:12px;color:var(--sub);}
+  @media(max-width:520px){.prod-stats,.risk-grid,.split{grid-template-columns:1fr;}.chain{min-width:580px;}}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="series-tag">素材セクター入門 #6</div>
+  <h1>ガラス・セメント（Glass & Cement）</h1>
+  <p>建設と製造業を支える — 重厚長大の内需型産業</p>
+</div>
+
+<!-- 1. Overview -->
+<div class="section">
+  <div class="section-title"><div class="icon" style="background:#edf2ff;">📖</div>セクター概観</div>
+  <div class="card">
+    <p>
+      <strong>ガラスとセメント</strong>はともに「窯業（ようぎょう）」に分類される、鉱物原料を高温で焼成・溶融する産業。
+      共通点は<strong>エネルギーコスト比率の高さ</strong>（原価の30-40%）と<strong>重量物で輸送コストが大きい</strong>（内需型になりやすい）こと。<br/><br/>
+      ただし投資テーマとしては大きく異なる。<strong>セメント</strong>は国内建設投資に連動する典型的な内需シクリカル。
+      一方<strong>ガラス</strong>は、建築用板ガラス（内需）からディスプレイ用（テック需要）、自動車用（グローバル）、
+      半導体・EV向け特殊ガラスまで、カバー領域が驚くほど広い。
+    </p>
+  </div>
+</div>
+
+<!-- ==================== GLASS ==================== -->
+<div class="section">
+  <div class="section-title"><div class="icon" style="background:#dbe4ff;">🪟</div>Part 1：ガラス（Glass）</div>
+</div>
+
+<!-- Glass value chain -->
+<div class="section">
+  <div class="section-title"><div class="icon" style="background:#fff3bf;">🔗</div>ガラスのバリューチェーン</div>
+  <div class="chain-container">
+    <div class="chain">
+      <div class="chain-step">
+        <div class="chain-box">
+          <div class="emoji">⛰</div>
+          <div class="label">珪砂・ソーダ灰</div>
+          <div class="sub-label">Silica Sand</div>
+        </div>
+      </div>
+      <div class="chain-arrow">→</div>
+      <div class="chain-step">
+        <div class="chain-box gl">
+          <div class="emoji">🔥</div>
+          <div class="label">溶融（1,500℃超）</div>
+          <div class="sub-label">Melting</div>
+        </div>
+      </div>
+      <div class="chain-arrow">→</div>
+      <div class="chain-step">
+        <div class="chain-box gl">
+          <div class="emoji">〰️</div>
+          <div class="label">フロート成形</div>
+          <div class="sub-label">Float Process</div>
+        </div>
+      </div>
+      <div class="chain-arrow">→</div>
+      <div class="chain-step">
+        <div class="chain-box gl">
+          <div class="emoji">✨</div>
+          <div class="label">加工（コート/強化）</div>
+          <div class="sub-label">Processing</div>
+        </div>
+      </div>
+      <div class="chain-arrow">→</div>
+      <div class="chain-step">
+        <div class="chain-box">
+          <div class="emoji">🏢</div>
+          <div class="label">需要家</div>
+          <div class="sub-label">建築/自動車/ディスプレイ</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="card" style="margin-top:8px;">
+    <p><strong>フロート法：</strong>溶融ガラスを錫の浴の上に浮かべて平らに成形する技術。1959年にピルキントン（現NSG）が発明。世界の板ガラスのほぼ100%がこの方法。ガラス窯は24時間365日稼働で、一度火を入れると10-15年止められない（高炉と同じ）。</p>
+  </div>
+</div>
+
+<!-- Glass product segments -->
+<div class="section">
+  <div class="section-title"><div class="icon" style="background:#d3f9d8;">📦</div>ガラス製品セグメント</div>
+
+  <div class="tab-bar">
+    <button class="tab-btn active" onclick="switchTab('flatglass')">建築用板ガラス</button>
+    <button class="tab-btn" onclick="switchTab('autoglass')">自動車用</button>
+    <button class="tab-btn" onclick="switchTab('display')">ディスプレイ</button>
+    <button class="tab-btn" onclick="switchTab('specglass')">特殊ガラス</button>
+  </div>
+
+  <!-- Flat Glass -->
+  <div class="tab-content active" id="tab-flatglass">
+    <div class="prod-profile" style="border-color:var(--glass);">
+      <div class="prod-header">
+        <span class="prod-badge" style="background:var(--glass);">🪟</span>
+        <h3>建築用板ガラス — 最大のボリュームゾーン</h3>
+      </div>
+      <div class="prod-desc">
+        窓ガラス、ペアガラス（複層ガラス）、Low-Eガラス（断熱）、防火ガラスなど。
+        建設投資に連動する内需型。エネルギー効率規制の強化でLow-E比率が上昇トレンド。
+        重量物のため<strong>輸送半径が限定的</strong>→地域ごとの寡占構造。
+      </div>
+      <div class="prod-stats">
+        <div class="stat-item">
+          <div class="stat-label">世界3強</div>
+          <div class="stat-value">AGC、NSG、Saint-Gobain</div>
+          <div class="stat-note">+中国の信義ガラス、福耀ガラス</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-label">需要ドライバー</div>
+          <div class="stat-value">建設投資＋省エネ規制</div>
+          <div class="stat-note">ZEB（ゼロエネルギービル）で高機能ガラス需要増</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-label">利益率</div>
+          <div class="stat-value">OPM 5-10%</div>
+          <div class="stat-note">エネルギーコスト比率が高く変動大</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-label">中国リスク</div>
+          <div class="stat-value">世界の板ガラスの60%が中国</div>
+          <div class="stat-note">不動産不況→過剰供給→価格崩壊リスク</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Auto Glass -->
+  <div class="tab-content" id="tab-autoglass">
+    <div class="prod-profile" style="border-color:var(--green);">
+      <div class="prod-header">
+        <span class="prod-badge" style="background:var(--green);">🚗</span>
+        <h3>自動車用ガラス — ADAS時代の付加価値向上</h3>
+      </div>
+      <div class="prod-desc">
+        フロントガラス（合わせガラス）、サイド/リアガラス（強化ガラス）。
+        ADAS（先進運転支援）でフロントガラスにカメラ・センサーが組み込まれ、単価が急上昇。
+        <strong>HUD（ヘッドアップディスプレイ）</strong>用の楔形ガラス、<strong>調光ガラス</strong>など高付加価値化が進行。
+        AGCとSaint-Gobain Sekuritが世界大手。
+      </div>
+      <div class="prod-stats">
+        <div class="stat-item">
+          <div class="stat-label">ADAS対応</div>
+          <div class="stat-value">カメラブラケット一体型</div>
+          <div class="stat-note">高精度な光学歪み管理が必要→技術障壁</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-label">サンルーフ</div>
+          <div class="stat-value">EV化でガラスルーフ増加</div>
+          <div class="stat-note">テスラ全車種、BYD等で大型ガラスルーフ採用</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-label">単価トレンド</div>
+          <div class="stat-value">1台あたり面積・機能が拡大</div>
+          <div class="stat-note">ICE車→EV車でガラス使用量+20-30%</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-label">主要プレーヤー</div>
+          <div class="stat-value">AGC、NSG、福耀</div>
+          <div class="stat-note">福耀（中国）がシェア急拡大中</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Display Glass -->
+  <div class="tab-content" id="tab-display">
+    <div class="prod-profile" style="border-color:var(--spec);">
+      <div class="prod-header">
+        <span class="prod-badge" style="background:var(--spec);">📱</span>
+        <h3>ディスプレイ用ガラス — テクノロジーの窓</h3>
+      </div>
+      <div class="prod-desc">
+        液晶/有機ELパネルの基板ガラス。<strong>無アルカリガラス</strong>を超薄板（0.1-0.7mm）に成形。
+        フュージョン法（オーバーフロー法）で両面が無研磨で平滑なガラスを製造。
+        <strong>Corning（米）が世界シェア約50%</strong>で圧倒的。AGCは2位ポジション。
+        TV大型化＋有機EL化でGen10.5（2,940×3,370mm）の超大型基板需要。
+      </div>
+      <div class="prod-stats">
+        <div class="stat-item">
+          <div class="stat-label">世界構造</div>
+          <div class="stat-value">Corning 50%、AGC 20%</div>
+          <div class="stat-note">+日本電気硝子（NEG）、Schott</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-label">需要ドライバー</div>
+          <div class="stat-value">TV大型化 + OLED化</div>
+          <div class="stat-note">IT用（タブレット/ノートPC）も安定需要</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-label">利益率</div>
+          <div class="stat-value">OPM 15-25%</div>
+          <div class="stat-note">技術障壁が高く高マージン。ただし市況循環あり</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-label">サイクル</div>
+          <div class="stat-value">パネルメーカーの稼働率に連動</div>
+          <div class="stat-note">BOE/CSOT（中国）の増産計画を注視</div>
+        </div>
+      </div>
+    </div>
+
+    <details>
+      <summary>ディスプレイガラスの価格メカニズム</summary>
+      <div class="detail-body">
+        <strong>四半期価格交渉：</strong>パネルメーカー（Samsung Display、LG Display、BOE等）と四半期ごとに価格交渉。
+        パネル市況が好調なら値上げ、不況なら値下げ圧力。<br/><br/>
+        <strong>Gen（世代）の概念：</strong>マザーガラスのサイズ。大きいほど生産効率が良い。
+        Gen8.5（55インチTV向け）→Gen10.5（65-75インチ）が主流に。<br/><br/>
+        <strong>面積ベースで需要を見る：</strong>枚数ではなく「面積成長率」がKPI。TV大型化は枚数横ばいでも面積増。
+      </div>
+    </details>
+  </div>
+
+  <!-- Specialty Glass -->
+  <div class="tab-content" id="tab-specglass">
+    <div class="prod-profile" style="border-color:var(--spec);">
+      <div class="prod-header">
+        <span class="prod-badge" style="background:var(--spec);">🔬</span>
+        <h3>特殊ガラス — 成長分野の宝庫</h3>
+      </div>
+      <div class="prod-desc">
+        汎用板ガラスから離れた高付加価値・ニッチ製品群。テクノロジーとエネルギー転換が追い風。
+      </div>
+    </div>
+
+    <div class="split">
+      <div class="card">
+        <p><strong>🔋 EV関連</strong><br/>
+        バッテリーセパレータ用ガラス繊維、車載ディスプレイ用カバーガラス。AGC「Dragontrail」はスマホ＋車載用カバーガラス。</p>
+      </div>
+      <div class="card">
+        <p><strong>💊 医薬品用</strong><br/>
+        バイアル瓶・アンプル。ホウケイ酸ガラス。バイオ医薬品の普及で高品質ガラス容器需要増。AGCの「AMINOCOVER」。</p>
+      </div>
+      <div class="card">
+        <p><strong>🔭 半導体関連</strong><br/>
+        フォトマスク基板（EUV用合成石英）。半導体露光に不可欠。AGC、HOYA（7741）。EUV世代で要求精度が極限化。</p>
+      </div>
+      <div class="card">
+        <p><strong>☀️ 太陽光パネル用</strong><br/>
+        カバーガラス。超白板ガラス（鉄分を除去し透過率を最大化）。AGCが世界大手。再エネ拡大で安定需要。</p>
+      </div>
+      <div class="card">
+        <p><strong>📡 光通信関連</strong><br/>
+        光ファイバーのプリフォーム（#5参照）。石英ガラス（合成石英）。信越石英等が供給。DC需要で間接的に恩恵。</p>
+      </div>
+      <div class="card">
+        <p><strong>🧪 ガラス繊維</strong><br/>
+        FRP（繊維強化プラスチック）の補強材。風力発電ブレード、自動車軽量化。日本電気硝子が国内大手。</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Glass profit structure -->
+<div class="section">
+  <div class="section-title"><div class="icon" style="background:#ffe3e3;">💰</div>ガラスの利益構造</div>
+  <div class="formula-box">
+    <div class="formula">
+      <span class="var">利益</span><span class="op">=</span>
+      <span class="var">（製品単価 − 原料 − エネルギー）</span><span class="op">×</span>
+      <span class="var">生産量</span><span class="op">−</span><span class="var">固定費</span>
+    </div>
+    <div class="note">エネルギーコストが原価の30-40%。LNG/重油価格が直接影響</div>
+  </div>
+
+  <div class="spread-visual">
+    <div style="font-weight:700;font-size:14px;margin-bottom:12px;">セグメント別コスト構造比較</div>
+
+    <div style="font-size:12px;font-weight:600;margin-bottom:4px;color:var(--glass);">建築用板ガラス</div>
+    <div class="spread-bar-container">
+      <div class="spread-bar">
+        <div class="spread-seg" style="width:20%;background:#5c7cfa;">原料（珪砂等）</div>
+        <div class="spread-seg" style="width:35%;background:#e8590c;">エネルギー</div>
+        <div class="spread-seg" style="width:25%;background:#868e96;">加工・固定費</div>
+        <div class="spread-seg" style="width:12%;background:#495057;">物流</div>
+        <div class="spread-seg" style="width:8%;background:#2b8a3e;">利益</div>
+      </div>
+      <div style="font-size:10px;color:var(--sub);margin-top:4px;margin-bottom:14px;">OPM 5-10% — エネルギー価格に極めて敏感</div>
+    </div>
+
+    <div style="font-size:12px;font-weight:600;margin-bottom:4px;color:var(--spec);">ディスプレイ用ガラス</div>
+    <div class="spread-bar-container">
+      <div class="spread-bar">
+        <div class="spread-seg" style="width:15%;background:#5c7cfa;">原料</div>
+        <div class="spread-seg" style="width:20%;background:#e8590c;">エネルギー</div>
+        <div class="spread-seg" style="width:30%;background:#868e96;">技術・R&D・固定費</div>
+        <div class="spread-seg" style="width:10%;background:#495057;">減価償却</div>
+        <div class="spread-seg" style="width:25%;background:#2b8a3e;">利益</div>
+      </div>
+      <div style="font-size:10px;color:var(--sub);margin-top:4px;">OPM 15-25% — 技術障壁が高く高マージン</div>
+    </div>
+
+    <div class="spread-annotation">
+      同じ「ガラス」でも板ガラスとディスプレイガラスでは利益率が3倍違う。<br/>
+      → <strong>AGCの分析では製品ミックスの変化を追うことが重要。</strong>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== CEMENT ==================== -->
+<div class="section" style="margin-top:48px;">
+  <div class="section-title"><div class="icon" style="background:#fff4e6;">🏗</div>Part 2：セメント（Cement）</div>
+</div>
+
+<div class="section">
+  <div class="section-title"><div class="icon" style="background:#fff3bf;">🔗</div>セメントのバリューチェーン</div>
+  <div class="chain-container">
+    <div class="chain">
+      <div class="chain-step">
+        <div class="chain-box">
+          <div class="emoji">⛰</div>
+          <div class="label">石灰石採掘</div>
+          <div class="sub-label">Limestone</div>
+        </div>
+      </div>
+      <div class="chain-arrow">→</div>
+      <div class="chain-step">
+        <div class="chain-box cm">
+          <div class="emoji">🔥</div>
+          <div class="label">焼成（1,450℃）</div>
+          <div class="sub-label">キルン（回転窯）</div>
+        </div>
+      </div>
+      <div class="chain-arrow">→</div>
+      <div class="chain-step">
+        <div class="chain-box cm">
+          <div class="emoji">⚙️</div>
+          <div class="label">粉砕→クリンカ</div>
+          <div class="sub-label">Clinker</div>
+        </div>
+      </div>
+      <div class="chain-arrow">→</div>
+      <div class="chain-step">
+        <div class="chain-box cm">
+          <div class="emoji">🧱</div>
+          <div class="label">セメント/生コン</div>
+          <div class="sub-label">Cement / RMC</div>
+        </div>
+      </div>
+      <div class="chain-arrow">→</div>
+      <div class="chain-step">
+        <div class="chain-box">
+          <div class="emoji">🏢</div>
+          <div class="label">建設現場</div>
+          <div class="sub-label">ゼネコン/公共工事</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="card" style="margin-top:8px;">
+    <p>
+      <strong>石灰石は日本で自給可能な数少ない鉱物資源。</strong>秩父・津久見・山口などに大規模鉱山。
+      セメント各社は鉱山を直接保有。キルン（回転窯）で1,450℃に焼成してクリンカを作り、石膏と混合してセメントに。
+      セメントは水と混ぜると固まるので<strong>雨・湿気に弱い＝長期保管不可＝在庫しにくい</strong>。
+    </p>
+  </div>
+</div>
+
+<!-- Cement characteristics -->
+<div class="section">
+  <div class="section-title"><div class="icon" style="background:#ffe3e3;">💰</div>セメントの事業特性</div>
+
+  <div class="formula-box" style="background:linear-gradient(135deg,#7f1d1d 0%,#b91c1c 100%);">
+    <div class="formula">
+      <span class="var">利益</span><span class="op">=</span>
+      <span class="var">（セメント単価 − 石灰石 − 燃料費）</span><span class="op">×</span>
+      <span class="var">出荷量</span><span class="op">−</span><span class="var">固定費</span>
+    </div>
+    <div class="note">燃料費（石炭・石油コークス・廃棄物）が原価の30-35%を占める</div>
+  </div>
+
+  <div class="callout-box" style="background:linear-gradient(135deg,#5c3d0e 0%,#92400e 100%);">
+    <h3>🗑 セメント＝「社会のゴミ箱」</h3>
+    <p>
+      セメントキルンの1,450℃という超高温は、廃棄物を完全に焼却・無害化できる。
+      <strong>廃タイヤ、下水汚泥、産業廃棄物、都市ゴミ焼却灰</strong>をキルンの燃料・原料として受け入れ。
+      これにより燃料費を削減しつつ廃棄物処理の受託収入を得る「一石二鳥」モデル。<br/><br/>
+      太平洋セメントは年間約800万トンの廃棄物・副産物を受け入れ。
+      <strong>廃棄物処理事業の利益貢献が年々拡大</strong>しており、
+      単なるセメント販売ではない「環境インフラ企業」としての側面が強まっている。
+    </p>
+  </div>
+
+  <details>
+    <summary>セメント業界の構造的特徴</summary>
+    <div class="detail-body">
+      <strong>① 内需型：</strong>セメントは重い（1m³ = 約3トン）ので輸送コスト大。基本的に国内消費。輸出は限定的。<br/><br/>
+      <strong>② 寡占：</strong>国内は<strong>太平洋セメント、住友大阪セメント、UBE三菱セメント</strong>の3グループで約8割。<br/><br/>
+      <strong>③ 公共投資依存：</strong>需要の約4割が公共工事。国土強靭化計画、防災・減災が下支え。<br/><br/>
+      <strong>④ 季節性：</strong>冬季（12-2月）は工事量減少でセメント出荷減。4-6月と9-11月がピーク。<br/><br/>
+      <strong>⑤ CO2問題：</strong>セメント製造は世界のCO2排出の約7%。焼成時にCaCO3→CaO＋CO2（プロセス排出）が不可避。カーボンキャプチャー（CCS）が長期的課題。
+    </div>
+  </details>
+
+  <details>
+    <summary>日本のセメント需要の長期トレンド</summary>
+    <div class="detail-body">
+      <strong>ピーク：</strong>1990年代前半の年間9,000万トン超（バブル期の建設ラッシュ）。<br/>
+      <strong>現在：</strong>年間約4,000万トン前後まで半減。人口減・建設投資減が構造要因。<br/>
+      <strong>下支え要因：</strong>国土強靭化（5年15兆円）、老朽インフラ更新（橋梁・トンネル）、大阪万博・リニア。<br/>
+      <strong>海外展開：</strong>太平洋セメントは米国（CalPortland）に大規模事業。アジア（ベトナム・フィリピン）も。
+      成熟する国内市場を海外成長で補う戦略。
+    </div>
+  </details>
+</div>
+
+<!-- KPIs for both -->
+<div class="section">
+  <div class="section-title"><div class="icon" style="background:#e8f4fd;">📊</div>アナリストが見るべきKPI</div>
+  <div class="card" style="padding:0;overflow:hidden;">
+    <table class="kpi-table">
+      <thead><tr><th>KPI</th><th>対象</th><th>なぜ重要か</th></tr></thead>
+      <tbody>
+        <tr><td class="kpi-name">セメント国内出荷量</td><td>セメント</td><td class="kpi-why">セメント協会が月次発表。建設投資の代理変数。前年比で需要トレンドを見る。</td></tr>
+        <tr><td class="kpi-name">セメント単価</td><td>セメント</td><td class="kpi-why">値上げの浸透度。太平洋セメントは2022-23年に累計で数千円/tの値上げを実施。</td></tr>
+        <tr><td class="kpi-name">燃料費（石炭・廃棄物）</td><td>セメント</td><td class="kpi-why">原価の30-35%。一般炭価格と連動。廃棄物燃料比率の上昇＝コスト低減。</td></tr>
+        <tr><td class="kpi-name">廃棄物受入量</td><td>セメント</td><td class="kpi-why">環境事業の規模と利益貢献。処理受託料が安定収益源。</td></tr>
+        <tr><td class="kpi-name">ディスプレイガラス面積出荷</td><td>ガラス</td><td class="kpi-why">枚数ではなく面積成長率。TV大型化で面積は枚数以上に成長。</td></tr>
+        <tr><td class="kpi-name">エネルギーコスト/売上比率</td><td>両方</td><td class="kpi-why">LNG・石炭・重油の価格変動がダイレクトに利益を左右。最大のコスト変動要因。</td></tr>
+        <tr><td class="kpi-name">板ガラス出荷（国内/欧州）</td><td>ガラス</td><td class="kpi-why">NSGは欧州比率が高い。欧州建設市況の代理変数。</td></tr>
+        <tr><td class="kpi-name">自動車用ガラス受注</td><td>ガラス</td><td class="kpi-why">ADAS対応・ガラスルーフで単価上昇トレンドを確認。OEM別の受注動向。</td></tr>
+        <tr><td class="kpi-name">セグメント利益構成</td><td>AGC</td><td class="kpi-why">AGCは建築/自動車/ディスプレイ/化学の4本柱。ミックス変化で利益率が大きく変動。</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Risks -->
+<div class="section">
+  <div class="section-title"><div class="icon" style="background:#ffe3e3;">⚠️</div>主なリスク要因</div>
+  <div class="risk-grid">
+    <div class="risk-item high">
+      <div class="risk-name">エネルギー価格高騰</div>
+      <div class="risk-desc">最大のリスク。LNG/石炭が原価の30-40%。2022年のエネルギー危機でセメント・ガラスとも大幅減益。</div>
+    </div>
+    <div class="risk-item high">
+      <div class="risk-name">中国の過剰生産（ガラス）</div>
+      <div class="risk-desc">板ガラス・ディスプレイガラスとも中国の能力過剰。不動産不況で余剰が輸出に向かうリスク。</div>
+    </div>
+    <div class="risk-item mid">
+      <div class="risk-name">国内建設投資減少</div>
+      <div class="risk-desc">人口減でセメント長期需要は右肩下がり。公共投資の予算削減があれば直撃。</div>
+    </div>
+    <div class="risk-item mid">
+      <div class="risk-name">CO2規制・炭素税</div>
+      <div class="risk-desc">セメントは世界のCO2の7%。EU CBM（炭素国境調整）の影響。CCS投資コストの負担。</div>
+    </div>
+    <div class="risk-item mid">
+      <div class="risk-name">ディスプレイ市況サイクル</div>
+      <div class="risk-desc">パネル価格の下落局面ではガラスの価格交渉が厳しくなる。中国パネルメーカーの稼働率に連動。</div>
+    </div>
+    <div class="risk-item low">
+      <div class="risk-name">代替材料</div>
+      <div class="risk-desc">木造建築（CLT）の普及でセメント需要減。樹脂窓への置換で板ガラス需要減。ただし影響は限定的。</div>
+    </div>
+  </div>
+</div>
+
+<!-- Coverage -->
+<div class="section">
+  <div class="section-title"><div class="icon" style="background:#f3e8ff;">🇯🇵</div>日本株カバレッジ対応表</div>
+  <div class="card" style="padding:0;overflow:hidden;">
+    <table class="cov-table">
+      <thead><tr><th>銘柄</th><th>ポジション</th><th>注目ポイント</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><strong>AGC（5201）</strong></td>
+          <td>ガラス世界最大手。多角化</td>
+          <td>建築/自動車/ディスプレイ/化学の4セグメント。フッ素化学（半導体エッチングガス）も成長。EUV向けフォトマスク基板。バイオCDMO。</td>
+        </tr>
+        <tr>
+          <td><strong>日本板硝子（NSG/5202）</strong></td>
+          <td>板ガラス＋自動車用</td>
+          <td>ピルキントン（フロート法発明者）を買収。欧州比率高。自動車用は世界3位。財務改善が長年の課題。有利子負債の水準。</td>
+        </tr>
+        <tr>
+          <td><strong>日本電気硝子（5214）</strong></td>
+          <td>ディスプレイ＋特殊ガラス</td>
+          <td>ディスプレイ用ガラス基板。ガラス繊維。全固体電池用結晶化ガラス。ニッチ高付加価値路線。</td>
+        </tr>
+        <tr>
+          <td><strong>太平洋セメント（5233）</strong></td>
+          <td>国内セメント最大手</td>
+          <td>国内シェア約35%。米国CalPortland。廃棄物リサイクル事業。石灰石鉱山の長期残余年数。</td>
+        </tr>
+        <tr>
+          <td><strong>住友大阪セメント（5232）</strong></td>
+          <td>セメント2位＋新素材</td>
+          <td>光電子事業（光変調器→通信インフラ）。セメントと無関係な成長事業が特徴的。</td>
+        </tr>
+        <tr>
+          <td><strong>三菱マテリアル（5711）</strong></td>
+          <td>セメント＋銅＋機能材料（再掲）</td>
+          <td>#4非鉄で既出。セメント事業はUBE三菱セメント（持分法）。非鉄＋セメントの複合分析が必要。</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <details>
+    <summary>AGC vs NSG — 同じガラスメーカーでも全く違う投資テーマ</summary>
+    <div class="detail-body">
+      <strong>AGC：</strong>「化学・電子で攻める」。フッ素化学（半導体のエッチングガス・撥水コーティング）、バイオCDMO（医薬品受託製造）に成長投資。ガラスの枠を超えた多角化企業。PBR1倍超の評価。<br/><br/>
+      <strong>NSG：</strong>「板ガラスの巨人だが財務が重い」。2006年のピルキントン買収で巨額負債。欧州経済に大きく依存。自動車用は技術力高い。財務改善（デレバレッジ）が株価の鍵。PBR1倍割れが長期化。<br/><br/>
+      → 同じセクターでも成長性・財務健全性・事業ポートフォリオが全く異なるため、個別銘柄分析が不可欠。
+    </div>
+  </details>
+</div>
+
+<!-- Cross sector -->
+<div class="section">
+  <div class="section-title"><div class="icon" style="background:#d3f9d8;">🔄</div>他セクターとのつながり</div>
+  <details>
+    <summary>石油・エネルギー（#2）→ ガラス・セメント — 燃料コスト</summary>
+    <div class="detail-body">
+      ガラス溶融炉はLNG/重油、セメントキルンは石炭/石油コークスを使用。エネルギー価格の変動が利益に直撃する「エネルギーコストの被害者」。#2のLNG/石炭価格見通しがガラス・セメントの利益予測に不可欠。
+    </div>
+  </details>
+  <details>
+    <summary>鉄鋼（#3）→ セメント — 高炉スラグ</summary>
+    <div class="detail-body">
+      高炉から出る副産物「高炉スラグ」はセメントの混合材として使用（高炉セメント）。CO2排出を減らせるためESG的に有利。鉄鋼の高炉稼働率が下がるとスラグ供給が減少→セメントのCO2原単位に影響。
+    </div>
+  </details>
+  <details>
+    <summary>線材・ケーブル（#5）→ ガラス — 光ファイバーの原料</summary>
+    <div class="detail-body">
+      光ファイバーの母材は超高純度石英ガラス。ガラスの製造技術がDC/AI時代の通信インフラを支える。信越石英、AGC等が関連。
+    </div>
+  </details>
+  <details>
+    <summary>非鉄（#4）→ ガラス — ディスプレイ周辺</summary>
+    <div class="detail-body">
+      ディスプレイパネルには透明導電膜（ITO＝酸化インジウム錫）が必要。インジウムはレアメタルで三井金属等が製錬。ガラス基板＋ITO＋偏光フィルムのサプライチェーン。
+    </div>
+  </details>
+  <details>
+    <summary>建設セクター → セメント・ガラス — 共通の需要家</summary>
+    <div class="detail-body">
+      建設投資はセメントと建築用ガラスの共通需要ドライバー。新設住宅着工戸数、非住宅着工床面積、公共投資額の3つが先行指標。鉄鋼のH形鋼・鉄筋も同じ需要に連動するため、#3との横串分析が有効。
+    </div>
+  </details>
+</div>
+
+<!-- Global -->
+<div class="section">
+  <div class="section-title"><div class="icon" style="background:#e8f4fd;">🌍</div>グローバルの参考プレーヤー</div>
+  <div class="card">
+    <p>
+      <strong>【ガラス】</strong><br/>
+      <strong>Saint-Gobain</strong>（仏）— 建築用ガラス世界最大手。建材全般に展開。<br/>
+      <strong>Corning</strong>（米）— ディスプレイガラス50%シェア。ゴリラガラス。光ファイバー。<br/>
+      <strong>信義ガラス</strong>（中国/香港上場）— 板ガラス＋太陽光ガラス。中国最大手。<br/>
+      <strong>福耀ガラス</strong>（中国）— 自動車用ガラス世界最大級。中国＋北米。<br/><br/>
+      <strong>【セメント】</strong><br/>
+      <strong>Holcim</strong>（スイス）— セメント世界最大手。脱炭素でリサイクル建材事業を拡大。<br/>
+      <strong>HeidelbergMaterials</strong>（独）— 欧州大手。CCS技術に先行投資。<br/>
+      <strong>UltraTech Cement</strong>（インド）— インド最大手。Adaniグループ。内需成長の恩恵。<br/>
+      <strong>中国建材</strong>（中国）— 世界最大のセメント生産量。国有企業。<br/><br/>
+      → HolcimのCCS/リサイクル戦略は脱炭素時代のセメントの方向性を示す。Corningの決算はディスプレイガラス市況の先行指標。
+    </p>
+  </div>
+</div>
+
+<div class="footnote">
+  素材セクター入門シリーズ #6 / 8<br/>
+  次回：#7 紙・パッケージング（Paper & Packaging）
+</div>
+
+<script>
+function switchTab(id){
+  document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('tab-'+id).classList.add('active');
+  event.target.classList.add('active');
+}
+</script>
+</body>
+</html>

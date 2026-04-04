@@ -1,0 +1,839 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>素材セクター入門 #3 — 鉄鋼（Steel）</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f5f5f7;
+    --card: #ffffff;
+    --text: #1d1d1f;
+    --sub: #6e6e73;
+    --accent: #2c2c2e;
+    --radius: 16px;
+    --shadow: 0 1px 3px rgba(0,0,0,0.04);
+    --shadow-lg: 0 4px 20px rgba(0,0,0,0.08);
+    --steel-gradient: linear-gradient(135deg, #2c3e50 0%, #3d5a80 50%, #4a6fa5 100%);
+    --bf: #e8590c;
+    --eaf: #5c7cfa;
+    --special: #ae3ec9;
+    --green: #2b8a3e;
+    --red: #c92a2a;
+    --orange: #e8590c;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    font-family: 'DM Sans','Noto Sans JP',sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.7;
+    padding: 24px 16px 60px;
+    max-width: 800px;
+    margin: 0 auto;
+  }
+  .header {
+    text-align: center;
+    margin-bottom: 40px;
+    padding: 32px 20px;
+    background: var(--steel-gradient);
+    border-radius: var(--radius);
+    color: #fff;
+    position: relative;
+    overflow: hidden;
+  }
+  .header::before {
+    content: '🔩';
+    position: absolute;
+    font-size: 120px;
+    opacity: 0.06;
+    top: -10px;
+    right: -10px;
+  }
+  .header .series-tag {
+    display: inline-block;
+    background: rgba(255,255,255,0.15);
+    padding: 4px 14px;
+    border-radius: 20px;
+    font-size: 12px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+  .header h1 { font-size: 28px; font-weight: 700; margin-bottom: 8px; }
+  .header p { font-size: 14px; opacity: 0.7; }
+
+  .section { margin-bottom: 32px; }
+  .section-title {
+    font-size: 18px; font-weight: 700; margin-bottom: 16px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .section-title .icon {
+    width: 28px; height: 28px; border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; flex-shrink: 0;
+  }
+  .card {
+    background: var(--card);
+    border-radius: var(--radius);
+    padding: 20px;
+    box-shadow: var(--shadow);
+    margin-bottom: 12px;
+  }
+  .card p { font-size: 14px; color: var(--sub); }
+  .card p strong { color: var(--text); }
+
+  /* Value chain */
+  .chain-container { overflow-x: auto; padding: 8px 0; }
+  .chain { display: flex; align-items: stretch; gap: 0; min-width: 700px; }
+  .chain-step { flex: 1; text-align: center; }
+  .chain-box {
+    border-radius: 12px; padding: 14px 8px; box-shadow: var(--shadow);
+    min-height: 100px; display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    border: 2px solid transparent;
+  }
+  .chain-box .emoji { font-size: 22px; margin-bottom: 4px; }
+  .chain-box .label { font-size: 11px; font-weight: 700; }
+  .chain-box .sub-label { font-size: 9px; color: var(--sub); margin-top: 2px; }
+  .chain-box.active { border-color: #3d5a80; background: #edf2ff; }
+  .chain-arrow { display: flex; align-items: center; justify-content: center; width: 24px; flex-shrink: 0; color: var(--sub); font-size: 14px; }
+
+  /* Tab system */
+  .tab-bar {
+    display: flex; gap: 4px; margin-bottom: 16px;
+    background: #e9ecef; border-radius: 10px; padding: 3px;
+  }
+  .tab-btn {
+    flex: 1; padding: 8px 4px; border: none; background: transparent;
+    border-radius: 8px; font-family: inherit; font-size: 12px;
+    font-weight: 600; color: var(--sub); cursor: pointer; transition: all 0.2s;
+  }
+  .tab-btn.active { background: var(--card); color: var(--text); box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+
+  /* BF vs EAF comparison */
+  .vs-container { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .vs-card {
+    background: var(--card); border-radius: var(--radius);
+    padding: 20px; box-shadow: var(--shadow); border-top: 4px solid;
+  }
+  .vs-card.bf { border-color: var(--bf); }
+  .vs-card.eaf { border-color: var(--eaf); }
+  .vs-card h3 { font-size: 15px; font-weight: 700; margin-bottom: 4px; }
+  .vs-card .vs-sub { font-size: 11px; color: var(--sub); margin-bottom: 12px; }
+  .vs-card .vs-item { font-size: 12px; margin-bottom: 8px; line-height: 1.6; color: var(--sub); }
+  .vs-card .vs-item strong { color: var(--text); }
+  .vs-badge {
+    display: inline-block; padding: 2px 8px; border-radius: 6px;
+    font-size: 10px; font-weight: 600; color: #fff; margin-bottom: 8px;
+  }
+  .vs-badge.bf { background: var(--bf); }
+  .vs-badge.eaf { background: var(--eaf); }
+
+  /* Formula */
+  .formula-box {
+    background: var(--steel-gradient);
+    border-radius: var(--radius); padding: 24px; color: #fff;
+    text-align: center; margin-bottom: 12px;
+  }
+  .formula-box .formula { font-size: 16px; font-weight: 700; margin-bottom: 8px; }
+  .formula-box .formula .var { color: #74c0fc; }
+  .formula-box .formula .op { color: #ffd43b; margin: 0 4px; }
+  .formula-box .note { font-size: 12px; opacity: 0.6; }
+
+  /* Product grid */
+  .product-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .product-item {
+    background: var(--card); border-radius: 12px; padding: 14px;
+    box-shadow: var(--shadow);
+  }
+  .product-item .prod-name { font-weight: 700; font-size: 13px; margin-bottom: 4px; }
+  .product-item .prod-desc { font-size: 11px; color: var(--sub); line-height: 1.6; }
+  .prod-tag {
+    display: inline-block; font-size: 9px; padding: 2px 6px;
+    border-radius: 6px; margin-top: 4px; font-weight: 600;
+  }
+  .tag-flat { background: #dbe4ff; color: #364fc7; }
+  .tag-long { background: #d3f9d8; color: #2b8a3e; }
+  .tag-pipe { background: #fff3bf; color: #e67700; }
+  .tag-spec { background: #f3d9fa; color: #ae3ec9; }
+
+  /* Raw materials */
+  .raw-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+  .raw-item {
+    background: var(--card); border-radius: 12px; padding: 16px;
+    box-shadow: var(--shadow); text-align: center;
+  }
+  .raw-item .raw-emoji { font-size: 28px; margin-bottom: 6px; }
+  .raw-item .raw-name { font-weight: 700; font-size: 14px; margin-bottom: 4px; }
+  .raw-item .raw-share { font-size: 20px; font-weight: 700; color: var(--bf); }
+  .raw-item .raw-note { font-size: 11px; color: var(--sub); margin-top: 4px; line-height: 1.5; }
+
+  /* Spread diagram */
+  .spread-visual {
+    background: var(--card); border-radius: var(--radius); padding: 24px;
+    box-shadow: var(--shadow); margin-bottom: 12px;
+  }
+  .spread-bar-container { margin: 16px 0; }
+  .spread-bar {
+    display: flex; height: 44px; border-radius: 10px; overflow: hidden;
+    font-size: 11px; font-weight: 600; color: #fff;
+  }
+  .spread-seg {
+    display: flex; align-items: center; justify-content: center;
+    padding: 0 8px; white-space: nowrap;
+  }
+  .spread-label {
+    display: flex; justify-content: space-between; font-size: 12px;
+    color: var(--sub); margin-top: 8px;
+  }
+  .spread-annotation {
+    font-size: 13px; color: var(--sub); text-align: center; margin-top: 16px;
+    padding-top: 16px; border-top: 1px solid #f1f3f5; line-height: 1.8;
+  }
+
+  /* KPI table */
+  .kpi-table {
+    width: 100%; border-collapse: collapse; font-size: 13px;
+  }
+  .kpi-table th { text-align: left; padding: 10px 12px; background: #f1f3f5; font-weight: 600; }
+  .kpi-table td { padding: 10px 12px; border-bottom: 1px solid #f1f3f5; }
+  .kpi-table tr:last-child td { border-bottom: none; }
+  .kpi-table .kpi-name { font-weight: 600; }
+  .kpi-table .kpi-why { color: var(--sub); font-size: 12px; }
+
+  /* Risk */
+  .risk-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .risk-item {
+    background: var(--card); border-radius: 12px; padding: 14px;
+    box-shadow: var(--shadow); border-left: 4px solid;
+  }
+  .risk-item.high { border-color: var(--red); }
+  .risk-item.mid { border-color: var(--orange); }
+  .risk-item.low { border-color: var(--green); }
+  .risk-item .risk-name { font-weight: 700; font-size: 13px; margin-bottom: 4px; }
+  .risk-item .risk-desc { font-size: 11px; color: var(--sub); }
+
+  /* Coverage table */
+  .cov-table {
+    width: 100%; border-collapse: collapse; font-size: 12px;
+    background: var(--card); border-radius: 12px; overflow: hidden; box-shadow: var(--shadow);
+  }
+  .cov-table th { text-align: left; padding: 10px 12px; background: #f1f3f5; font-weight: 600; font-size: 11px; }
+  .cov-table td { padding: 10px 12px; border-bottom: 1px solid #f1f3f5; }
+  .cov-table tr:last-child td { border-bottom: none; }
+
+  /* Expandable */
+  details {
+    background: var(--card); border-radius: 12px; padding: 16px;
+    box-shadow: var(--shadow); margin-bottom: 10px;
+  }
+  details summary {
+    font-weight: 700; font-size: 14px; cursor: pointer; list-style: none;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  details summary::after { content: '▸'; transition: transform 0.2s; }
+  details[open] summary::after { transform: rotate(90deg); }
+  details .detail-body { margin-top: 12px; font-size: 13px; color: var(--sub); line-height: 1.8; }
+
+  /* China callout */
+  .china-box {
+    background: linear-gradient(135deg, #c92a2a 0%, #e03131 100%);
+    border-radius: var(--radius); padding: 24px; color: #fff; margin-bottom: 12px;
+  }
+  .china-box h3 { font-size: 17px; font-weight: 700; margin-bottom: 10px; }
+  .china-box p { font-size: 13px; opacity: 0.9; line-height: 1.8; }
+
+  .footnote { margin-top: 40px; text-align: center; font-size: 12px; color: var(--sub); }
+
+  @media (max-width: 520px) {
+    .vs-container, .product-grid, .risk-grid { grid-template-columns: 1fr; }
+    .raw-grid { grid-template-columns: 1fr 1fr; }
+    .chain { min-width: 600px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="series-tag">素材セクター入門 #3</div>
+  <h1>鉄鋼（Steel）</h1>
+  <p>産業のコメ — 建設・自動車・インフラを支える基幹素材</p>
+</div>
+
+<!-- 1. Overview -->
+<div class="section">
+  <div class="section-title">
+    <div class="icon" style="background:#e8f4fd;">📖</div>
+    鉄鋼セクターとは
+  </div>
+  <div class="card">
+    <p>
+      鉄鉱石と原料炭から<strong>鉄（Steel）</strong>を製造し、薄板・厚板・棒鋼・管などの形で販売する産業。
+      世界の粗鋼生産量は年間約<strong>19億トン</strong>、そのうち中国が約<strong>54%</strong>を占める。
+      日本は世界第3位（約9,000万トン）で、高級鋼に強み。<br/><br/>
+      カバレッジでは<strong>日本製鉄（5401）、JFEホールディングス（5411）、神戸製鋼所（5406）</strong>が中核。
+      「スプレッド（鋼材価格−原料コスト）」と「中国の需給」がすべてを支配する。
+    </p>
+  </div>
+</div>
+
+<!-- 2. Value Chain -->
+<div class="section">
+  <div class="section-title">
+    <div class="icon" style="background:#fff3bf;">🔗</div>
+    鉄鋼バリューチェーン
+  </div>
+  <div class="chain-container">
+    <div class="chain">
+      <div class="chain-step">
+        <div class="chain-box">
+          <div class="emoji">🪨</div>
+          <div class="label">鉄鉱石</div>
+          <div class="sub-label">Iron Ore</div>
+        </div>
+      </div>
+      <div class="chain-arrow">→</div>
+      <div class="chain-step">
+        <div class="chain-box">
+          <div class="emoji">ite</div>
+          <div class="label">原料炭</div>
+          <div class="sub-label">Coking Coal</div>
+        </div>
+      </div>
+      <div class="chain-arrow">→</div>
+      <div class="chain-step">
+        <div class="chain-box active">
+          <div class="emoji">🔥</div>
+          <div class="label">高炉/電炉</div>
+          <div class="sub-label">BF / EAF</div>
+        </div>
+      </div>
+      <div class="chain-arrow">→</div>
+      <div class="chain-step">
+        <div class="chain-box active">
+          <div class="emoji">🏭</div>
+          <div class="label">製鋼・圧延</div>
+          <div class="sub-label">Steelmaking</div>
+        </div>
+      </div>
+      <div class="chain-arrow">→</div>
+      <div class="chain-step">
+        <div class="chain-box active">
+          <div class="emoji">📦</div>
+          <div class="label">鋼材製品</div>
+          <div class="sub-label">Products</div>
+        </div>
+      </div>
+      <div class="chain-arrow">→</div>
+      <div class="chain-step">
+        <div class="chain-box">
+          <div class="emoji">🚗</div>
+          <div class="label">需要家</div>
+          <div class="sub-label">Auto/建設/造船</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="card" style="margin-top: 8px;">
+    <p><strong>青枠＝鉄鋼メーカーの守備範囲。</strong>左側の原料は#1鉱業で解説済み。右側の需要家が販売先。</p>
+  </div>
+</div>
+
+<!-- 3. BF vs EAF -->
+<div class="section">
+  <div class="section-title">
+    <div class="icon" style="background:#ffe3e3;">⚔️</div>
+    高炉 vs 電炉 — 2つの製鉄法
+  </div>
+  <div class="vs-container">
+    <div class="vs-card bf">
+      <span class="vs-badge bf">高炉 BF</span>
+      <h3>高炉一貫製鉄</h3>
+      <div class="vs-sub">Blast Furnace</div>
+      <div class="vs-item"><strong>原料：</strong>鉄鉱石＋原料炭（コークス）</div>
+      <div class="vs-item"><strong>規模：</strong>巨大（1基で年産400万トン超）</div>
+      <div class="vs-item"><strong>品質：</strong>◎ 高品質鋼板が製造可能</div>
+      <div class="vs-item"><strong>コスト：</strong>固定費が大きい。稼働率が命</div>
+      <div class="vs-item"><strong>CO2：</strong>× 1トン当たり約2トンのCO2</div>
+      <div class="vs-item"><strong>日本例：</strong>日本製鉄、JFE、神戸製鋼</div>
+      <div class="vs-item"><strong>製品：</strong>自動車用薄板、高張力鋼板（ハイテン）、電磁鋼板</div>
+    </div>
+    <div class="vs-card eaf">
+      <span class="vs-badge eaf">電炉 EAF</span>
+      <h3>電気炉製鉄</h3>
+      <div class="vs-sub">Electric Arc Furnace</div>
+      <div class="vs-item"><strong>原料：</strong>鉄スクラップ（＋一部DRI）</div>
+      <div class="vs-item"><strong>規模：</strong>中〜小規模で柔軟</div>
+      <div class="vs-item"><strong>品質：</strong>△ 建材向けが中心（改善中）</div>
+      <div class="vs-item"><strong>コスト：</strong>電力費が大。変動費型</div>
+      <div class="vs-item"><strong>CO2：</strong>◎ 高炉の約1/4</div>
+      <div class="vs-item"><strong>日本例：</strong>東京製鐵、大和工業、共英製鋼</div>
+      <div class="vs-item"><strong>製品：</strong>H形鋼、棒鋼、角鋼管（建材中心）</div>
+    </div>
+  </div>
+
+  <details style="margin-top: 12px;">
+    <summary>⚡ 高炉→電炉シフトのメガトレンド</summary>
+    <div class="detail-body">
+      脱炭素圧力で<strong>高炉から電炉（＋DRI）への転換</strong>が世界的トレンド。<br/><br/>
+      <strong>DRI（直接還元鉄）：</strong>天然ガスや水素で鉄鉱石を還元。高炉のコークスを使わない。<br/>
+      <strong>水素還元製鉄：</strong>究極のグリーンスチール。HYBRIT（スウェーデン）が先行。日本製鉄のCOURSE50。<br/>
+      <strong>電炉の品質向上：</strong>東京製鐵は高級薄板への参入を進行中。高炉の牙城を崩しつつある。<br/><br/>
+      → ただし完全置換には数十年。短中期では高炉が主力のまま。
+      投資判断では「脱炭素コスト」を織り込むかがバリュエーションの分岐点。
+    </div>
+  </details>
+</div>
+
+<!-- 4. Raw materials -->
+<div class="section">
+  <div class="section-title">
+    <div class="icon" style="background:#fff3bf;">🪨</div>
+    原料コスト構造（高炉の場合）
+  </div>
+  <div class="raw-grid">
+    <div class="raw-item">
+      <div class="raw-emoji">🪨</div>
+      <div class="raw-name">鉄鉱石</div>
+      <div class="raw-share">~35%</div>
+      <div class="raw-note">原価の最大項目。<br/>指標：62% Fe CFR中国<br/>BHP/Rio/Vale寡占</div>
+    </div>
+    <div class="raw-item">
+      <div class="raw-emoji">�ite</div>
+      <div class="raw-name">原料炭</div>
+      <div class="raw-share">~25%</div>
+      <div class="raw-note">コークス製造用。<br/>豪州産が主力。<br/>豪州天候で急騰リスク</div>
+    </div>
+    <div class="raw-item">
+      <div class="raw-emoji">⚡</div>
+      <div class="raw-name">その他</div>
+      <div class="raw-share">~40%</div>
+      <div class="raw-note">電力・ガス・合金鉄<br/>副資材・物流費<br/>人件費・修繕費</div>
+    </div>
+  </div>
+  <div class="card" style="margin-top: 12px;">
+    <p>
+      <strong>鉄鉱石＋原料炭で原価の約6割。</strong>#1鉱業セクターの供給側と完全に裏表の関係。
+      鉄鉱石価格が$10/t上がるとトン当たりコストが約$15-16増加（1.55トンの鉱石で1トンの鋼を作る）。
+      四半期契約から月次/スポットへ価格決定が移行しており、変動がより頻繁に。
+    </p>
+  </div>
+</div>
+
+<!-- 5. Spread = everything -->
+<div class="section">
+  <div class="section-title">
+    <div class="icon" style="background:#dbe4ff;">💰</div>
+    スプレッド分析 — 鉄鋼の利益はこれで決まる
+  </div>
+
+  <div class="formula-box">
+    <div class="formula">
+      <span class="var">鉄鋼利益</span>
+      <span class="op">=</span>
+      <span class="var">（鋼材価格 − 原料コスト）</span>
+      <span class="op">×</span>
+      <span class="var">販売量</span>
+      <span class="op">−</span>
+      <span class="var">固定費</span>
+    </div>
+    <div class="note">「メタルスプレッド」とも呼ぶ。鋼材と原料のサヤが全て</div>
+  </div>
+
+  <div class="spread-visual">
+    <div style="font-weight:700; font-size:14px; margin-bottom:4px;">鋼材価格の内訳イメージ（高炉・熱延コイル）</div>
+    <div style="font-size:12px; color:var(--sub); margin-bottom:16px;">数字はイメージ。市況で大きく変動</div>
+
+    <div class="spread-bar-container">
+      <div class="spread-bar">
+        <div class="spread-seg" style="width:35%; background:#e8590c;">鉄鉱石</div>
+        <div class="spread-seg" style="width:25%; background:#d9480f;">原料炭</div>
+        <div class="spread-seg" style="width:15%; background:#868e96;">エネルギー等</div>
+        <div class="spread-seg" style="width:10%; background:#495057;">固定費</div>
+        <div class="spread-seg" style="width:15%; background:#2b8a3e;">マージン</div>
+      </div>
+      <div class="spread-label">
+        <span>← 原料コスト（~60%）→</span>
+        <span>←利益→</span>
+      </div>
+    </div>
+
+    <div class="spread-annotation">
+      <strong>鋼材価格が同じでも、原料が上がればマージン（緑）は縮小。</strong><br/>
+      逆に原料が下がって鋼材価格を維持できれば、マージン拡大（＝好決算）。<br/>
+      これが「スプレッド拡大/縮小」の意味。
+    </div>
+  </div>
+
+  <details>
+    <summary>スプレッド分析の実務テクニック</summary>
+    <div class="detail-body">
+      <strong>① 鋼材指標：</strong>TSI HRC（熱延コイル）、Platts鉄筋、中国HRC先物。日本国内はメタルワン等が公表する市中価格。<br/><br/>
+      <strong>② 原料指標：</strong>62% Fe鉄鉱石CFR中国（S&P Global/Platts）、豪州原料炭FOB（TSI）。<br/><br/>
+      <strong>③ タイムラグ：</strong>原料は仕入から使用まで1-2ヶ月。鋼材価格改定は四半期ベース（紐付き）or 随時（店売り）。このラグがスプレッドの変動を生む。<br/><br/>
+      <strong>④ 紐付き vs 店売り：</strong><br/>
+      ・紐付き（ひもつき）＝自動車メーカー等との長期契約。価格は半期/四半期交渉で決定。安定的だが価格転嫁に時間。<br/>
+      ・店売り＝流通市場でのスポット販売。市況に即座に連動。ボラティリティ高い。
+    </div>
+  </details>
+</div>
+
+<!-- 6. Products -->
+<div class="section">
+  <div class="section-title">
+    <div class="icon" style="background:#d3f9d8;">📦</div>
+    鋼材製品の分類
+  </div>
+
+  <div class="tab-bar">
+    <button class="tab-btn active" onclick="switchTab('flat')">薄板（Flat）</button>
+    <button class="tab-btn" onclick="switchTab('long')">条鋼（Long）</button>
+    <button class="tab-btn" onclick="switchTab('pipe')">管</button>
+    <button class="tab-btn" onclick="switchTab('specialty')">特殊鋼</button>
+  </div>
+
+  <div class="tab-content active" id="tab-flat">
+    <div class="product-grid">
+      <div class="product-item">
+        <div class="prod-name">🔲 熱延コイル（HRC）</div>
+        <div class="prod-desc">最も基本的な鋼板。建材・容器・パイプ原料。市況の基準価格。中国HRC価格が世界を支配。</div>
+        <span class="prod-tag tag-flat">Flat</span>
+      </div>
+      <div class="product-item">
+        <div class="prod-name">🪞 冷延コイル（CRC）</div>
+        <div class="prod-desc">HRCをさらに冷間圧延。表面がきれい。自動車外板・家電に使用。HRCより$50-100/tプレミアム。</div>
+        <span class="prod-tag tag-flat">Flat</span>
+      </div>
+      <div class="product-item">
+        <div class="prod-name">🛡 表面処理鋼板</div>
+        <div class="prod-desc">亜鉛めっき（GA/GI）、すずめっき（ブリキ）。自動車・建材・缶。付加価値が高い。</div>
+        <span class="prod-tag tag-flat">Flat</span>
+      </div>
+      <div class="product-item">
+        <div class="prod-name">🧲 電磁鋼板</div>
+        <div class="prod-desc">モーターの鉄心に使用。EV/HV需要で爆発的成長。方向性（トランス用）と無方向性（モーター用）。日本製鉄が世界トップ。</div>
+        <span class="prod-tag tag-spec">戦略製品</span>
+      </div>
+    </div>
+    <div class="card" style="margin-top: 10px;">
+      <p><strong>自動車向けハイテン鋼板（高張力鋼板）</strong>は日本メーカーの最大の強み。590MPa以上の超ハイテンは日本製鉄・JFEがグローバルリーダー。軽量化＋衝突安全性の両立に不可欠。</p>
+    </div>
+  </div>
+
+  <div class="tab-content" id="tab-long">
+    <div class="product-grid">
+      <div class="product-item">
+        <div class="prod-name">🏗 H形鋼</div>
+        <div class="prod-desc">建築の柱・梁。国内建設投資に連動。東京製鐵が電炉で参入しシェア拡大中。</div>
+        <span class="prod-tag tag-long">Long</span>
+      </div>
+      <div class="product-item">
+        <div class="prod-name">🔩 棒鋼・線材</div>
+        <div class="prod-desc">鉄筋コンクリートの鉄筋。ボルト・ワイヤーの原料。電炉メーカーの主力。</div>
+        <span class="prod-tag tag-long">Long</span>
+      </div>
+      <div class="product-item">
+        <div class="prod-name">🚂 レール</div>
+        <div class="prod-desc">鉄道用。日本製鉄が独占的に供給。インド・東南アジア向けが成長市場。</div>
+        <span class="prod-tag tag-long">Long</span>
+      </div>
+      <div class="product-item">
+        <div class="prod-name">📐 形鋼</div>
+        <div class="prod-desc">L形、溝形など。建築・造船・橋梁。用途に応じた断面形状。</div>
+        <span class="prod-tag tag-long">Long</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="tab-content" id="tab-pipe">
+    <div class="product-grid">
+      <div class="product-item">
+        <div class="prod-name">🛢 シームレスパイプ</div>
+        <div class="prod-desc">継ぎ目なし。油井管（OCTG）に使用。原油価格・掘削リグ数に連動。日本製鉄のUSSが世界大手。</div>
+        <span class="prod-tag tag-pipe">Pipe</span>
+      </div>
+      <div class="product-item">
+        <div class="prod-name">🔧 溶接管（ERW/UOE）</div>
+        <div class="prod-desc">ラインパイプ（石油・ガスの輸送管）。大径パイプはインフラ投資に連動。</div>
+        <span class="prod-tag tag-pipe">Pipe</span>
+      </div>
+    </div>
+    <div class="card" style="margin-top: 10px;">
+      <p><strong>OCTG（Oil Country Tubular Goods）</strong>は原油価格→掘削投資→パイプ需要という連鎖。高油価＝パイプ好調。#2石油エネルギーと直結するセグメント。</p>
+    </div>
+  </div>
+
+  <div class="tab-content" id="tab-specialty">
+    <div class="product-grid">
+      <div class="product-item">
+        <div class="prod-name">⚙️ ステンレス鋼</div>
+        <div class="prod-desc">クロム含有で耐食性。ニッケル価格に連動。厨房・化学プラント。日鉄ステンレスなど。</div>
+        <span class="prod-tag tag-spec">特殊</span>
+      </div>
+      <div class="product-item">
+        <div class="prod-name">🔧 工具鋼・軸受鋼</div>
+        <div class="prod-desc">特殊鋼の王道。大同特殊鋼(5471)、山陽特殊製鋼。自動車エンジン・ベアリング向け。</div>
+        <span class="prod-tag tag-spec">特殊</span>
+      </div>
+      <div class="product-item">
+        <div class="prod-name">🏎 高合金鋼</div>
+        <div class="prod-desc">ニッケル・モリブデン等を添加。航空機・発電タービン・半導体製造装置向け。超高付加価値。</div>
+        <span class="prod-tag tag-spec">特殊</span>
+      </div>
+      <div class="product-item">
+        <div class="prod-name">🧲 電磁鋼板（再掲）</div>
+        <div class="prod-desc">EV駆動モーター用の無方向性電磁鋼板が成長分野。高効率グレードは供給逼迫。日本製鉄・JFE・POSCO。</div>
+        <span class="prod-tag tag-spec">戦略製品</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 7. China -->
+<div class="section">
+  <div class="section-title">
+    <div class="icon" style="background:#ffe3e3;">🇨🇳</div>
+    中国ファクター（最重要の外部変数）
+  </div>
+  <div class="china-box">
+    <h3>🇨🇳 世界の粗鋼の54%は中国が生産</h3>
+    <p>
+      中国の鉄鋼過剰生産→安値輸出が世界の鉄鋼市況を支配する最大の要因。
+      不動産不況で内需が減少→余剰分が輸出に回る→世界の鋼材価格を押し下げる。
+      2024年の中国鉄鋼輸出は約1億トン超で過去最高水準。<br/><br/>
+      日本のアナリストとして最も重要なウォッチ項目の一つ。
+    </p>
+  </div>
+
+  <details>
+    <summary>中国鉄鋼のウォッチポイント</summary>
+    <div class="detail-body">
+      <strong>① 粗鋼生産量：</strong>月次で国家統計局が発表。前年比増減が市況の方向を示す。<br/><br/>
+      <strong>② 輸出量：</strong>中国海関（税関）が月次発表。輸出増＝世界の供給過剰圧力。<br/><br/>
+      <strong>③ 不動産着工面積：</strong>鉄鋼需要の約3割が不動産。恒大・碧桂園問題後の回復度合い。<br/><br/>
+      <strong>④ 在庫水準：</strong>社会在庫（流通在庫）が積み上がれば価格下落シグナル。Mysteel等が週次で発表。<br/><br/>
+      <strong>⑤ 生産制限政策：</strong>「粗鋼減産令」が出れば供給引き締め→価格支持。環境規制（冬季制限）も。<br/><br/>
+      → 中国HRC先物（上海先物取引所）は日本の鉄鋼株の先行指標。
+    </div>
+  </details>
+
+  <details>
+    <summary>貿易摩擦と通商リスク</summary>
+    <div class="detail-body">
+      <strong>反ダンピング関税（AD）：</strong>各国が中国製鉄鋼に課税。米国は232条で25%関税。EUもセーフガード。<br/><br/>
+      <strong>日本への影響：</strong>中国鋼材が直接日本に入る量は限定的だが、ASEAN・インド経由で間接的に市況を押し下げる。
+      日本メーカーの海外子会社（タイ・インド等）は中国材との直接競合に晒される。<br/><br/>
+      <strong>USスチール買収：</strong>日本製鉄のUSスチール買収は通商政策の象徴的事案。
+      米国内の政治リスクを浮き彫りに。
+    </div>
+  </details>
+</div>
+
+<!-- 8. KPIs -->
+<div class="section">
+  <div class="section-title">
+    <div class="icon" style="background:#e8f4fd;">📊</div>
+    アナリストが見るべきKPI
+  </div>
+  <div class="card" style="padding: 0; overflow: hidden;">
+    <table class="kpi-table">
+      <thead><tr><th>KPI</th><th>なぜ重要か</th></tr></thead>
+      <tbody>
+        <tr>
+          <td class="kpi-name">メタルスプレッド</td>
+          <td class="kpi-why">鋼材価格−原料コスト。利益の「実力」を示す最重要指標。</td>
+        </tr>
+        <tr>
+          <td class="kpi-name">粗鋼生産量</td>
+          <td class="kpi-why">各社の稼働率の代理変数。前年比で需要トレンドを見る。</td>
+        </tr>
+        <tr>
+          <td class="kpi-name">高炉稼働率</td>
+          <td class="kpi-why">高炉は止められない（吹き止め＝年単位の作業）。稼働率低下＝深刻な需要減。</td>
+        </tr>
+        <tr>
+          <td class="kpi-name">紐付き比率</td>
+          <td class="kpi-why">長期契約比率。高いほど安定、低いほど市況感応度大。日本製鉄は紐付き約7割。</td>
+        </tr>
+        <tr>
+          <td class="kpi-name">単価（円/トン）</td>
+          <td class="kpi-why">製品ミックス＋値上げ効果を測定。高級鋼比率が高いほど単価上昇。</td>
+        </tr>
+        <tr>
+          <td class="kpi-name">EBITDA/トン</td>
+          <td class="kpi-why">トン当たり収益性。グローバル比較で使用。$100超なら良好。</td>
+        </tr>
+        <tr>
+          <td class="kpi-name">設備投資/減価償却</td>
+          <td class="kpi-why">Capex/DA > 1.0は成長投資中。日本鉄鋼は長年アンダーインベスト問題。</td>
+        </tr>
+        <tr>
+          <td class="kpi-name">セグメント別利益</td>
+          <td class="kpi-why">日本製鉄は製鉄・エンジ・化学・新素材に分散。JFEは鉄鋼＋エンジ＋商事。</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- 9. Risks -->
+<div class="section">
+  <div class="section-title">
+    <div class="icon" style="background:#ffe3e3;">⚠️</div>
+    主なリスク要因
+  </div>
+  <div class="risk-grid">
+    <div class="risk-item high">
+      <div class="risk-name">中国の過剰生産・輸出</div>
+      <div class="risk-desc">最大のリスク。中国の内需減→輸出増→世界の鋼材価格崩壊。2015年のチャイナショック再来リスク。</div>
+    </div>
+    <div class="risk-item high">
+      <div class="risk-name">原料価格急騰</div>
+      <div class="risk-desc">鉄鉱石・原料炭の急騰でスプレッド縮小。鋼材値上げが追いつかないとマージン圧縮。</div>
+    </div>
+    <div class="risk-item mid">
+      <div class="risk-name">需要減（構造的）</div>
+      <div class="risk-desc">国内人口減→建設投資縮小。自動車のEV化でアルミ代替・軽量化。長期的な内需縮小。</div>
+    </div>
+    <div class="risk-item mid">
+      <div class="risk-name">脱炭素コスト</div>
+      <div class="risk-desc">高炉のCO2排出対策（水素還元等）に兆円規模の投資。コスト増をどこまで価格転嫁できるか。</div>
+    </div>
+    <div class="risk-item mid">
+      <div class="risk-name">為替</div>
+      <div class="risk-desc">円安→輸出競争力改善＋原料コスト増のネットアウト。円安は概ね中立〜やや追い風。</div>
+    </div>
+    <div class="risk-item low">
+      <div class="risk-name">設備トラブル・事故</div>
+      <div class="risk-desc">高炉は24時間365日稼働。重大事故で数ヶ月の生産停止リスク。</div>
+    </div>
+  </div>
+</div>
+
+<!-- 10. Coverage -->
+<div class="section">
+  <div class="section-title">
+    <div class="icon" style="background:#f3e8ff;">🇯🇵</div>
+    日本株カバレッジ対応表
+  </div>
+  <div class="card" style="padding: 0; overflow: hidden;">
+    <table class="cov-table">
+      <thead><tr><th>銘柄</th><th>特徴</th><th>注目ポイント</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><strong>日本製鉄（5401）</strong></td>
+          <td>高炉一貫。国内最大手。グローバル粗鋼4位。</td>
+          <td>USスチール買収、電磁鋼板、インド合弁（AM/NS India）、ハイテン技術。橋本社長の値上げ方針。</td>
+        </tr>
+        <tr>
+          <td><strong>JFE HD（5411）</strong></td>
+          <td>高炉一貫。鉄鋼＋エンジ＋商事の3本柱。</td>
+          <td>インド（JSWとの合弁）、エンジニアリング（JFEエンジ）、鉄鋼事業の収益改善。</td>
+        </tr>
+        <tr>
+          <td><strong>神戸製鋼所（5406）</strong></td>
+          <td>鉄鋼＋アルミ＋機械＋電力。多角化。</td>
+          <td>アルミ・銅事業（自動車軽量化）、コベルコ建機、電力事業。品質不正問題からの回復。</td>
+        </tr>
+        <tr>
+          <td><strong>東京製鐵（5423）</strong></td>
+          <td>電炉最大手。H形鋼＋薄板参入。</td>
+          <td>脱炭素の恩恵（電炉＝低CO2）。高炉品質への挑戦。スクラップ価格感応度。</td>
+        </tr>
+        <tr>
+          <td><strong>大同特殊鋼（5471）</strong></td>
+          <td>特殊鋼専業。工具鋼・ステンレス。</td>
+          <td>自動車EV化対応（モーターコア材）、航空機向け。ニッチ高付加価値。</td>
+        </tr>
+        <tr>
+          <td><strong>大和工業（5444）</strong></td>
+          <td>電炉。海外比率高（米国・中東）。</td>
+          <td>高ROE経営。米国ミニミル好調。サウジ・バーレーンの海外事業。</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- 11. Cross sector -->
+<div class="section">
+  <div class="section-title">
+    <div class="icon" style="background:#d3f9d8;">🔄</div>
+    他セクターとのつながり
+  </div>
+  <details>
+    <summary>鉱業 → 鉄鋼（原料の売り手 vs 買い手）</summary>
+    <div class="detail-body">
+      #1で解説した鉄鉱石・原料炭は鉄鋼の最大コスト要因。BHP/Rio/Valeの生産量ガイダンス変更は日本鉄鋼のコスト見通しに直結。鉱業が増益なら鉄鋼はコスト増の裏返し（逆もしかり）。
+    </div>
+  </details>
+  <details>
+    <summary>鉄鋼 → 自動車（最大の顧客）</summary>
+    <div class="detail-body">
+      日本の鉄鋼需要の約2割が自動車向け。紐付き契約で半期/四半期交渉。トヨタ向け鋼板価格の交渉結果は業界のベンチマーク。自動車生産台数の増減がダイレクトに鉄鋼の出荷量を左右。
+    </div>
+  </details>
+  <details>
+    <summary>鉄鋼 → 建設（第2の顧客）</summary>
+    <div class="detail-body">
+      H形鋼・棒鋼（鉄筋）・鋼板の主要用途。国内建設投資（公共＋民間）、特に再開発・インフラ更新需要。マンション着工、非住宅着工統計がKPI。
+    </div>
+  </details>
+  <details>
+    <summary>鉄鋼 → 造船・海運</summary>
+    <div class="detail-body">
+      厚板の需要先。造船受注量→厚板需要。新造船価格は鋼材コストに左右される。日本は韓国・中国に造船シェアを奪われたが、LNG船・環境規制対応船で一部回復。
+    </div>
+  </details>
+  <details>
+    <summary>鉄鋼 → エネルギー（パイプ＋設備）</summary>
+    <div class="detail-body">
+      #2石油エネルギーと直結。油井管（OCTG）需要は原油掘削リグ数に連動。ラインパイプはLNGプロジェクトの配管需要。高油価→掘削投資増→パイプ好調。
+    </div>
+  </details>
+  <details>
+    <summary>非鉄金属との競合</summary>
+    <div class="detail-body">
+      アルミは鉄鋼の代替材。自動車のボディパネル・EV車体でアルミ採用が増加。鉄 vs アルミの軽量化競争。鉄はハイテン化で対抗。銅も電装化で自動車内の使用量増加。
+    </div>
+  </details>
+</div>
+
+<!-- 12. Global context -->
+<div class="section">
+  <div class="section-title">
+    <div class="icon" style="background:#e8f4fd;">🌍</div>
+    グローバルの主要プレーヤー（参考）
+  </div>
+  <div class="card">
+    <p>
+      <strong>China Baowu</strong>（中国）— 世界最大。粗鋼年産1.3億トン超。国有企業。<br/>
+      <strong>ArcelorMittal</strong>（ルクセンブルク）— 旧世界最大。欧州＋新興国に展開。<br/>
+      <strong>日本製鉄</strong>（日本）— 世界4位。高品質鋼で差別化。USスチール買収で北米拡大狙い。<br/>
+      <strong>POSCO</strong>（韓国）— 技術力高い。電磁鋼板で日本勢と競合。リチウム事業にも参入。<br/>
+      <strong>Nucor</strong>（米国）— 電炉最大手。ミニミルモデルの先駆者。高収益。<br/>
+      <strong>Tata Steel</strong>（インド）— 欧州＋インド。インド内需成長の恩恵。<br/><br/>
+      → 世界の鉄鋼業は「中国 vs 残り全部」の構図。日本メーカーは<strong>品質・技術で差別化</strong>するポジション。
+    </p>
+  </div>
+</div>
+
+<div class="footnote">
+  素材セクター入門シリーズ #3 / 8<br/>
+  次回：#4 非鉄金属（Non-Ferrous Metals）
+</div>
+
+<script>
+function switchTab(id) {
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + id).classList.add('active');
+  event.target.classList.add('active');
+}
+</script>
+</body>
+</html>

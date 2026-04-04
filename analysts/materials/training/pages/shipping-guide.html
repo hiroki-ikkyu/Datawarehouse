@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>素材セクター入門 #8 — 海運（Shipping）</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#f5f5f7;--card:#fff;--text:#1d1d1f;--sub:#6e6e73;--accent:#2c2c2e;--radius:16px;--shadow:0 1px 3px rgba(0,0,0,0.04);--shadow-lg:0 4px 20px rgba(0,0,0,0.08);--sh-gradient:linear-gradient(135deg,#1a365d 0%,#2563eb 50%,#3b82f6 100%);--dry:#e8590c;--tanker:#5c7cfa;--container:#2b8a3e;--lng:#0891b2;--red:#c92a2a;--orange:#e8590c;--green:#2b8a3e;}
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{font-family:'DM Sans','Noto Sans JP',sans-serif;background:var(--bg);color:var(--text);line-height:1.7;padding:24px 16px 60px;max-width:800px;margin:0 auto;}
+  .header{text-align:center;margin-bottom:40px;padding:32px 20px;background:var(--sh-gradient);border-radius:var(--radius);color:#fff;position:relative;overflow:hidden;}
+  .header::before{content:'🚢';position:absolute;font-size:120px;opacity:0.06;top:-10px;right:-10px;}
+  .header .series-tag{display:inline-block;background:rgba(255,255,255,0.15);padding:4px 14px;border-radius:20px;font-size:12px;letter-spacing:1px;text-transform:uppercase;margin-bottom:12px;}
+  .header h1{font-size:26px;font-weight:700;margin-bottom:8px;}
+  .header p{font-size:14px;opacity:0.7;}
+  .section{margin-bottom:32px;}
+  .section-title{font-size:18px;font-weight:700;margin-bottom:16px;display:flex;align-items:center;gap:8px;}
+  .section-title .icon{width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;}
+  .card{background:var(--card);border-radius:var(--radius);padding:20px;box-shadow:var(--shadow);margin-bottom:12px;}
+  .card p{font-size:14px;color:var(--sub);}
+  .card p strong{color:var(--text);}
+  .tab-bar{display:flex;gap:4px;margin-bottom:16px;background:#e9ecef;border-radius:10px;padding:3px;overflow-x:auto;}
+  .tab-btn{flex:1;padding:8px 4px;border:none;background:transparent;border-radius:8px;font-family:inherit;font-size:11px;font-weight:600;color:var(--sub);cursor:pointer;transition:all 0.2s;white-space:nowrap;min-width:60px;}
+  .tab-btn.active{background:var(--card);color:var(--text);box-shadow:0 1px 3px rgba(0,0,0,0.08);}
+  .tab-content{display:none;}
+  .tab-content.active{display:block;}
+  .prod-profile{background:var(--card);border-radius:var(--radius);padding:20px;box-shadow:var(--shadow);border-top:4px solid;margin-bottom:12px;}
+  .prod-header{display:flex;align-items:center;gap:10px;margin-bottom:12px;}
+  .prod-badge{padding:4px 10px;border-radius:8px;font-size:11px;font-weight:700;color:#fff;}
+  .prod-profile h3{font-size:16px;font-weight:700;}
+  .prod-profile .prod-desc{font-size:13px;color:var(--sub);line-height:1.8;margin-bottom:12px;}
+  .prod-stats{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+  .stat-item{background:#f8f9fa;border-radius:8px;padding:10px;}
+  .stat-label{font-size:10px;color:var(--sub);font-weight:600;text-transform:uppercase;letter-spacing:0.5px;}
+  .stat-value{font-size:15px;font-weight:700;margin-top:2px;}
+  .stat-note{font-size:10px;color:var(--sub);margin-top:2px;}
+  .formula-box{background:var(--sh-gradient);border-radius:var(--radius);padding:24px;color:#fff;text-align:center;margin-bottom:12px;}
+  .formula-box .formula{font-size:15px;font-weight:700;margin-bottom:8px;}
+  .formula-box .formula .var{color:#bfdbfe;}
+  .formula-box .formula .op{color:#ffd43b;margin:0 4px;}
+  .formula-box .note{font-size:12px;opacity:0.6;}
+  .spread-visual{background:var(--card);border-radius:var(--radius);padding:24px;box-shadow:var(--shadow);margin-bottom:12px;}
+  .spread-bar{display:flex;height:40px;border-radius:10px;overflow:hidden;font-size:10px;font-weight:600;color:#fff;margin:12px 0;}
+  .spread-seg{display:flex;align-items:center;justify-content:center;padding:0 4px;white-space:nowrap;}
+  .spread-annotation{font-size:13px;color:var(--sub);text-align:center;margin-top:16px;padding-top:16px;border-top:1px solid #f1f3f5;line-height:1.8;}
+  .callout-box{border-radius:var(--radius);padding:24px;color:#fff;margin-bottom:12px;}
+  .callout-box h3{font-size:17px;font-weight:700;margin-bottom:10px;}
+  .callout-box p{font-size:13px;opacity:0.9;line-height:1.8;}
+  .kpi-table{width:100%;border-collapse:collapse;font-size:13px;}
+  .kpi-table th{text-align:left;padding:10px 12px;background:#f1f3f5;font-weight:600;}
+  .kpi-table td{padding:10px 12px;border-bottom:1px solid #f1f3f5;}
+  .kpi-table tr:last-child td{border-bottom:none;}
+  .kpi-table .kpi-name{font-weight:600;}
+  .kpi-table .kpi-why{color:var(--sub);font-size:12px;}
+  .risk-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+  .risk-item{background:var(--card);border-radius:12px;padding:14px;box-shadow:var(--shadow);border-left:4px solid;}
+  .risk-item.high{border-color:var(--red);}
+  .risk-item.mid{border-color:var(--orange);}
+  .risk-item.low{border-color:var(--green);}
+  .risk-item .risk-name{font-weight:700;font-size:13px;margin-bottom:4px;}
+  .risk-item .risk-desc{font-size:11px;color:var(--sub);}
+  .cov-table{width:100%;border-collapse:collapse;font-size:12px;background:var(--card);border-radius:12px;overflow:hidden;box-shadow:var(--shadow);}
+  .cov-table th{text-align:left;padding:10px 12px;background:#f1f3f5;font-weight:600;font-size:11px;}
+  .cov-table td{padding:10px 12px;border-bottom:1px solid #f1f3f5;}
+  .cov-table tr:last-child td{border-bottom:none;}
+  details{background:var(--card);border-radius:12px;padding:16px;box-shadow:var(--shadow);margin-bottom:10px;}
+  details summary{font-weight:700;font-size:14px;cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center;}
+  details summary::after{content:'▸';transition:transform 0.2s;}
+  details[open] summary::after{transform:rotate(90deg);}
+  details .detail-body{margin-top:12px;font-size:13px;color:var(--sub);line-height:1.8;}
+  .index-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+  .index-card{background:var(--card);border-radius:12px;padding:16px;box-shadow:var(--shadow);border-top:3px solid;}
+  .index-card .idx-name{font-weight:700;font-size:14px;margin-bottom:4px;}
+  .index-card .idx-what{font-size:12px;color:var(--sub);margin-bottom:6px;}
+  .index-card .idx-note{font-size:11px;color:var(--sub);}
+  .footnote{margin-top:40px;text-align:center;font-size:12px;color:var(--sub);}
+  .final-box{background:linear-gradient(135deg,#1a1a2e,#16213e,#0f3460);border-radius:var(--radius);padding:28px;color:#fff;text-align:center;margin-top:48px;}
+  .final-box h2{font-size:22px;margin-bottom:12px;}
+  .final-box p{font-size:13px;opacity:0.7;line-height:1.8;}
+  @media(max-width:520px){.prod-stats,.risk-grid,.index-grid{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="series-tag">素材セクター入門 #8（最終回）</div>
+  <h1>海運（Shipping）</h1>
+  <p>世界貿易の90%を運ぶ — 究極のシクリカル産業</p>
+</div>
+
+<!-- 1. Overview -->
+<div class="section">
+  <div class="section-title"><div class="icon" style="background:#dbeafe;">📖</div>海運セクターとは</div>
+  <div class="card">
+    <p>
+      世界貿易量の約<strong>90%</strong>は海上輸送。原油、鉄鉱石、石炭、穀物、コンテナ貨物、LNGなど
+      あらゆる素材・製品を世界中に運ぶ。<strong>素材セクターの「動脈」</strong>であり、
+      #1〜#7で扱ったすべてのコモディティの輸送コストに直結。<br/><br/>
+      日本の海運3社＝<strong>日本郵船（9101）、商船三井（9104）、川崎汽船（9107）</strong>。
+      2021-22年のコンテナ運賃バブルで各社とも史上最高益を更新。
+      現在はコンテナ事業をONE（Ocean Network Express）に統合し、3社ともポートフォリオ再構築中。
+    </p>
+  </div>
+</div>
+
+<!-- 2. Ship types -->
+<div class="section">
+  <div class="section-title"><div class="icon" style="background:#d3f9d8;">🚢</div>船種別プロファイル</div>
+
+  <div class="tab-bar">
+    <button class="tab-btn active" onclick="switchTab('dry')">ドライバルク</button>
+    <button class="tab-btn" onclick="switchTab('tanker')">タンカー</button>
+    <button class="tab-btn" onclick="switchTab('container')">コンテナ</button>
+    <button class="tab-btn" onclick="switchTab('lngship')">LNG船</button>
+    <button class="tab-btn" onclick="switchTab('car')">自動車船</button>
+  </div>
+
+  <!-- Dry Bulk -->
+  <div class="tab-content active" id="tab-dry">
+    <div class="prod-profile" style="border-color:var(--dry);">
+      <div class="prod-header">
+        <span class="prod-badge" style="background:var(--dry);">⛴</span>
+        <h3>ドライバルク — 素材セクターの生命線</h3>
+      </div>
+      <div class="prod-desc">
+        <strong>鉄鉱石、石炭、穀物、ボーキサイト</strong>などバラ積み貨物を運ぶ。
+        素材セクターのアナリストにとって最も関係が深い船種。
+        船のサイズで<strong>Capesize（18万DWT超/鉄鉱石・石炭）、Panamax（6-8万DWT/穀物・石炭）、
+        Supramax/Handysize（小型/マイナーバルク）</strong>に分類。
+      </div>
+      <div class="prod-stats">
+        <div class="stat-item"><div class="stat-label">指標</div><div class="stat-value">BDI（バルチック海運指数）</div><div class="stat-note">Capesize/Panamax/Supramax/Handyの加重平均</div></div>
+        <div class="stat-item"><div class="stat-label">貨物</div><div class="stat-value">鉄鉱石34%、石炭25%</div><div class="stat-note">+穀物10%+ボーキサイト+その他</div></div>
+        <div class="stat-item"><div class="stat-label">需要ドライバー</div><div class="stat-value">中国の鉄鉱石・石炭輸入</div><div class="stat-note">世界のドライバルク需要の約40%が中国向け</div></div>
+        <div class="stat-item"><div class="stat-label">供給ドライバー</div><div class="stat-value">新造船竣工＋スクラップ</div><div class="stat-note">船齢20年超のスクラップ＋環境規制でのソフト減船</div></div>
+      </div>
+    </div>
+
+    <details>
+      <summary>BDIの読み方と限界</summary>
+      <div class="detail-body">
+        <strong>BDI（Baltic Dry Index）：</strong>ロンドンのバルチック海運取引所が毎日発表。ドライバルク船のスポット運賃の総合指標。<br/><br/>
+        <strong>構成：</strong>Capesize 40%、Panamax 30%、Supramax 20%、Handysize 10%（2024年基準）。<br/><br/>
+        <strong>注意点：</strong>BDIはスポット運賃の指標であり、日本の海運3社の実際の利益はスポットと長期契約のミックスで決まる。BDIが急落しても長期契約比率が高い会社は影響が限定的。<br/><br/>
+        <strong>季節性：</strong>ブラジル鉄鉱石の出荷期（4-9月）にCapesize運賃が上がる傾向。穀物は北半球の収穫期（10-12月）にPanamax需要増。
+      </div>
+    </details>
+  </div>
+
+  <!-- Tanker -->
+  <div class="tab-content" id="tab-tanker">
+    <div class="prod-profile" style="border-color:var(--tanker);">
+      <div class="prod-header">
+        <span class="prod-badge" style="background:var(--tanker);">🛢</span>
+        <h3>タンカー — 原油・石油製品を運ぶ</h3>
+      </div>
+      <div class="prod-desc">
+        <strong>VLCC（超大型/30万DWT/中東→アジアの原油輸送）、Suezmax（15万DWT）、
+        Aframax（10万DWT/短距離）、MR（石油製品タンカー）</strong>に分類。
+        OPEC+の増減産政策で荷動きが変動。地政学リスク（ホルムズ海峡）に敏感。
+      </div>
+      <div class="prod-stats">
+        <div class="stat-item"><div class="stat-label">指標</div><div class="stat-value">WS（ワールドスケール）</div><div class="stat-note">基準運賃に対する倍率。WS100=基準。WS200=2倍</div></div>
+        <div class="stat-item"><div class="stat-label">需要ドライバー</div><div class="stat-value">OPEC+の生産量</div><div class="stat-note">増産→荷動き増→運賃上昇</div></div>
+        <div class="stat-item"><div class="stat-label">トンマイル効果</div><div class="stat-value">距離×数量</div><div class="stat-note">ロシア制裁→遠距離輸送増→実質的な船腹タイト化</div></div>
+        <div class="stat-item"><div class="stat-label">日本ポイント</div><div class="stat-value">商船三井がVLCC大手</div><div class="stat-note">日本郵船もタンカー保有。出光等の長期契約</div></div>
+      </div>
+    </div>
+
+    <details>
+      <summary>トンマイル効果とロシア制裁の影響</summary>
+      <div class="detail-body">
+        海運の需要は「量（トン）× 距離（マイル）」で決まる。同じ量の原油でも、中東→日本（近い）より中東→欧州やロシア→インド→欧州（遠い）のほうが船腹を長期間占有する。<br/><br/>
+        <strong>ロシア制裁の影響：</strong>欧州がロシア産原油を禁輸→ロシアは遠方のインド/中国に輸出→トンマイルが増加→実質的に船腹がタイト化→運賃上昇。<br/>
+        欧州は中東/米国/西アフリカから原油を調達→こちらも距離が伸びる。<br/><br/>
+        → 輸送量が横ばいでも、トンマイル増でタンカー運賃は上がり得る。
+      </div>
+    </details>
+  </div>
+
+  <!-- Container -->
+  <div class="tab-content" id="tab-container">
+    <div class="prod-profile" style="border-color:var(--container);">
+      <div class="prod-header">
+        <span class="prod-badge" style="background:var(--container);">📦</span>
+        <h3>コンテナ船 — ONE（日本3社JV）</h3>
+      </div>
+      <div class="prod-desc">
+        20フィート/40フィートコンテナで工業製品・消費財を輸送。
+        日本郵船・商船三井・川崎汽船の3社は2018年にコンテナ事業を<strong>ONE（Ocean Network Express）</strong>に統合。
+        世界シェア6位前後。2021-22年にコロナ特需で運賃が10倍超に暴騰→史上最高益→正常化へ。
+      </div>
+      <div class="prod-stats">
+        <div class="stat-item"><div class="stat-label">指標</div><div class="stat-value">SCFI / WCI</div><div class="stat-note">上海→各仕向地のスポット運賃指数</div></div>
+        <div class="stat-item"><div class="stat-label">需要ドライバー</div><div class="stat-value">世界のGDP成長率</div><div class="stat-note">消費財の貿易量。米国の在庫サイクル</div></div>
+        <div class="stat-item"><div class="stat-label">ONE出資比率</div><div class="stat-value">NYK38%, MOL31%, K-Line31%</div><div class="stat-note">持分法利益として各社の決算に反映</div></div>
+        <div class="stat-item"><div class="stat-label">紅海危機（2024）</div><div class="stat-value">フーシ派攻撃→喜望峰迂回</div><div class="stat-note">航行距離増→実質船腹減→運賃急騰の一因</div></div>
+      </div>
+    </div>
+
+    <details>
+      <summary>コンテナ運賃のサイクルと2021-22年バブル</summary>
+      <div class="detail-body">
+        <strong>正常時：</strong>上海→北米西岸で$1,500-2,500/FEU（40ft）。<br/>
+        <strong>2021年ピーク：</strong>$20,000/FEU超に暴騰。コロナでの港湾混雑＋巣ごもり需要で船腹不足。<br/>
+        <strong>2022-23年：</strong>正常化で急落。$1,000-2,000まで低下。<br/>
+        <strong>2024年：</strong>紅海危機でやや持ち直し。$3,000-5,000に。<br/><br/>
+        ONEの利益は「(運賃−コスト)×積載量」で決まるため、スポット運賃の変動が3社の持分法利益を大きく左右。ただし長期契約比率を引き上げることで安定化を図っている。
+      </div>
+    </details>
+  </div>
+
+  <!-- LNG Ship -->
+  <div class="tab-content" id="tab-lngship">
+    <div class="prod-profile" style="border-color:var(--lng);">
+      <div class="prod-header">
+        <span class="prod-badge" style="background:var(--lng);">🧊</span>
+        <h3>LNG船 — 長期契約の安定収益源</h3>
+      </div>
+      <div class="prod-desc">
+        LNGを−162℃で液化したまま運ぶ特殊船。建造費は1隻$250M超（約370億円）と極めて高額。
+        <strong>15-25年の長期傭船契約</strong>が一般的で、海運セクターの中で最も安定したキャッシュフロー。
+        商船三井が世界最大級のLNG船隊を保有。日本郵船も大手。
+      </div>
+      <div class="prod-stats">
+        <div class="stat-item"><div class="stat-label">契約形態</div><div class="stat-value">長期傭船（15-25年）</div><div class="stat-note">Take-or-Pay型で安定CF。ほぼ債券的な性格</div></div>
+        <div class="stat-item"><div class="stat-label">商船三井</div><div class="stat-value">LNG船約90隻</div><div class="stat-note">世界トップクラス。拡大継続中</div></div>
+        <div class="stat-item"><div class="stat-label">成長ドライバー</div><div class="stat-value">LNG需要増＋新プロジェクト</div><div class="stat-note">カタール/米国/モザンビーク等の新規LNG輸出</div></div>
+        <div class="stat-item"><div class="stat-label">利益率</div><div class="stat-value">安定高収益</div><div class="stat-note">スポット変動に晒されない。ROE安定に貢献</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Car Carrier -->
+  <div class="tab-content" id="tab-car">
+    <div class="prod-profile" style="border-color:var(--green);">
+      <div class="prod-header">
+        <span class="prod-badge" style="background:var(--green);">🚗</span>
+        <h3>自動車船 — 日本の得意分野</h3>
+      </div>
+      <div class="prod-desc">
+        完成車を運ぶPCC/PCTC（Pure Car/Truck Carrier）。日本郵船・商船三井が世界大手。
+        日本の自動車輸出台数に連動するが、近年は中国からの輸出急増も荷動きに貢献。
+        EV化で車両重量増→1隻あたり積載台数減→実質的な船腹タイト化が発生。
+      </div>
+      <div class="prod-stats">
+        <div class="stat-item"><div class="stat-label">需要ドライバー</div><div class="stat-value">完成車輸出台数</div><div class="stat-note">日本＋韓国＋中国からの輸出。中国が急拡大</div></div>
+        <div class="stat-item"><div class="stat-label">船腹状況</div><div class="stat-value">タイト（2024-25年）</div><div class="stat-note">中国EV輸出急増＋EV重量増で実質供給不足</div></div>
+        <div class="stat-item"><div class="stat-label">運賃</div><div class="stat-value">長期契約＋スポット</div><div class="stat-note">OEMとの年間契約が基本。スポットは高騰中</div></div>
+        <div class="stat-item"><div class="stat-label">日本企業</div><div class="stat-value">NYK、MOL</div><div class="stat-note">2社で世界シェアの約3割。高い参入障壁</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 3. Market Indices -->
+<div class="section">
+  <div class="section-title"><div class="icon" style="background:#fff3bf;">📈</div>主要市況指標</div>
+  <div class="index-grid">
+    <div class="index-card" style="border-color:var(--dry);">
+      <div class="idx-name">BDI</div>
+      <div class="idx-what">Baltic Dry Index</div>
+      <div class="idx-note">ドライバルクのスポット運賃指数。毎日発表。鉄鉱石・石炭の荷動きで変動。景気先行指標としても注目。</div>
+    </div>
+    <div class="index-card" style="border-color:var(--tanker);">
+      <div class="idx-name">WS</div>
+      <div class="idx-what">Worldscale</div>
+      <div class="idx-note">タンカー運賃の基準指数。WS100=基準。BDTI（原油）/BCTI（石油製品）もフォロー。</div>
+    </div>
+    <div class="index-card" style="border-color:var(--container);">
+      <div class="idx-name">SCFI</div>
+      <div class="idx-what">Shanghai Containerized Freight Index</div>
+      <div class="idx-note">上海発のコンテナスポット運賃。毎週金曜日発表。米西岸/欧州/東南アジア等の航路別。</div>
+    </div>
+    <div class="index-card" style="border-color:var(--lng);">
+      <div class="idx-name">Spark</div>
+      <div class="idx-what">Spark25 LNG Freight Rate</div>
+      <div class="idx-note">LNG船のスポット傭船料。$/dayで表示。日本勢は長期契約が中心なので直接影響は限定的。</div>
+    </div>
+  </div>
+</div>
+
+<!-- 4. Profit structure -->
+<div class="section">
+  <div class="section-title"><div class="icon" style="background:#ffe3e3;">💰</div>海運の利益構造</div>
+  <div class="formula-box">
+    <div class="formula">
+      <span class="var">利益</span><span class="op">=</span>
+      <span class="var">（運賃収入 − 航海費 − 船費）</span><span class="op">×</span>
+      <span class="var">稼働日数</span>
+    </div>
+    <div class="note">航海費＝燃料費＋港費。船費＝船員費＋保険＋修繕＋減価償却</div>
+  </div>
+
+  <div class="spread-visual">
+    <div style="font-weight:700;font-size:14px;margin-bottom:4px;">運賃収入の内訳イメージ（ドライバルク・スポット）</div>
+    <div class="spread-bar">
+      <div class="spread-seg" style="width:30%;background:#e8590c;">燃料費</div>
+      <div class="spread-seg" style="width:10%;background:#d9480f;">港費・水先案内</div>
+      <div class="spread-seg" style="width:15%;background:#868e96;">船員費</div>
+      <div class="spread-seg" style="width:15%;background:#495057;">減価償却＋保険</div>
+      <div class="spread-seg" style="width:10%;background:#343a40;">修繕・管理</div>
+      <div class="spread-seg" style="width:20%;background:#2b8a3e;">利益</div>
+    </div>
+    <div class="spread-annotation">
+      <strong>燃料費が最大のコスト項目</strong>（運航コストの30-40%）。<br/>
+      IMO2020で低硫黄燃料（VLSFO）への切替えが義務化。スクラバー装着船はHSFO（安い）を使用可。<br/>
+      運賃市況が好調な時は利益率50%超に達することもあるが、不況時は赤字に転落する<strong>究極のシクリカル</strong>。
+    </div>
+  </div>
+
+  <details>
+    <summary>スポット vs 長期契約（COA/T/C）のミックス</summary>
+    <div class="detail-body">
+      <strong>スポット：</strong>1航海ごとの契約。市況に直結。ボラティリティ大。<br/>
+      <strong>COA（Contract of Affreightment）：</strong>一定期間に一定量を運ぶ数量契約。やや安定。<br/>
+      <strong>T/C（Time Charter）：</strong>期間傭船。1日あたり＄○○で船を貸す。1-5年が一般的。燃料費は用船者負担。<br/>
+      <strong>長期傭船：</strong>10-25年。LNG船・自動車船に多い。債券的なCF。<br/><br/>
+      → <strong>商船三井</strong>はLNG船＋海洋事業の長期契約比率が高く、安定CF型。<br/>
+      → <strong>日本郵船</strong>は多角化（物流/ターミナル含む）でバランス型。<br/>
+      → <strong>川崎汽船</strong>はドライバルク/コンテナ（ONE）の比率が高く、市況感応度大。
+    </div>
+  </details>
+</div>
+
+<!-- 5. Transformation -->
+<div class="section">
+  <div class="section-title"><div class="icon" style="background:#dbeafe;">🔄</div>日本海運3社の事業構造転換</div>
+
+  <div class="callout-box" style="background:var(--sh-gradient);">
+    <h3>「コンテナ船会社」→「総合海運・物流グループ」への転換</h3>
+    <p>
+      コンテナ事業をONEに統合した後、各社とも<strong>非海運事業の拡大</strong>を加速。
+      物流（フォワーディング/倉庫）、ターミナル運営、不動産、海洋事業（FPSO/FSO）、
+      洋上風力関連に投資を拡大中。「海運のボラティリティに依存しない安定利益基盤」の構築が共通戦略。<br/><br/>
+      ONEからの持分法利益は依然大きいが、市況正常化で縮小。
+      <strong>非ONEの「自営事業」でどれだけ稼げるか</strong>が中長期のバリュエーションを決める。
+    </p>
+  </div>
+</div>
+
+<!-- 6. KPIs -->
+<div class="section">
+  <div class="section-title"><div class="icon" style="background:#e8f4fd;">📊</div>アナリストが見るべきKPI</div>
+  <div class="card" style="padding:0;overflow:hidden;">
+    <table class="kpi-table">
+      <thead><tr><th>KPI</th><th>なぜ重要か</th></tr></thead>
+      <tbody>
+        <tr><td class="kpi-name">BDI / Capesize運賃</td><td class="kpi-why">ドライバルクのスポット市況。鉄鉱石・石炭の荷動きに連動。日次で変動。</td></tr>
+        <tr><td class="kpi-name">SCFI / WCI</td><td class="kpi-why">コンテナ運賃。ONEの利益に直結。週次発表。航路別で見る。</td></tr>
+        <tr><td class="kpi-name">ONE持分法利益</td><td class="kpi-why">3社の利益の大きな割合。ONEの四半期決算で先行把握可能。</td></tr>
+        <tr><td class="kpi-name">長期契約比率</td><td class="kpi-why">LNG船/自動車船の長期傭船比率。高い＝安定CF。各社の戦略差が出る。</td></tr>
+        <tr><td class="kpi-name">燃料費（バンカー価格）</td><td class="kpi-why">VLSFO/HSFOの価格。原油連動。スクラバー装着率も確認。</td></tr>
+        <tr><td class="kpi-name">船腹供給（オーダーブック）</td><td class="kpi-why">新造船の受注残/既存船腹の比率。供給増ペースが運賃の天井を決める。</td></tr>
+        <tr><td class="kpi-name">スクラップ量</td><td class="kpi-why">老齢船の解撤量。環境規制（CII/EEXI）でスクラップ加速→供給引締め。</td></tr>
+        <tr><td class="kpi-name">株主還元（配当/自社株買い）</td><td class="kpi-why">3社ともコンテナバブルの余剰CFで大型還元。配当性向/総還元性向を確認。</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- 7. Risks -->
+<div class="section">
+  <div class="section-title"><div class="icon" style="background:#ffe3e3;">⚠️</div>主なリスク要因</div>
+  <div class="risk-grid">
+    <div class="risk-item high">
+      <div class="risk-name">運賃の暴落</div>
+      <div class="risk-desc">究極のシクリカル。BDIが500（歴史的低水準）に沈めば全社赤字。新造船の一斉竣工が最大のリスク。</div>
+    </div>
+    <div class="risk-item high">
+      <div class="risk-name">地政学リスク</div>
+      <div class="risk-desc">ホルムズ海峡封鎖、紅海/スエズ運河の封鎖、台湾海峡有事。航路変更で運賃急変。</div>
+    </div>
+    <div class="risk-item mid">
+      <div class="risk-name">環境規制（CII/EEXI/EU ETS）</div>
+      <div class="risk-desc">IMOの炭素強度指標（CII）で低評価船は減速or解撤。EU ETSで排出権購入義務。コスト増。</div>
+    </div>
+    <div class="risk-item mid">
+      <div class="risk-name">燃料転換コスト</div>
+      <div class="risk-desc">LNG焚き/メタノール/アンモニアへの燃料転換投資が巨額。新造船は2重燃料が標準化。</div>
+    </div>
+    <div class="risk-item mid">
+      <div class="risk-name">中国景気減速</div>
+      <div class="risk-desc">ドライバルク需要の約40%が中国。不動産不況→鉄鉱石輸入減→BDI下落。</div>
+    </div>
+    <div class="risk-item low">
+      <div class="risk-name">為替（USD建て収益）</div>
+      <div class="risk-desc">運賃はドル建て、コストもドル建てが多い。ただし邦船は円報告→円安で見かけ上増益。</div>
+    </div>
+  </div>
+</div>
+
+<!-- 8. Coverage -->
+<div class="section">
+  <div class="section-title"><div class="icon" style="background:#f3e8ff;">🇯🇵</div>日本株カバレッジ対応表</div>
+  <div class="card" style="padding:0;overflow:hidden;">
+    <table class="cov-table">
+      <thead><tr><th>銘柄</th><th>特徴</th><th>注目ポイント</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><strong>日本郵船（9101）</strong></td>
+          <td>最大手。多角化進行中</td>
+          <td>ONE38%出資。物流（郵船ロジスティクス完全子会社化）。自動車船好調。LNG船。ターミナル。配当利回り。「海・陸・空」の総合物流グループ化。</td>
+        </tr>
+        <tr>
+          <td><strong>商船三井（9104）</strong></td>
+          <td>LNG船・海洋事業に強み</td>
+          <td>ONE31%出資。LNG船約90隻で世界トップ級。FPSO/FSO（海洋浮体）。洋上風力。不動産。長期安定CFの比率を高める「ポートフォリオ経営」。</td>
+        </tr>
+        <tr>
+          <td><strong>川崎汽船（9107）</strong></td>
+          <td>ドライバルク＋ONE依存高</td>
+          <td>ONE31%出資。ドライバルク比率高め。自動車船も保有。ONE利益への依存度が3社で最も高い。コンテナ市況感応度が大。</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- 9. Cross sector -->
+<div class="section">
+  <div class="section-title"><div class="icon" style="background:#d3f9d8;">🔄</div>他セクターとのつながり（全セクター総まとめ）</div>
+  <details>
+    <summary>鉱業（#1）→ 海運 — 鉄鉱石・石炭の輸送</summary>
+    <div class="detail-body">
+      BHP/Rio/Valeの鉄鉱石をCapesizeで豪州/ブラジル→中国/日本に輸送。原料炭もPanamax/Capeで輸送。鉱山の出荷量＝ドライバルク需要。鉱山のガイダンス変更はBDIに影響。
+    </div>
+  </details>
+  <details>
+    <summary>石油・エネルギー（#2）→ 海運 — 原油・LNG輸送</summary>
+    <div class="detail-body">
+      OPEC+の増減産→VLCC荷動き。LNG新規プロジェクト→LNG船需要。船舶燃料（VLSFO/HSFO）は原油連動→海運のコスト。#2の全ての変動が海運に波及。
+    </div>
+  </details>
+  <details>
+    <summary>鉄鋼（#3）→ 海運 — 原料輸入＋鋼材輸出</summary>
+    <div class="detail-body">
+      日本の鉄鋼メーカーは鉄鉱石・原料炭をバルク船で輸入。鋼材の輸出も海上輸送。日本製鉄のインド・ブラジルの合弁からの鋼材輸送も。海運コストは鉄鋼のランディングコストに含まれる。
+    </div>
+  </details>
+  <details>
+    <summary>紙・パッケージング（#7）→ 海運 — チップ船</summary>
+    <div class="detail-body">
+      木材チップは専用のチップ船で豪州/東南アジアから輸入。紙の輸出も海上輸送。王子HD等は自社チップ船を保有。
+    </div>
+  </details>
+  <details>
+    <summary>自動車 → 海運 — 完成車輸送</summary>
+    <div class="detail-body">
+      自動車船（PCC/PCTC）で日本/韓国/中国→北米/欧州/中東に完成車を輸出。EV輸出の急増（特に中国BYD等）が自動車船需要を押し上げ。日本郵船・商船三井が世界大手。
+    </div>
+  </details>
+</div>
+
+<!-- Global -->
+<div class="section">
+  <div class="section-title"><div class="icon" style="background:#e8f4fd;">🌍</div>グローバルの参考プレーヤー</div>
+  <div class="card">
+    <p>
+      <strong>【コンテナ】</strong> MSC（スイス/1位）、Maersk（デンマーク/2位）、CMA CGM（仏/3位）。ONEは6-7位。<br/>
+      <strong>【ドライバルク】</strong> Star Bulk（ギリシャ）、Golden Ocean（ノルウェー）。邦船はドライでは中堅。<br/>
+      <strong>【タンカー】</strong> Frontline（ノルウェー）、Euronav（ベルギー）、TORM（デンマーク）。<br/>
+      <strong>【LNG】</strong> Flex LNG、Cool Company。商船三井が隻数ベースで世界トップ級。<br/>
+      <strong>【自動車船】</strong> Wallenius Wilhelmsen（ノルウェー）が最大。日本郵船・商船三井がTop3。<br/><br/>
+      → Maerskの四半期決算はコンテナ市況のベンチマーク。Frontlineはタンカー市況の代表銘柄。
+    </p>
+  </div>
+</div>
+
+<!-- FINAL: Series complete -->
+<div class="final-box">
+  <h2>🎓 素材セクター入門 — 全8回完了</h2>
+  <p>
+    #1 石炭・鉱業 → #2 石油・エネルギー → #3 鉄鋼 → #4 非鉄金属<br/>
+    #5 線材・ケーブル → #6 ガラス・セメント → #7 紙・パッケージング → #8 海運<br/><br/>
+    川上（鉱山・エネルギー）から川下（加工・物流）まで、<br/>
+    すべてのサブセクターが原料・エネルギー・輸送で繋がっている。<br/>
+    クロスセクター分析こそが素材アナリストの最大の武器。
+  </p>
+</div>
+
+<div class="footnote">
+  素材セクター入門シリーズ #8 / 8（完）
+</div>
+
+<script>
+function switchTab(id){
+  document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('tab-'+id).classList.add('active');
+  event.target.classList.add('active');
+}
+</script>
+</body>
+</html>

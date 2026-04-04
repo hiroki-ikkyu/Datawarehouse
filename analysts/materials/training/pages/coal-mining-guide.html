@@ -1,0 +1,782 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>素材セクター入門 #1 — 石炭・鉱業</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f5f5f7;
+    --card: #ffffff;
+    --text: #1d1d1f;
+    --sub: #6e6e73;
+    --accent: #2c2c2e;
+    --blue: #3a7bd5;
+    --orange: #e8590c;
+    --green: #2b8a3e;
+    --red: #c92a2a;
+    --radius: 16px;
+    --shadow: 0 1px 3px rgba(0,0,0,0.04);
+    --shadow-lg: 0 4px 20px rgba(0,0,0,0.08);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'DM Sans', 'Noto Sans JP', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.7;
+    padding: 24px 16px 60px;
+    max-width: 800px;
+    margin: 0 auto;
+  }
+
+  .header {
+    text-align: center;
+    margin-bottom: 40px;
+    padding: 32px 20px;
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+    border-radius: var(--radius);
+    color: #fff;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .header::before {
+    content: '⛏';
+    position: absolute;
+    font-size: 120px;
+    opacity: 0.06;
+    top: -10px;
+    right: -10px;
+  }
+
+  .header .series-tag {
+    display: inline-block;
+    background: rgba(255,255,255,0.15);
+    padding: 4px 14px;
+    border-radius: 20px;
+    font-size: 12px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+    backdrop-filter: blur(4px);
+  }
+
+  .header h1 {
+    font-size: 28px;
+    font-weight: 700;
+    margin-bottom: 8px;
+  }
+
+  .header p {
+    font-size: 14px;
+    opacity: 0.7;
+  }
+
+  .section {
+    margin-bottom: 32px;
+  }
+
+  .section-title {
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .section-title .icon {
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    flex-shrink: 0;
+  }
+
+  .card {
+    background: var(--card);
+    border-radius: var(--radius);
+    padding: 20px;
+    box-shadow: var(--shadow);
+    margin-bottom: 12px;
+  }
+
+  .card p {
+    font-size: 14px;
+    color: var(--sub);
+  }
+
+  .card p strong {
+    color: var(--text);
+  }
+
+  /* Value Chain Diagram */
+  .chain-container {
+    overflow-x: auto;
+    padding: 8px 0;
+  }
+
+  .chain {
+    display: flex;
+    align-items: stretch;
+    gap: 0;
+    min-width: 600px;
+  }
+
+  .chain-step {
+    flex: 1;
+    text-align: center;
+    position: relative;
+  }
+
+  .chain-box {
+    background: var(--card);
+    border-radius: 12px;
+    padding: 16px 12px;
+    box-shadow: var(--shadow);
+    border: 2px solid transparent;
+    transition: all 0.2s;
+    cursor: pointer;
+    min-height: 120px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .chain-box:hover {
+    box-shadow: var(--shadow-lg);
+    transform: translateY(-2px);
+  }
+
+  .chain-box.highlight {
+    border-color: var(--blue);
+    background: #f0f6ff;
+  }
+
+  .chain-box .emoji {
+    font-size: 28px;
+    margin-bottom: 6px;
+  }
+
+  .chain-box .label {
+    font-size: 13px;
+    font-weight: 700;
+  }
+
+  .chain-box .sub-label {
+    font-size: 11px;
+    color: var(--sub);
+    margin-top: 4px;
+  }
+
+  .chain-arrow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    flex-shrink: 0;
+    color: var(--sub);
+    font-size: 18px;
+  }
+
+  /* Commodity Types */
+  .commodity-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+
+  .commodity-item {
+    background: var(--card);
+    border-radius: 12px;
+    padding: 16px;
+    box-shadow: var(--shadow);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .commodity-item:hover {
+    box-shadow: var(--shadow-lg);
+    transform: translateY(-1px);
+  }
+
+  .commodity-item .name {
+    font-weight: 700;
+    font-size: 15px;
+    margin-bottom: 4px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .commodity-item .desc {
+    font-size: 12px;
+    color: var(--sub);
+    line-height: 1.6;
+  }
+
+  .commodity-item .tag {
+    display: inline-block;
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 10px;
+    margin-top: 6px;
+    font-weight: 500;
+  }
+
+  .tag-bulk { background: #fff3bf; color: #e67700; }
+  .tag-precious { background: #d3f9d8; color: #2b8a3e; }
+  .tag-base { background: #dbe4ff; color: #364fc7; }
+  .tag-energy { background: #ffe3e3; color: #c92a2a; }
+
+  /* Profit Drivers */
+  .driver-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .driver {
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+    background: var(--card);
+    border-radius: 12px;
+    padding: 16px;
+    box-shadow: var(--shadow);
+  }
+
+  .driver-num {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--accent);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+
+  .driver-content .driver-title {
+    font-weight: 700;
+    font-size: 14px;
+    margin-bottom: 4px;
+  }
+
+  .driver-content .driver-desc {
+    font-size: 13px;
+    color: var(--sub);
+  }
+
+  /* Price Formula */
+  .formula-box {
+    background: linear-gradient(135deg, #1a1a2e, #16213e);
+    border-radius: var(--radius);
+    padding: 24px;
+    color: #fff;
+    text-align: center;
+    margin-bottom: 12px;
+  }
+
+  .formula-box .formula {
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 12px;
+    letter-spacing: 0.5px;
+  }
+
+  .formula-box .formula span.var {
+    color: #74c0fc;
+  }
+
+  .formula-box .formula span.op {
+    color: #ffd43b;
+    margin: 0 6px;
+  }
+
+  .formula-box .note {
+    font-size: 12px;
+    opacity: 0.6;
+  }
+
+  /* Risk matrix */
+  .risk-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .risk-item {
+    background: var(--card);
+    border-radius: 12px;
+    padding: 14px;
+    box-shadow: var(--shadow);
+    border-left: 4px solid;
+  }
+
+  .risk-item.high { border-color: var(--red); }
+  .risk-item.mid { border-color: var(--orange); }
+  .risk-item.low { border-color: var(--green); }
+
+  .risk-item .risk-name {
+    font-weight: 700;
+    font-size: 13px;
+    margin-bottom: 4px;
+  }
+
+  .risk-item .risk-desc {
+    font-size: 11px;
+    color: var(--sub);
+  }
+
+  /* KPI Table */
+  .kpi-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+
+  .kpi-table th {
+    text-align: left;
+    padding: 10px 12px;
+    background: #f1f3f5;
+    font-weight: 600;
+    border-radius: 8px 8px 0 0;
+  }
+
+  .kpi-table td {
+    padding: 10px 12px;
+    border-bottom: 1px solid #f1f3f5;
+  }
+
+  .kpi-table tr:last-child td { border-bottom: none; }
+
+  .kpi-table .kpi-name { font-weight: 600; }
+  .kpi-table .kpi-why { color: var(--sub); font-size: 12px; }
+
+  /* Expandable */
+  details {
+    background: var(--card);
+    border-radius: 12px;
+    padding: 16px;
+    box-shadow: var(--shadow);
+    margin-bottom: 10px;
+  }
+
+  details summary {
+    font-weight: 700;
+    font-size: 14px;
+    cursor: pointer;
+    list-style: none;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  details summary::after {
+    content: '▸';
+    transition: transform 0.2s;
+  }
+
+  details[open] summary::after {
+    transform: rotate(90deg);
+  }
+
+  details .detail-body {
+    margin-top: 12px;
+    font-size: 13px;
+    color: var(--sub);
+    line-height: 1.8;
+  }
+
+  .footnote {
+    margin-top: 40px;
+    text-align: center;
+    font-size: 12px;
+    color: var(--sub);
+  }
+
+  /* Cycle diagram */
+  .cycle-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 20px;
+    background: var(--card);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+  }
+
+  .cycle-node {
+    padding: 10px 16px;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 600;
+    text-align: center;
+  }
+
+  .cycle-arrow {
+    font-size: 18px;
+    color: var(--sub);
+  }
+
+  .c-up { background: #d3f9d8; color: #2b8a3e; }
+  .c-peak { background: #fff3bf; color: #e67700; }
+  .c-down { background: #ffe3e3; color: #c92a2a; }
+  .c-bottom { background: #dbe4ff; color: #364fc7; }
+
+  @media (max-width: 500px) {
+    .commodity-grid, .risk-grid { grid-template-columns: 1fr; }
+    .chain { min-width: 500px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="series-tag">素材セクター入門 #1</div>
+  <h1>石炭・鉱業（Mining）</h1>
+  <p>バリューチェーンの最上流 — すべての素材の出発点</p>
+</div>
+
+<!-- 1. What is it? -->
+<div class="section">
+  <div class="section-title">
+    <div class="icon" style="background:#e8f4fd;">📖</div>
+    そもそも鉱業とは
+  </div>
+  <div class="card">
+    <p>
+      地球の地殻から<strong>鉱物資源</strong>を掘り出し、選鉱（不純物除去）して素材メーカーに販売する産業。
+      素材セクターの<strong>最上流</strong>に位置し、鉄鋼・非鉄・セメント・エネルギーすべての原料供給元。
+      「何を掘るか」「どこで掘るか」「いくらで売れるか」が事業の全て。
+    </p>
+  </div>
+</div>
+
+<!-- 2. Value Chain -->
+<div class="section">
+  <div class="section-title">
+    <div class="icon" style="background:#fff3bf;">🔗</div>
+    バリューチェーン（川上→川下の流れ）
+  </div>
+  <div class="chain-container">
+    <div class="chain">
+      <div class="chain-step">
+        <div class="chain-box highlight">
+          <div class="emoji">🏔</div>
+          <div class="label">探鉱</div>
+          <div class="sub-label">Exploration</div>
+          <div class="sub-label">鉱床を探す</div>
+        </div>
+      </div>
+      <div class="chain-arrow">→</div>
+      <div class="chain-step">
+        <div class="chain-box highlight">
+          <div class="emoji">⛏</div>
+          <div class="label">採掘</div>
+          <div class="sub-label">Mining</div>
+          <div class="sub-label">鉱石を掘る</div>
+        </div>
+      </div>
+      <div class="chain-arrow">→</div>
+      <div class="chain-step">
+        <div class="chain-box highlight">
+          <div class="emoji">🔬</div>
+          <div class="label">選鉱</div>
+          <div class="sub-label">Processing</div>
+          <div class="sub-label">品位を上げる</div>
+        </div>
+      </div>
+      <div class="chain-arrow">→</div>
+      <div class="chain-step">
+        <div class="chain-box">
+          <div class="emoji">🚢</div>
+          <div class="label">輸送</div>
+          <div class="sub-label">Logistics</div>
+          <div class="sub-label">港・鉄道で運ぶ</div>
+        </div>
+      </div>
+      <div class="chain-arrow">→</div>
+      <div class="chain-step">
+        <div class="chain-box">
+          <div class="emoji">🏭</div>
+          <div class="label">製錬・加工</div>
+          <div class="sub-label">Smelting</div>
+          <div class="sub-label">← 川中以降</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="card" style="margin-top: 12px;">
+    <p>
+      <strong>青枠＝鉱業会社の守備範囲。</strong>探鉱→採掘→選鉱まで。
+      輸送はコスト構造に大きく影響し（特に鉄鉱石は重量物）、鉱山から港までの距離が競争力を左右する。
+    </p>
+  </div>
+</div>
+
+<!-- 3. What do they dig? -->
+<div class="section">
+  <div class="section-title">
+    <div class="icon" style="background:#d3f9d8;">⚒</div>
+    何を掘るのか？ — コモディティ分類
+  </div>
+  <div class="commodity-grid">
+    <div class="commodity-item">
+      <div class="name">🪨 鉄鉱石</div>
+      <div class="desc">鉄鋼の原料。世界取引量トップ。豪州・ブラジルが二大産地。品位（Fe含有率）が価格に直結。</div>
+      <div class="tag tag-bulk">バルク商品</div>
+    </div>
+    <div class="commodity-item">
+      <div class="name">�ite 原料炭</div>
+      <div class="desc">製鉄用（コークス原料）。一般炭と区別。豪州が最大輸出国。鉄鋼需要に連動。</div>
+      <div class="tag tag-energy">エネルギー</div>
+    </div>
+    <div class="commodity-item">
+      <div class="name">🔥 一般炭</div>
+      <div class="desc">火力発電用。脱炭素で需要減も、アジア新興国ではまだ主力電源。価格はニューキャッスル指標。</div>
+      <div class="tag tag-energy">エネルギー</div>
+    </div>
+    <div class="commodity-item">
+      <div class="name">🥇 金・銀</div>
+      <div class="desc">安全資産・工業用途。金は中央銀行の外貨準備需要。銀は太陽光パネル需要増。</div>
+      <div class="tag tag-precious">貴金属</div>
+    </div>
+    <div class="commodity-item">
+      <div class="name">🟤 銅</div>
+      <div class="desc">電気伝導率No.1。EV・再エネ・データセンターで需要爆発。「Dr. Copper」＝景気の先行指標。</div>
+      <div class="tag tag-base">ベースメタル</div>
+    </div>
+    <div class="commodity-item">
+      <div class="name">🔋 リチウム・ニッケル</div>
+      <div class="desc">EV電池の核心素材。リチウムは供給過剰で暴落→回復サイクル中。ニッケルはインドネシア急増。</div>
+      <div class="tag tag-base">ベースメタル</div>
+    </div>
+  </div>
+</div>
+
+<!-- 4. Profit formula -->
+<div class="section">
+  <div class="section-title">
+    <div class="icon" style="background:#ffe3e3;">💰</div>
+    鉱業の利益構造
+  </div>
+  <div class="formula-box">
+    <div class="formula">
+      <span class="var">利益</span>
+      <span class="op">=</span>
+      <span class="var">（市場価格 − 採掘コスト）</span>
+      <span class="op">×</span>
+      <span class="var">生産量</span>
+    </div>
+    <div class="note">究極的にはこの式がすべて。だから「コスト曲線」上の位置が最重要</div>
+  </div>
+  <div class="driver-list">
+    <div class="driver">
+      <div class="driver-num">1</div>
+      <div class="driver-content">
+        <div class="driver-title">市場価格（Price）</div>
+        <div class="driver-desc">LME・TSI・プラッツなどの指標価格で決まる。自分ではコントロールできない。中国の需要が最大の変動要因。</div>
+      </div>
+    </div>
+    <div class="driver">
+      <div class="driver-num">2</div>
+      <div class="driver-content">
+        <div class="driver-title">採掘コスト（Cost Curve Position）</div>
+        <div class="driver-desc">コスト曲線の左側＝低コスト鉱山ほど、価格下落局面でも利益が出る。人件費、エネルギー費、ロイヤリティ、為替が構成要素。</div>
+      </div>
+    </div>
+    <div class="driver">
+      <div class="driver-num">3</div>
+      <div class="driver-content">
+        <div class="driver-title">生産量（Volume）</div>
+        <div class="driver-desc">鉱山の品位劣化、天候（洪水・サイクロン）、設備トラブルで上下。増産には数年〜10年のリードタイム。</div>
+      </div>
+    </div>
+    <div class="driver">
+      <div class="driver-num">4</div>
+      <div class="driver-content">
+        <div class="driver-title">為替</div>
+        <div class="driver-desc">コモディティはUSD建て、コストは現地通貨建てが多い。AUD安・BRL安は豪州・ブラジル鉱山に追い風。</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 5. Commodity Cycle -->
+<div class="section">
+  <div class="section-title">
+    <div class="icon" style="background:#dbe4ff;">🔄</div>
+    コモディティサイクル（超重要）
+  </div>
+  <div class="cycle-container">
+    <div class="cycle-node c-bottom">供給不足<br/>価格上昇</div>
+    <div class="cycle-arrow">→</div>
+    <div class="cycle-node c-up">高価格で<br/>増産投資</div>
+    <div class="cycle-arrow">→</div>
+    <div class="cycle-node c-peak">供給過剰<br/>価格下落</div>
+    <div class="cycle-arrow">→</div>
+    <div class="cycle-node c-down">減産・淘汰<br/>投資停止</div>
+    <div class="cycle-arrow">→</div>
+    <div class="cycle-node c-bottom">再び<br/>供給不足</div>
+  </div>
+  <div class="card" style="margin-top: 12px;">
+    <p>
+      <strong>このサイクルが鉱業銘柄分析の核心。</strong>
+      鉱山開発には5〜10年かかるため、需要増に供給が追いつかず価格が上がる→高値に誘われて投資ラッシュ→一斉に供給が出て暴落、という繰り返し。
+      「今サイクルのどこにいるか？」を見極めることがアナリストの仕事。
+    </p>
+  </div>
+</div>
+
+<!-- 6. Key KPIs -->
+<div class="section">
+  <div class="section-title">
+    <div class="icon" style="background:#e8f4fd;">📊</div>
+    アナリストが見るべきKPI
+  </div>
+  <div class="card" style="padding: 0; overflow: hidden;">
+    <table class="kpi-table">
+      <thead>
+        <tr>
+          <th>KPI</th>
+          <th>なぜ重要か</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="kpi-name">AISC（All-In Sustaining Cost）</td>
+          <td class="kpi-why">鉱山の真の採掘コスト。金鉱山で特に使う。コスト曲線上の位置を示す。</td>
+        </tr>
+        <tr>
+          <td class="kpi-name">C1 Cash Cost</td>
+          <td class="kpi-why">銅・ニッケルなどベースメタルのコスト指標。バイプロダクト（副産物）控除後。</td>
+        </tr>
+        <tr>
+          <td class="kpi-name">品位（Grade）</td>
+          <td class="kpi-why">Fe%, Cu%など。品位が下がると同じ量の鉱石からの産出量が減り、コスト上昇。</td>
+        </tr>
+        <tr>
+          <td class="kpi-name">埋蔵量（Reserves）</td>
+          <td class="kpi-why">残り何年掘れるか。「Mine Life」が短い鉱山は将来の成長に不安。</td>
+        </tr>
+        <tr>
+          <td class="kpi-name">FCF Yield</td>
+          <td class="kpi-why">鉱業は設備投資が大きい。真の現金創出力をFCFで見る。高FCF＝還元余力あり。</td>
+        </tr>
+        <tr>
+          <td class="kpi-name">Net Debt / EBITDA</td>
+          <td class="kpi-why">サイクル底でも耐えられるか？2x以下が健全の目安。</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- 7. Risks -->
+<div class="section">
+  <div class="section-title">
+    <div class="icon" style="background:#ffe3e3;">⚠️</div>
+    主なリスク要因
+  </div>
+  <div class="risk-grid">
+    <div class="risk-item high">
+      <div class="risk-name">コモディティ価格</div>
+      <div class="risk-desc">最大のリスク。鉄鉱石価格が$20/t下がるとBHPの利益は数十億ドル変動。</div>
+    </div>
+    <div class="risk-item high">
+      <div class="risk-name">カントリーリスク</div>
+      <div class="risk-desc">資源ナショナリズム、ロイヤリティ引上げ、輸出規制（インドネシアのニッケル禁輸など）。</div>
+    </div>
+    <div class="risk-item mid">
+      <div class="risk-name">ESG・脱炭素</div>
+      <div class="risk-desc">石炭は座礁資産化リスク。Scope 3排出問題。一方で銅・リチウムはグリーン需要の恩恵。</div>
+    </div>
+    <div class="risk-item mid">
+      <div class="risk-name">操業リスク</div>
+      <div class="risk-desc">天候（豪州のサイクロン）、鉱山事故、労使紛争、設備故障でガイダンス未達。</div>
+    </div>
+    <div class="risk-item low">
+      <div class="risk-name">為替</div>
+      <div class="risk-desc">USD建て売上 vs 現地通貨コスト。AUD/USD、BRL/USDの変動がマージンに直結。</div>
+    </div>
+    <div class="risk-item mid">
+      <div class="risk-name">水・環境規制</div>
+      <div class="risk-desc">水資源の制約（特にチリ銅鉱山）、尾鉱ダム事故リスク（Vale 2019年事故）。</div>
+    </div>
+  </div>
+</div>
+
+<!-- 8. Japanese coverage angle -->
+<div class="section">
+  <div class="section-title">
+    <div class="icon" style="background:#f3e8ff;">🇯🇵</div>
+    日本株カバレッジとの関連
+  </div>
+  <details>
+    <summary>日本に「純粋な鉱業会社」は少ない</summary>
+    <div class="detail-body">
+      日本の鉱業は海外権益参画型が中心。三菱商事・三井物産（商社）が豪州炭鉱やチリ銅鉱山の持分を保有。
+      住友金属鉱山（5713）は例外的に鉱山開発〜製錬まで一貫操業（ニッケル・金・銅）。
+      カバレッジでは<strong>原料コスト側</strong>として鉱業を理解する必要がある。鉄鉱石・原料炭価格は鉄鋼セクターの利益を直撃する。
+    </div>
+  </details>
+  <details>
+    <summary>鉄鋼セクターとの連動</summary>
+    <div class="detail-body">
+      日本製鉄（5401）やJFE（5411）にとって、鉄鉱石と原料炭は最大のコスト要因（原価の約6割）。
+      鉄鉱石価格が上がれば鉄鋼は減益要因、鉱業は増益要因。<strong>逆相関</strong>の関係を理解しておくことが重要。
+      ただし鉄鋼が値上げできれば（スプレッド維持）、必ずしもマイナスではない。
+    </div>
+  </details>
+  <details>
+    <summary>原料炭 vs 一般炭の違いは必須知識</summary>
+    <div class="detail-body">
+      <strong>原料炭（Coking Coal）：</strong>製鉄用。高品質で価格も高い。代替が効かないため脱炭素圧力でも需要は当面残る。<br/><br/>
+      <strong>一般炭（Thermal Coal）：</strong>発電用。再エネ拡大で先進国では需要減。ただしインド・東南アジアでは増加中。
+      金融機関の投融資引揚げ（ダイベストメント）対象になりやすい。
+    </div>
+  </details>
+</div>
+
+<!-- 9. Global majors -->
+<div class="section">
+  <div class="section-title">
+    <div class="icon" style="background:#e8f4fd;">🌍</div>
+    グローバル鉱業メジャー（参考）
+  </div>
+  <div class="card">
+    <p>
+      <strong>BHP</strong>（豪）— 鉄鉱石・銅・ニッケル。時価総額最大。<br/>
+      <strong>Rio Tinto</strong>（豪/英）— 鉄鉱石・アルミ。ピルバラ鉄鉱石が稼ぎ頭。<br/>
+      <strong>Vale</strong>（ブラジル）— 鉄鉱石世界最大級。品位が高い（65% Fe）。<br/>
+      <strong>Glencore</strong>（スイス）— 石炭・銅・亜鉛＋トレーディング。商社に近い。<br/>
+      <strong>Freeport-McMoRan</strong>（米）— 銅の世界最大級。インドネシアのグラスバーグ鉱山。
+    </p>
+    <p style="margin-top: 10px;">
+      → BHPの決算やガイダンスは、日本の鉄鋼・非鉄セクターの原料コストを予測する上で必読。
+    </p>
+  </div>
+</div>
+
+<div class="footnote">
+  素材セクター入門シリーズ #1 / 8<br/>
+  次回：#2 石油・エネルギー（原油・LNG）
+</div>
+
+</body>
+</html>

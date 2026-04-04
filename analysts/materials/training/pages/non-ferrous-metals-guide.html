@@ -1,0 +1,904 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>素材セクター入門 #4 — 非鉄金属（Non-Ferrous Metals）</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f5f5f7;
+    --card: #ffffff;
+    --text: #1d1d1f;
+    --sub: #6e6e73;
+    --accent: #2c2c2e;
+    --radius: 16px;
+    --shadow: 0 1px 3px rgba(0,0,0,0.04);
+    --shadow-lg: 0 4px 20px rgba(0,0,0,0.08);
+    --nf-gradient: linear-gradient(135deg, #5f3dc4 0%, #7048e8 50%, #845ef7 100%);
+    --copper: #e8590c;
+    --alum: #868e96;
+    --nickel: #2b8a3e;
+    --zinc: #5c7cfa;
+    --gold: #f59f00;
+    --rare: #ae3ec9;
+    --red: #c92a2a;
+    --orange: #e8590c;
+    --green: #2b8a3e;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    font-family: 'DM Sans','Noto Sans JP',sans-serif;
+    background: var(--bg); color: var(--text); line-height: 1.7;
+    padding: 24px 16px 60px; max-width: 800px; margin: 0 auto;
+  }
+  .header {
+    text-align: center; margin-bottom: 40px; padding: 32px 20px;
+    background: var(--nf-gradient); border-radius: var(--radius);
+    color: #fff; position: relative; overflow: hidden;
+  }
+  .header::before { content:'🥇'; position:absolute; font-size:120px; opacity:0.06; top:-10px; right:-10px; }
+  .header .series-tag {
+    display:inline-block; background:rgba(255,255,255,0.15);
+    padding:4px 14px; border-radius:20px; font-size:12px;
+    letter-spacing:1px; text-transform:uppercase; margin-bottom:12px;
+  }
+  .header h1 { font-size:26px; font-weight:700; margin-bottom:8px; }
+  .header p { font-size:14px; opacity:0.7; }
+
+  .section { margin-bottom:32px; }
+  .section-title {
+    font-size:18px; font-weight:700; margin-bottom:16px;
+    display:flex; align-items:center; gap:8px;
+  }
+  .section-title .icon {
+    width:28px; height:28px; border-radius:8px;
+    display:flex; align-items:center; justify-content:center;
+    font-size:14px; flex-shrink:0;
+  }
+  .card {
+    background:var(--card); border-radius:var(--radius);
+    padding:20px; box-shadow:var(--shadow); margin-bottom:12px;
+  }
+  .card p { font-size:14px; color:var(--sub); }
+  .card p strong { color:var(--text); }
+
+  /* Value chain */
+  .chain-container { overflow-x:auto; padding:8px 0; }
+  .chain { display:flex; align-items:stretch; gap:0; min-width:720px; }
+  .chain-step { flex:1; text-align:center; }
+  .chain-box {
+    border-radius:12px; padding:14px 8px; box-shadow:var(--shadow);
+    min-height:100px; display:flex; flex-direction:column;
+    align-items:center; justify-content:center;
+    border:2px solid transparent;
+  }
+  .chain-box .emoji { font-size:22px; margin-bottom:4px; }
+  .chain-box .label { font-size:11px; font-weight:700; }
+  .chain-box .sub-label { font-size:9px; color:var(--sub); margin-top:2px; }
+  .chain-box.active { border-color:#7048e8; background:#f3f0ff; }
+  .chain-box.mine { border-color:#e8590c; background:#fff4e6; }
+  .chain-arrow { display:flex; align-items:center; justify-content:center; width:24px; flex-shrink:0; color:var(--sub); font-size:14px; }
+
+  /* Tab system */
+  .tab-bar {
+    display:flex; gap:4px; margin-bottom:16px;
+    background:#e9ecef; border-radius:10px; padding:3px;
+    overflow-x:auto;
+  }
+  .tab-btn {
+    flex:1; padding:8px 4px; border:none; background:transparent;
+    border-radius:8px; font-family:inherit; font-size:11px;
+    font-weight:600; color:var(--sub); cursor:pointer;
+    transition:all 0.2s; white-space:nowrap; min-width:60px;
+  }
+  .tab-btn.active { background:var(--card); color:var(--text); box-shadow:0 1px 3px rgba(0,0,0,0.08); }
+  .tab-content { display:none; }
+  .tab-content.active { display:block; }
+
+  /* Metal profile card */
+  .metal-profile {
+    background:var(--card); border-radius:var(--radius);
+    padding:20px; box-shadow:var(--shadow); border-top:4px solid;
+    margin-bottom:12px;
+  }
+  .metal-header { display:flex; align-items:center; gap:10px; margin-bottom:12px; }
+  .metal-badge {
+    padding:4px 10px; border-radius:8px; font-size:11px;
+    font-weight:700; color:#fff;
+  }
+  .metal-profile h3 { font-size:16px; font-weight:700; }
+  .metal-profile .metal-desc { font-size:13px; color:var(--sub); line-height:1.8; margin-bottom:12px; }
+  .metal-stats {
+    display:grid; grid-template-columns:1fr 1fr; gap:8px;
+  }
+  .stat-item {
+    background:#f8f9fa; border-radius:8px; padding:10px;
+  }
+  .stat-label { font-size:10px; color:var(--sub); font-weight:600; text-transform:uppercase; letter-spacing:0.5px; }
+  .stat-value { font-size:15px; font-weight:700; margin-top:2px; }
+  .stat-note { font-size:10px; color:var(--sub); margin-top:2px; }
+
+  /* Formula */
+  .formula-box {
+    background:var(--nf-gradient); border-radius:var(--radius);
+    padding:24px; color:#fff; text-align:center; margin-bottom:12px;
+  }
+  .formula-box .formula { font-size:15px; font-weight:700; margin-bottom:8px; }
+  .formula-box .formula .var { color:#d0bfff; }
+  .formula-box .formula .op { color:#ffd43b; margin:0 4px; }
+  .formula-box .note { font-size:12px; opacity:0.6; }
+
+  /* LME box */
+  .lme-box {
+    background:linear-gradient(135deg, #212529 0%, #343a40 100%);
+    border-radius:var(--radius); padding:24px; color:#fff; margin-bottom:12px;
+  }
+  .lme-box h3 { font-size:17px; font-weight:700; margin-bottom:10px; }
+  .lme-box p { font-size:13px; opacity:0.85; line-height:1.8; }
+
+  /* Smelter economics */
+  .spread-visual {
+    background:var(--card); border-radius:var(--radius); padding:24px;
+    box-shadow:var(--shadow); margin-bottom:12px;
+  }
+  .spread-bar-container { margin:16px 0; }
+  .spread-bar {
+    display:flex; height:44px; border-radius:10px; overflow:hidden;
+    font-size:11px; font-weight:600; color:#fff;
+  }
+  .spread-seg {
+    display:flex; align-items:center; justify-content:center;
+    padding:0 6px; white-space:nowrap;
+  }
+  .spread-label { display:flex; justify-content:space-between; font-size:12px; color:var(--sub); margin-top:8px; }
+  .spread-annotation {
+    font-size:13px; color:var(--sub); text-align:center; margin-top:16px;
+    padding-top:16px; border-top:1px solid #f1f3f5; line-height:1.8;
+  }
+
+  /* KPI table */
+  .kpi-table { width:100%; border-collapse:collapse; font-size:13px; }
+  .kpi-table th { text-align:left; padding:10px 12px; background:#f1f3f5; font-weight:600; }
+  .kpi-table td { padding:10px 12px; border-bottom:1px solid #f1f3f5; }
+  .kpi-table tr:last-child td { border-bottom:none; }
+  .kpi-table .kpi-name { font-weight:600; }
+  .kpi-table .kpi-why { color:var(--sub); font-size:12px; }
+
+  /* Risk */
+  .risk-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .risk-item {
+    background:var(--card); border-radius:12px; padding:14px;
+    box-shadow:var(--shadow); border-left:4px solid;
+  }
+  .risk-item.high { border-color:var(--red); }
+  .risk-item.mid { border-color:var(--orange); }
+  .risk-item.low { border-color:var(--green); }
+  .risk-item .risk-name { font-weight:700; font-size:13px; margin-bottom:4px; }
+  .risk-item .risk-desc { font-size:11px; color:var(--sub); }
+
+  /* Coverage table */
+  .cov-table {
+    width:100%; border-collapse:collapse; font-size:12px;
+    background:var(--card); border-radius:12px; overflow:hidden; box-shadow:var(--shadow);
+  }
+  .cov-table th { text-align:left; padding:10px 12px; background:#f1f3f5; font-weight:600; font-size:11px; }
+  .cov-table td { padding:10px 12px; border-bottom:1px solid #f1f3f5; }
+  .cov-table tr:last-child td { border-bottom:none; }
+
+  /* Expandable */
+  details {
+    background:var(--card); border-radius:12px; padding:16px;
+    box-shadow:var(--shadow); margin-bottom:10px;
+  }
+  details summary {
+    font-weight:700; font-size:14px; cursor:pointer; list-style:none;
+    display:flex; justify-content:space-between; align-items:center;
+  }
+  details summary::after { content:'▸'; transition:transform 0.2s; }
+  details[open] summary::after { transform:rotate(90deg); }
+  details .detail-body { margin-top:12px; font-size:13px; color:var(--sub); line-height:1.8; }
+
+  /* EV callout */
+  .ev-box {
+    background:linear-gradient(135deg, #087f5b 0%, #0ca678 100%);
+    border-radius:var(--radius); padding:24px; color:#fff; margin-bottom:12px;
+  }
+  .ev-box h3 { font-size:17px; font-weight:700; margin-bottom:10px; }
+  .ev-box p { font-size:13px; opacity:0.9; line-height:1.8; }
+
+  .footnote { margin-top:40px; text-align:center; font-size:12px; color:var(--sub); }
+
+  @media (max-width:520px) {
+    .metal-stats { grid-template-columns:1fr; }
+    .risk-grid { grid-template-columns:1fr; }
+    .chain { min-width:620px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="series-tag">素材セクター入門 #4</div>
+  <h1>非鉄金属（Non-Ferrous Metals）</h1>
+  <p>鉄以外の全金属 — 銅・アルミ・ニッケル・亜鉛・金・レアメタル</p>
+</div>
+
+<!-- 1. Overview -->
+<div class="section">
+  <div class="section-title">
+    <div class="icon" style="background:#f3f0ff;">📖</div>
+    非鉄金属セクターとは
+  </div>
+  <div class="card">
+    <p>
+      「鉄以外の金属」すべてを扱う巨大セクター。<strong>ベースメタル（銅・アルミ・亜鉛・鉛・ニッケル・錫）</strong>、
+      <strong>貴金属（金・銀・PGM）</strong>、<strong>レアメタル・電池材料（リチウム・コバルト等）</strong>に大別される。<br/><br/>
+      鉄鋼との最大の違いは<strong>LME（ロンドン金属取引所）で国際価格が決まる</strong>こと。
+      日本メーカーの大半は「製錬（スメルター）」で、鉱山→精鉱を買って→地金に加工する。
+      鉱山権益を持つ住友金属鉱山（5713）は例外的に川上〜川下一貫。<br/><br/>
+      EV・再エネ・データセンターで銅・ニッケル・リチウムの需要が構造的に増加するテーマセクター。
+    </p>
+  </div>
+</div>
+
+<!-- 2. Value Chain -->
+<div class="section">
+  <div class="section-title">
+    <div class="icon" style="background:#fff3bf;">🔗</div>
+    バリューチェーン
+  </div>
+  <div class="chain-container">
+    <div class="chain">
+      <div class="chain-step">
+        <div class="chain-box mine">
+          <div class="emoji">🏔</div>
+          <div class="label">鉱山</div>
+          <div class="sub-label">Mining</div>
+          <div class="sub-label">BHP/Rio/FCX等</div>
+        </div>
+      </div>
+      <div class="chain-arrow">→</div>
+      <div class="chain-step">
+        <div class="chain-box mine">
+          <div class="emoji">🔬</div>
+          <div class="label">選鉱・精鉱</div>
+          <div class="sub-label">Concentrate</div>
+          <div class="sub-label">Cu 25-30%品位</div>
+        </div>
+      </div>
+      <div class="chain-arrow">→</div>
+      <div class="chain-step">
+        <div class="chain-box active">
+          <div class="emoji">🔥</div>
+          <div class="label">製錬</div>
+          <div class="sub-label">Smelting</div>
+          <div class="sub-label">日本メーカー中心</div>
+        </div>
+      </div>
+      <div class="chain-arrow">→</div>
+      <div class="chain-step">
+        <div class="chain-box active">
+          <div class="emoji">✨</div>
+          <div class="label">精製</div>
+          <div class="sub-label">Refining</div>
+          <div class="sub-label">99.99%地金</div>
+        </div>
+      </div>
+      <div class="chain-arrow">→</div>
+      <div class="chain-step">
+        <div class="chain-box active">
+          <div class="emoji">🔧</div>
+          <div class="label">加工</div>
+          <div class="sub-label">Fabrication</div>
+          <div class="sub-label">伸銅・圧延</div>
+        </div>
+      </div>
+      <div class="chain-arrow">→</div>
+      <div class="chain-step">
+        <div class="chain-box">
+          <div class="emoji">📱</div>
+          <div class="label">需要家</div>
+          <div class="sub-label">電線/自動車/電子</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="card" style="margin-top:8px;">
+    <p>
+      <strong>紫枠＝日本の非鉄メーカーの主戦場。</strong>鉱山は海外メジャーが支配（#1参照）。
+      日本勢は精鉱を輸入→製錬→地金・加工品を販売する「受託製錬型」が主流。
+      住友金属鉱山だけが鉱山→製錬→材料まで一貫の異色モデル。
+    </p>
+  </div>
+</div>
+
+<!-- 3. Smelter Economics -->
+<div class="section">
+  <div class="section-title">
+    <div class="icon" style="background:#ffe3e3;">💰</div>
+    製錬の利益構造（超重要）
+  </div>
+
+  <div class="formula-box">
+    <div class="formula">
+      <span class="var">製錬利益</span>
+      <span class="op">=</span>
+      <span class="var">TC/RC</span>
+      <span class="op">+</span>
+      <span class="var">Free Metal</span>
+      <span class="op">+</span>
+      <span class="var">副産物</span>
+      <span class="op">−</span>
+      <span class="var">製造コスト</span>
+    </div>
+    <div class="note">TC/RC＝鉱山から受け取る「加工賃」。LME価格そのものではない</div>
+  </div>
+
+  <div class="spread-visual">
+    <div style="font-weight:700; font-size:14px; margin-bottom:4px;">製錬（銅スメルター）の収益構造イメージ</div>
+    <div style="font-size:12px; color:var(--sub); margin-bottom:16px;">TC/RC＋Free Metal＋副産物が収入源</div>
+
+    <div class="spread-bar-container">
+      <div class="spread-bar">
+        <div class="spread-seg" style="width:35%; background:#7048e8;">TC/RC</div>
+        <div class="spread-seg" style="width:20%; background:#9775fa;">Free Metal</div>
+        <div class="spread-seg" style="width:15%; background:#b197fc;">副産物（金銀硫酸）</div>
+        <div class="spread-seg" style="width:20%; background:#868e96;">製造コスト</div>
+        <div class="spread-seg" style="width:10%; background:#2b8a3e;">利益</div>
+      </div>
+      <div class="spread-label">
+        <span>← 収入 →</span>
+        <span>コスト＋利益</span>
+      </div>
+    </div>
+
+    <div class="spread-annotation">
+      <strong>TC/RC（Treatment Charge / Refining Charge）：</strong>鉱山がスメルターに支払う加工賃。精鉱の需給で年次交渉（ベンチマーク）。精鉱過剰期はTC/RC上昇＝スメルター有利。<br/><br/>
+      <strong>Free Metal：</strong>精鉱中の金属含有量と、鉱山に支払う金属量の差分。スメルターの「隠れ利益」。<br/><br/>
+      <strong>副産物：</strong>金・銀・硫酸など。銅製錬では金の副産物が利益に大きく貢献。
+    </div>
+  </div>
+
+  <details>
+    <summary>TC/RCベンチマーク交渉の仕組み</summary>
+    <div class="detail-body">
+      毎年、大手鉱山（Freeport、BHP等）と大手スメルター（中国銅陵、パンパシフィック銅等）がベンチマーク価格を交渉。<br/><br/>
+      <strong>精鉱が余剰（鉱山が弱い）→ TC/RC上昇 → スメルター有利</strong><br/>
+      <strong>精鉱が逼迫（鉱山が強い）→ TC/RC下落 → スメルター不利</strong><br/><br/>
+      2024-25年は中国の製錬能力急拡大で精鉱争奪→TC/RCが歴史的低水準に下落。日本の銅スメルターにとって逆風。<br/><br/>
+      → TC/RCのトレンドは非鉄セクター分析の最重要ファクターの一つ。
+    </div>
+  </details>
+
+  <details>
+    <summary>鉱山型 vs 製錬型の違い（投資の含意）</summary>
+    <div class="detail-body">
+      <strong>鉱山型（住友金属鉱山、BHP等）：</strong>LME価格に直結。価格上昇の恩恵が大きいが、下落リスクも大。オペレーティングレバレッジ高。<br/><br/>
+      <strong>製錬型（三菱マテリアル、DOWAなど）：</strong>TC/RC＋加工賃モデル。LME価格の直接影響は限定的（在庫評価影響はある）。安定的だがアップサイドも小さい。<br/><br/>
+      → 住友金属鉱山は「銅・ニッケル・金」の鉱山利益でLME連動性が高い。
+      三菱マテリアル等は製錬＋機能材料の複合ビジネス。
+    </div>
+  </details>
+</div>
+
+<!-- 4. LME -->
+<div class="section">
+  <div class="section-title">
+    <div class="icon" style="background:#e8f4fd;">🏛</div>
+    LME（ロンドン金属取引所）
+  </div>
+  <div class="lme-box">
+    <h3>🏛 LME — 非鉄金属の「価格の聖地」</h3>
+    <p>
+      1877年設立。世界の非鉄金属の国際指標価格を決定。銅・アルミ・亜鉛・鉛・ニッケル・錫の6金属が上場。
+      3ヶ月物先物が最も取引量が多い。日本の非鉄メーカーの決算前提もLME価格。<br/><br/>
+      <strong>在庫：</strong>LME倉庫在庫が需給バロメーター。在庫減少＝需給タイト＝価格支持。<br/>
+      <strong>カーブ：</strong>バックワーデーション（現物＞先物）＝供給逼迫。コンタンゴ（先物＞現物）＝供給余剰。<br/><br/>
+      金はLMEではなく<strong>COMEX（NY）</strong>とLBMA（ロンドン）が主要市場。
+    </p>
+  </div>
+</div>
+
+<!-- 5. Metal by metal -->
+<div class="section">
+  <div class="section-title">
+    <div class="icon" style="background:#d3f9d8;">⚒</div>
+    金属別プロファイル
+  </div>
+
+  <div class="tab-bar">
+    <button class="tab-btn active" onclick="switchTab('cu')">銅</button>
+    <button class="tab-btn" onclick="switchTab('al')">アルミ</button>
+    <button class="tab-btn" onclick="switchTab('ni')">ニッケル</button>
+    <button class="tab-btn" onclick="switchTab('zn')">亜鉛</button>
+    <button class="tab-btn" onclick="switchTab('au')">金</button>
+    <button class="tab-btn" onclick="switchTab('battery')">電池材料</button>
+  </div>
+
+  <!-- Copper -->
+  <div class="tab-content active" id="tab-cu">
+    <div class="metal-profile" style="border-color:var(--copper);">
+      <div class="metal-header">
+        <span class="metal-badge" style="background:var(--copper);">Cu</span>
+        <h3>銅 — 「Dr. Copper」景気の体温計</h3>
+      </div>
+      <div class="metal-desc">
+        電気伝導率が銀に次いで高い。電線・配管・基板・モーター巻線と用途が広大。
+        景気敏感性が極めて高く「Dr. Copper（銅先生）」と呼ばれる。
+        EV1台でICE車の約4倍（80kg vs 20kg）の銅を使用。データセンター・再エネでも需要急増。
+      </div>
+      <div class="metal-stats">
+        <div class="stat-item">
+          <div class="stat-label">世界生産</div>
+          <div class="stat-value">~2,200万t/年</div>
+          <div class="stat-note">チリ25%、ペルー10%、コンゴ10%</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-label">価格指標</div>
+          <div class="stat-value">LME Copper</div>
+          <div class="stat-note">~$9,000-10,000/t（2024-25年）</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-label">需要構成</div>
+          <div class="stat-value">建設30% 電気25%</div>
+          <div class="stat-note">+自動車+機械+家電</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-label">中国シェア</div>
+          <div class="stat-value">需要の~55%</div>
+          <div class="stat-note">中国の製錬能力も世界の半分超</div>
+        </div>
+      </div>
+    </div>
+    <details>
+      <summary>日本の銅セクター構造</summary>
+      <div class="detail-body">
+        <strong>パンパシフィック銅（PPMC）：</strong>JX金属（ENEOS傘下→上場予定）の銅製錬子会社。佐賀関製錬所は世界最大級。<br/>
+        <strong>住友金属鉱山：</strong>チリ・ペルーの鉱山権益＋東予製錬所。鉱山利益が大。<br/>
+        <strong>三菱マテリアル：</strong>直島製錬所。銅製錬＋電子材料の複合。<br/><br/>
+        日本は世界有数の銅製錬国だが、鉱石はほぼ全量輸入。チリ・ペルーの鉱山トラブルや輸出税が直接影響。
+      </div>
+    </details>
+  </div>
+
+  <!-- Aluminum -->
+  <div class="tab-content" id="tab-al">
+    <div class="metal-profile" style="border-color:var(--alum);">
+      <div class="metal-header">
+        <span class="metal-badge" style="background:var(--alum);">Al</span>
+        <h3>アルミニウム — 軽量化の王者</h3>
+      </div>
+      <div class="metal-desc">
+        鉄の1/3の比重。自動車軽量化・飲料缶・建材・航空機に不可欠。
+        製錬に大量の電力を必要とするため「電気の缶詰」と呼ばれる。
+        中国が世界生産の約60%を占め、その電力はほぼ石炭火力→CO2問題。
+        グリーンアルミ（水力発電由来）にプレミアムが付き始めている。
+      </div>
+      <div class="metal-stats">
+        <div class="stat-item">
+          <div class="stat-label">世界生産</div>
+          <div class="stat-value">~7,000万t/年</div>
+          <div class="stat-note">中国60%、インド5%、ロシア5%</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-label">価格指標</div>
+          <div class="stat-value">LME Aluminium</div>
+          <div class="stat-note">~$2,300-2,600/t + プレミアム</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-label">コスト構造</div>
+          <div class="stat-value">電力費が30-40%</div>
+          <div class="stat-note">電力価格がコスト曲線を決定</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-label">日本ポイント</div>
+          <div class="stat-value">地金は全量輸入</div>
+          <div class="stat-note">国内は圧延・加工のみ（UACJ等）</div>
+        </div>
+      </div>
+    </div>
+    <details>
+      <summary>アルミの価格構造（LME + プレミアム）</summary>
+      <div class="detail-body">
+        アルミ価格 ＝ <strong>LME価格</strong> ＋ <strong>地域プレミアム</strong><br/><br/>
+        日本向けは「CIF Japan Premium」が四半期交渉で決まる。
+        輸送コスト・関税・需給で変動。LMEが$2,500でプレミアムが$150なら着値$2,650/t。<br/><br/>
+        日本にはアルミ製錬所がない（1970年代に全廃。電力コスト高で採算割れ）。
+        地金を輸入→圧延・加工→自動車パネル・缶材・箔として販売。
+      </div>
+    </details>
+    <details>
+      <summary>鉄鋼との軽量化競争</summary>
+      <div class="detail-body">
+        EV化で車体軽量化ニーズが増大。アルミは鉄の1/3の重さで採用拡大中（テスラ Model Sはアルミボディ）。
+        鉄はハイテン鋼で対抗（同強度でより薄くできる）。<br/><br/>
+        #3鉄鋼の「非鉄との競合」と完全に表裏一体。
+        <strong>神戸製鋼（5406）</strong>は鉄鋼＋アルミの両方を持つユニークなポジション。
+      </div>
+    </details>
+  </div>
+
+  <!-- Nickel -->
+  <div class="tab-content" id="tab-ni">
+    <div class="metal-profile" style="border-color:var(--nickel);">
+      <div class="metal-header">
+        <span class="metal-badge" style="background:var(--nickel);">Ni</span>
+        <h3>ニッケル — ステンレス＋EV電池の二刀流</h3>
+      </div>
+      <div class="metal-desc">
+        需要の約70%がステンレス鋼（耐食性付与）。残りがEV電池正極材（ハイニッケル化）、特殊合金。
+        インドネシアが生産急増（NPI＋HPAL）し、2022-23年に価格暴落。
+        Class 1（バッテリーグレード）とClass 2（NPI/フェロニッケル）の二極化が進行。
+      </div>
+      <div class="metal-stats">
+        <div class="stat-item">
+          <div class="stat-label">世界生産</div>
+          <div class="stat-value">~330万t/年</div>
+          <div class="stat-note">インドネシア50%超、フィリピン、ニューカレドニア</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-label">価格指標</div>
+          <div class="stat-value">LME Nickel</div>
+          <div class="stat-note">~$16,000-18,000/t（変動大）</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-label">需要構成</div>
+          <div class="stat-value">ステンレス70%</div>
+          <div class="stat-note">+電池10%+合金+めっき</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-label">日本ポイント</div>
+          <div class="stat-value">住友鉱山がキー</div>
+          <div class="stat-note">ポマラ鉱山（インドネシア）+電池材料</div>
+        </div>
+      </div>
+    </div>
+    <details>
+      <summary>インドネシアの輸出規制問題</summary>
+      <div class="detail-body">
+        インドネシアは2020年に未加工ニッケル鉱石の輸出を禁止。国内製錬を義務化。
+        中国資本のNPI（ニッケル銑鉄）工場が大量建設→世界のニッケル供給が急増→価格暴落。<br/><br/>
+        環境問題（RKEF工場のCO2排出、HPAL工場の残渣処理）も深刻化。
+        ESG観点で「インドネシア産ニッケル」を避ける動きも。
+        住友金属鉱山のポマラ鉱山HPALプロジェクトの行方がカバレッジ上の重要論点。
+      </div>
+    </details>
+  </div>
+
+  <!-- Zinc -->
+  <div class="tab-content" id="tab-zn">
+    <div class="metal-profile" style="border-color:var(--zinc);">
+      <div class="metal-header">
+        <span class="metal-badge" style="background:var(--zinc);">Zn</span>
+        <h3>亜鉛 — 鉄の守護者（めっき）</h3>
+      </div>
+      <div class="metal-desc">
+        需要の約60%が亜鉛めっき（ガルバナイジング）。鉄鋼の防食処理に不可欠。
+        鉄鋼生産量に連動する「鉄鋼の影」的存在。ダイカスト・化学品にも使用。
+        日本では三井金属鉱業（5706）が亜鉛製錬大手。
+      </div>
+      <div class="metal-stats">
+        <div class="stat-item">
+          <div class="stat-label">世界生産</div>
+          <div class="stat-value">~1,400万t/年</div>
+          <div class="stat-note">中国30%、ペルー、豪州</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-label">価格指標</div>
+          <div class="stat-value">LME Zinc</div>
+          <div class="stat-note">~$2,500-3,000/t</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-label">需要構成</div>
+          <div class="stat-value">めっき60%</div>
+          <div class="stat-note">+ダイカスト+化学+電池</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-label">鉄鋼との連動</div>
+          <div class="stat-value">鋼材生産量に比例</div>
+          <div class="stat-note">#3鉄鋼の需要＝亜鉛の需要</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Gold -->
+  <div class="tab-content" id="tab-au">
+    <div class="metal-profile" style="border-color:var(--gold);">
+      <div class="metal-header">
+        <span class="metal-badge" style="background:var(--gold);">Au</span>
+        <h3>金 — 究極の安全資産</h3>
+      </div>
+      <div class="metal-desc">
+        「通貨としての金」と「素材としての金」の二面性。中央銀行の外貨準備需要が近年急増（特に中国・新興国）。
+        実質金利（米国TIPS利回り）と逆相関。インフレヘッジ＋地政学リスクヘッジ。
+        工業用途は宝飾50%、投資25%、中央銀行15%、工業10%。
+      </div>
+      <div class="metal-stats">
+        <div class="stat-item">
+          <div class="stat-label">年間供給</div>
+          <div class="stat-value">~4,900t/年</div>
+          <div class="stat-note">鉱山3,600t+リサイクル1,300t</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-label">価格指標</div>
+          <div class="stat-value">COMEX / LBMA</div>
+          <div class="stat-note">~$2,000-2,400/oz（2024-25年）</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-label">主要産出国</div>
+          <div class="stat-value">中国、豪州、ロシア</div>
+          <div class="stat-note">南ア→中国が首位に交代</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-label">日本ポイント</div>
+          <div class="stat-value">住友鉱山の菱刈鉱山</div>
+          <div class="stat-note">世界有数の高品位金鉱山（40g/t超）</div>
+        </div>
+      </div>
+    </div>
+    <details>
+      <summary>金価格のドライバー</summary>
+      <div class="detail-body">
+        <strong>① 米国実質金利：</strong>TIPS利回りと逆相関。実質金利低下→金に妙味→価格上昇。<br/>
+        <strong>② 中央銀行購入：</strong>2022年以降、中国人民銀行等が過去最大ペースで金を購入。ドル離れの一環。<br/>
+        <strong>③ 地政学リスク：</strong>紛争・制裁時の避難先。ウクライナ戦争、中東情勢で高騰。<br/>
+        <strong>④ ドル：</strong>ドル安→金高のパターン（ドル建て資産のため）。<br/><br/>
+        → 住友金属鉱山の業績には金価格＋銅価格の両方が効く。金はAISCで見る（#1参照）。
+      </div>
+    </details>
+  </div>
+
+  <!-- Battery Materials -->
+  <div class="tab-content" id="tab-battery">
+    <div class="ev-box">
+      <h3>🔋 電池材料 — EV時代の新・非鉄</h3>
+      <p>
+        リチウムイオン電池の正極材にニッケル・コバルト・マンガン・リチウムが使用。
+        「NMC811」＝ニッケル80%・マンガン10%・コバルト10%。ハイニッケル化が進行中。
+        LFP（リン酸鉄）の台頭で中国ではニッケルフリーも増加。
+        全固体電池の実用化も2027-28年に見えてきた。
+      </p>
+    </div>
+    <div class="metal-stats" style="background:var(--card); border-radius:var(--radius); padding:20px; box-shadow:var(--shadow);">
+      <div class="stat-item">
+        <div class="stat-label">リチウム</div>
+        <div class="stat-value">供給過剰で暴落中</div>
+        <div class="stat-note">$80,000→$10,000/t。豪州・チリ・中国。SQM/Albemarle。</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-label">コバルト</div>
+        <div class="stat-value">コンゴ70%の集中リスク</div>
+        <div class="stat-note">ESG（児童労働）問題。使用量削減トレンド。</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-label">住友金属鉱山</div>
+        <div class="stat-value">正極材でグローバル展開</div>
+        <div class="stat-note">NCA正極材をパナソニック→テスラ向けに供給。ニッケル鉱山→正極材の一貫体制。</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-label">全固体電池</div>
+        <div class="stat-value">硫化物系が有力</div>
+        <div class="stat-note">出光興産（硫化リチウム）。三井金属（固体電解質）。非鉄の新成長テーマ。</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 6. KPIs -->
+<div class="section">
+  <div class="section-title">
+    <div class="icon" style="background:#e8f4fd;">📊</div>
+    アナリストが見るべきKPI
+  </div>
+  <div class="card" style="padding:0; overflow:hidden;">
+    <table class="kpi-table">
+      <thead><tr><th>KPI</th><th>対象</th><th>なぜ重要か</th></tr></thead>
+      <tbody>
+        <tr>
+          <td class="kpi-name">LME価格（各金属）</td>
+          <td>全体</td>
+          <td class="kpi-why">在庫評価・鉱山利益の基準。前提価格との乖離をチェック。</td>
+        </tr>
+        <tr>
+          <td class="kpi-name">TC/RC</td>
+          <td>製錬</td>
+          <td class="kpi-why">スメルターの加工賃。年次ベンチマーク交渉結果が利益を左右。</td>
+        </tr>
+        <tr>
+          <td class="kpi-name">C1 Cash Cost</td>
+          <td>鉱山</td>
+          <td class="kpi-why">副産物控除後の採掘コスト。コスト曲線上の位置。</td>
+        </tr>
+        <tr>
+          <td class="kpi-name">LME在庫</td>
+          <td>全体</td>
+          <td class="kpi-why">需給バロメーター。在庫減→タイト→価格支持。</td>
+        </tr>
+        <tr>
+          <td class="kpi-name">在庫評価影響</td>
+          <td>製錬</td>
+          <td class="kpi-why">石油元売と同様。金属価格上昇期は含み益。実力ベースで見ること。</td>
+        </tr>
+        <tr>
+          <td class="kpi-name">生産量（鉱山/地金）</td>
+          <td>鉱山・製錬</td>
+          <td class="kpi-why">ガイダンス達成率。鉱山品位劣化、製錬所修繕で上下。</td>
+        </tr>
+        <tr>
+          <td class="kpi-name">機能材料売上構成</td>
+          <td>加工</td>
+          <td class="kpi-why">三菱マテリアル等は電子材料・超硬工具の利益比率が高い。LME非連動の安定収益源。</td>
+        </tr>
+        <tr>
+          <td class="kpi-name">為替（USD/JPY）</td>
+          <td>全体</td>
+          <td class="kpi-why">LMEはドル建て。円安→円ベース売上増だがコストも増。在庫影響は円安で拡大。</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- 7. Risks -->
+<div class="section">
+  <div class="section-title">
+    <div class="icon" style="background:#ffe3e3;">⚠️</div>
+    主なリスク要因
+  </div>
+  <div class="risk-grid">
+    <div class="risk-item high">
+      <div class="risk-name">LME価格急落</div>
+      <div class="risk-desc">銅・ニッケルが$1,000/t動けば数百億円の影響。中国景気減速、投機の巻き戻しで急落リスク。</div>
+    </div>
+    <div class="risk-item high">
+      <div class="risk-name">中国製錬能力過剰</div>
+      <div class="risk-desc">銅・アルミとも中国の製錬能力が世界の過半。精鉱争奪→TC/RC下落→日本スメルター圧迫。</div>
+    </div>
+    <div class="risk-item mid">
+      <div class="risk-name">資源ナショナリズム</div>
+      <div class="risk-desc">インドネシアのニッケル輸出規制、チリの銅ロイヤリティ引上げ、コンゴの鉱業法改正。</div>
+    </div>
+    <div class="risk-item mid">
+      <div class="risk-name">技術代替リスク</div>
+      <div class="risk-desc">LFP電池（ニッケルフリー）の拡大、アルミから炭素繊維への置換、銅線→光ファイバー。</div>
+    </div>
+    <div class="risk-item mid">
+      <div class="risk-name">為替・在庫評価</div>
+      <div class="risk-desc">石油元売と同じ問題。金属価格下落期に巨額の在庫評価損。実力ベースとの乖離に注意。</div>
+    </div>
+    <div class="risk-item low">
+      <div class="risk-name">環境規制・鉱滓処理</div>
+      <div class="risk-desc">製錬所の排水・排ガス規制強化。休廃止鉱山の鉱害対策費（鉱害引当金）。</div>
+    </div>
+  </div>
+</div>
+
+<!-- 8. Coverage -->
+<div class="section">
+  <div class="section-title">
+    <div class="icon" style="background:#f3e8ff;">🇯🇵</div>
+    日本株カバレッジ対応表
+  </div>
+  <div class="card" style="padding:0; overflow:hidden;">
+    <table class="cov-table">
+      <thead><tr><th>銘柄</th><th>ポジション</th><th>注目ポイント</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><strong>住友金属鉱山（5713）</strong></td>
+          <td>鉱山〜製錬〜材料の一貫</td>
+          <td>銅・ニッケル・金の鉱山利益。NCA正極材。菱刈金鉱山。ポマラHPAL。LME感応度最大。</td>
+        </tr>
+        <tr>
+          <td><strong>三菱マテリアル（5711）</strong></td>
+          <td>銅製錬＋機能材料＋セメント</td>
+          <td>銅加工（伸銅品）、超硬工具、電子材料。セメント併営。TC/RC＋機能材料の安定性。</td>
+        </tr>
+        <tr>
+          <td><strong>三井金属鉱業（5706）</strong></td>
+          <td>亜鉛製錬＋機能材料</td>
+          <td>電解銅箔（5G・EV向け）、全固体電池用電解質。機能材料比率の向上。亜鉛TC/RC。</td>
+        </tr>
+        <tr>
+          <td><strong>DOWAホールディングス（5714）</strong></td>
+          <td>製錬＋環境リサイクル</td>
+          <td>都市鉱山（E-waste）リサイクル。貴金属回収。半導体材料（化合物半導体）。環境事業が特徴的。</td>
+        </tr>
+        <tr>
+          <td><strong>古河電気工業（5801）</strong></td>
+          <td>銅加工＋光ファイバー＋電池</td>
+          <td>→ 線材・ケーブルとも重複。銅荒引線→電線。光ファイバーでデータセンター需要。</td>
+        </tr>
+        <tr>
+          <td><strong>UACJ（5741）</strong></td>
+          <td>アルミ圧延専業</td>
+          <td>缶材・自動車パネル。北米に大型工場。LME＋プレミアム＋加工賃の三層構造。</td>
+        </tr>
+        <tr>
+          <td><strong>フジクラ（5803）</strong></td>
+          <td>電線＋光ファイバー＋FPC</td>
+          <td>→ 線材・ケーブルとも重複。光ファイバー・FPCでデータセンター＋スマホ需要。</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- 9. Cross sector -->
+<div class="section">
+  <div class="section-title">
+    <div class="icon" style="background:#d3f9d8;">🔄</div>
+    他セクターとのつながり
+  </div>
+  <details>
+    <summary>鉱業（#1）→ 非鉄 — 原料の供給元</summary>
+    <div class="detail-body">
+      BHP/Freeportの銅精鉱、Vale/インドネシアのニッケル鉱石が日本の非鉄メーカーの原料。TC/RCベンチマーク交渉は鉱山（売り手）vs スメルター（買い手）の力関係そのもの。
+    </div>
+  </details>
+  <details>
+    <summary>鉄鋼（#3）との競合 — アルミ vs 鉄</summary>
+    <div class="detail-body">
+      自動車ボディの軽量化で鉄 vs アルミの競争が激化。テスラはアルミダイキャスト（ギガキャスト）で車体を一体成形。トヨタも採用検討。鉄はハイテン鋼で対抗。神戸製鋼は両方を持つ稀有なポジション。
+    </div>
+  </details>
+  <details>
+    <summary>石油・エネルギー（#2）— 電力コスト</summary>
+    <div class="detail-body">
+      アルミ製錬は電力費が30-40%。電力価格高騰は直接的なコスト増。日本はアルミ製錬を撤退済みだが、海外工場（中国・中東）は電力の安さが競争力。LNG価格→電力料金→製錬コストの連鎖。
+    </div>
+  </details>
+  <details>
+    <summary>線材・ケーブル（#5予定）— 銅の最大需要先</summary>
+    <div class="detail-body">
+      電線＝銅の最大需要用途。非鉄で製錬した銅地金→荒引線→電線・ケーブル。住友電工・古河電工・フジクラは「銅の加工メーカー」でもある。LME銅価格は電線の原材料コストに直結。
+    </div>
+  </details>
+  <details>
+    <summary>自動車 — EVでの需要構造変化</summary>
+    <div class="detail-body">
+      ICE車→EV車で金属使用量が劇的に変化：<br/>
+      <strong>銅：</strong>20kg→80kg（配線・モーター・充電器）<br/>
+      <strong>ニッケル：</strong>0kg→40kg（NMC電池の場合）<br/>
+      <strong>アルミ：</strong>150kg→250kg（車体軽量化・電池ケース）<br/>
+      <strong>リチウム：</strong>0kg→8kg（電池）<br/><br/>
+      → EV普及率の見通しが非鉄セクターの長期バリュエーションを左右。
+    </div>
+  </details>
+</div>
+
+<!-- 10. Global context -->
+<div class="section">
+  <div class="section-title">
+    <div class="icon" style="background:#e8f4fd;">🌍</div>
+    グローバルの参考プレーヤー
+  </div>
+  <div class="card">
+    <p>
+      <strong>Freeport-McMoRan</strong>（米）— 銅の世界最大級。グラスバーグ鉱山。銅のベンチマーク。<br/>
+      <strong>Codelco</strong>（チリ国営）— 銅生産世界最大。チリ政府の鋳銭局的存在。<br/>
+      <strong>Alcoa / Rio Tinto</strong> — アルミ世界大手。ボーキサイト→アルミナ→地金の一貫。<br/>
+      <strong>Nornickel</strong>（ロシア）— ニッケル・パラジウム大手。制裁リスク。<br/>
+      <strong>Glencore</strong>（スイス）— 銅・亜鉛・ニッケル＋トレーディング。商社機能。<br/>
+      <strong>Albemarle / SQM</strong> — リチウム世界大手。チリ・豪州のリチウム鉱山。<br/><br/>
+      → Freeportの生産ガイダンス変更は世界の銅TC/RCに直結。非鉄アナリストは必ずフォロー。
+    </p>
+  </div>
+</div>
+
+<div class="footnote">
+  素材セクター入門シリーズ #4 / 8<br/>
+  次回：#5 線材・ケーブル（Wire & Cable）
+</div>
+
+<script>
+function switchTab(id) {
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + id).classList.add('active');
+  event.target.classList.add('active');
+}
+</script>
+</body>
+</html>

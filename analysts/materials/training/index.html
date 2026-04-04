@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<title>Ikkyu Academy — 素材セクター教材</title>
+<link rel="manifest" href="manifest.json">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f5f5f7;--card:#fff;--text:#1d1d1f;--sub:#86868b;--accent:#0071e3;--border:#e5e5e7;--r:14px;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'DM Sans','Noto Sans JP',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;padding-bottom:env(safe-area-inset-bottom);}
+
+/* Header */
+.header{background:var(--card);border-bottom:1px solid var(--border);padding:12px 16px;position:sticky;top:0;z-index:100;}
+.header-top{display:flex;align-items:center;justify-content:space-between;}
+.header h1{font-size:17px;font-weight:700;}
+.header .back-btn{display:none;font-size:14px;color:var(--accent);background:none;border:none;cursor:pointer;font-family:inherit;font-weight:600;padding:4px 0;}
+.header.viewing .back-btn{display:block;}
+.header.viewing h1{display:none;}
+.header .back-title{font-size:14px;font-weight:600;display:none;}
+.header.viewing .back-title{display:block;}
+
+/* Tab bar */
+.tabs{display:flex;gap:4px;padding:8px 16px;background:var(--card);border-bottom:1px solid var(--border);overflow-x:auto;}
+.tab{padding:7px 14px;border-radius:20px;border:none;background:transparent;font-family:inherit;font-size:12px;font-weight:600;color:var(--sub);cursor:pointer;white-space:nowrap;transition:all 0.2s;}
+.tab.active{background:var(--text);color:#fff;}
+.header.viewing + .tabs{display:none;}
+
+/* Content area */
+.content{padding:12px 16px 40px;}
+.header.viewing ~ .content{display:none;}
+
+/* Cards */
+.section-label{font-size:11px;font-weight:600;color:var(--sub);text-transform:uppercase;letter-spacing:1px;margin:20px 0 10px;padding:0 2px;}
+.section-label:first-child{margin-top:8px;}
+.lesson-card{background:var(--card);border-radius:var(--r);padding:14px 16px;margin-bottom:8px;display:flex;align-items:center;gap:12px;cursor:pointer;border:1px solid var(--border);transition:all 0.15s;-webkit-tap-highlight-color:transparent;}
+.lesson-card:active{transform:scale(0.98);background:#f0f0f2;}
+.lesson-num{width:32px;height:32px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff;flex-shrink:0;}
+.lesson-info{flex:1;min-width:0;}
+.lesson-title{font-size:14px;font-weight:600;margin-bottom:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.lesson-sub{font-size:11px;color:var(--sub);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.lesson-arrow{color:var(--sub);font-size:14px;flex-shrink:0;}
+
+/* Colors per level */
+.intro .lesson-num{background:linear-gradient(135deg,#3b82f6,#60a5fa);}
+.inter .lesson-num{background:linear-gradient(135deg,#8b5cf6,#a78bfa);}
+.adv .lesson-num{background:linear-gradient(135deg,#059669,#34d399);}
+.special .lesson-num{background:linear-gradient(135deg,#f59e0b,#fbbf24);}
+
+/* Progress bar */
+.progress-bar{background:var(--card);border-radius:var(--r);padding:16px;margin-bottom:16px;border:1px solid var(--border);}
+.progress-label{font-size:11px;font-weight:600;color:var(--sub);margin-bottom:8px;}
+.progress-track{height:6px;background:#e5e5e7;border-radius:3px;overflow:hidden;}
+.progress-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,#3b82f6,#8b5cf6,#059669);transition:width 0.5s;}
+.progress-text{font-size:12px;font-weight:600;margin-top:6px;}
+
+/* Iframe viewer */
+.viewer{display:none;position:fixed;top:0;left:0;right:0;bottom:0;z-index:50;background:var(--bg);}
+.viewer.active{display:flex;flex-direction:column;}
+.viewer iframe{flex:1;border:none;width:100%;}
+
+/* Mindmap tab */
+.mindmap-container{text-align:center;padding:20px 0;}
+.mindmap-card{background:var(--card);border-radius:var(--r);padding:16px;margin-bottom:8px;border:1px solid var(--border);cursor:pointer;display:flex;align-items:center;gap:12px;transition:all 0.15s;-webkit-tap-highlight-color:transparent;}
+.mindmap-card:active{transform:scale(0.98);}
+.mindmap-icon{width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;}
+.mindmap-name{font-size:14px;font-weight:600;}
+.mindmap-desc{font-size:11px;color:var(--sub);margin-top:2px;}
+</style>
+</head>
+<body>
+
+<div class="header" id="header">
+  <div class="header-top">
+    <button class="back-btn" onclick="closeViewer()">← 戻る</button>
+    <h1>📚 Ikkyu Academy</h1>
+    <div class="back-title" id="backTitle"></div>
+  </div>
+</div>
+
+<div class="tabs" id="tabBar">
+  <button class="tab active" onclick="switchLevel('map')">🗺 Map</button>
+  <button class="tab" onclick="switchLevel('intro')">入門</button>
+  <button class="tab" onclick="switchLevel('inter')">中級</button>
+  <button class="tab" onclick="switchLevel('adv')">上級</button>
+  <button class="tab" onclick="switchLevel('special')">特別</button>
+  <button class="tab" onclick="switchLevel('all')">全て</button>
+</div>
+
+<div class="content" id="content"></div>
+
+<div class="viewer" id="viewer">
+  <iframe id="viewerFrame" sandbox="allow-scripts allow-same-origin"></iframe>
+</div>
+
+<script>
+const LESSONS = [
+  // 入門編
+  {id:'intro-1', level:'intro', num:'#1', title:'石炭・鉱業', sub:'バリューチェーン・コモディティ分類・利益構造', file:'coal-mining-guide.html', color:'#e8590c', icon:'⛏'},
+  {id:'intro-2', level:'intro', num:'#2', title:'石油・エネルギー', sub:'上流E&P・中流・下流の三層構造', file:'oil-energy-guide.html', color:'#dc2626', icon:'🛢'},
+  {id:'intro-3', level:'intro', num:'#3', title:'鉄鋼', sub:'高炉vs電炉・スプレッド分析・中国ファクター', file:'steel-guide.html', color:'#3b82f6', icon:'🔩'},
+  {id:'intro-4', level:'intro', num:'#4', title:'非鉄金属', sub:'銅/アルミ/ニッケル/亜鉛/金/電池材料', file:'non-ferrous-metals-guide.html', color:'#8b5cf6', icon:'🥇'},
+  {id:'intro-5', level:'intro', num:'#5', title:'線材・ケーブル', sub:'電力ケーブル/光ファイバー/ハーネス/DC需要', file:'wire-cable-guide.html', color:'#06b6d4', icon:'🔌'},
+  {id:'intro-6', level:'intro', num:'#6', title:'ガラス・セメント', sub:'板ガラス/自動車/ディスプレイ+セメント', file:'glass-cement-guide.html', color:'#6b7280', icon:'🏗'},
+  {id:'intro-7', level:'intro', num:'#7', title:'紙・パッケージング', sub:'印刷用紙衰退vs段ボール成長', file:'paper-packaging-guide.html', color:'#a16207', icon:'📦'},
+  {id:'intro-8', level:'intro', num:'#8', title:'海運', sub:'ドライバルク/タンカー/コンテナ/LNG/自動車船', file:'shipping-guide.html', color:'#2563eb', icon:'🚢'},
+  // 中級編
+  {id:'inter-1', level:'inter', num:'#1', title:'スプレッド分析の実践', sub:'鉄鋼/石化/銅製錬/石油精製の4スプレッド', file:'intermediate-1-spread-analysis.html', color:'#3b82f6', icon:'📐'},
+  {id:'inter-2', level:'inter', num:'#2', title:'コモディティサイクルの見極め方', sub:'4フェーズ・Capexサイクル・先行指標', file:'intermediate-2-commodity-cycle.html', color:'#0ea5e9', icon:'🔄'},
+  {id:'inter-3', level:'inter', num:'#3', title:'決算分析テクニック', sub:'在庫影響除去・ブリッジ・感応度分析', file:'intermediate-3-earnings-analysis.html', color:'#7c3aed', icon:'📊'},
+  {id:'inter-4', level:'inter', num:'#4', title:'中国データの読み方', sub:'PMI/不動産/信用サイクル/貿易統計', file:'intermediate-4-china-data.html', color:'#dc2626', icon:'🇨🇳'},
+  {id:'inter-5', level:'inter', num:'#5', title:'バリュエーション手法', sub:'EV/EBITDA・ミッドサイクルPE・P/NAV・SOTP', file:'intermediate-5-valuation.html', color:'#059669', icon:'💎'},
+  {id:'inter-6', level:'inter', num:'#6', title:'クロスセクター連鎖分析', sub:'コモディティ変動の波及パス・ペアトレード', file:'intermediate-6-cross-sector.html', color:'#7c3aed', icon:'🔗'},
+  {id:'inter-7', level:'inter', num:'#7', title:'セルサイドレポートの読み方', sub:'バイアス理解・コンセンサス活用', file:'intermediate-7-sellside-reports.html', color:'#1e40af', icon:'📑'},
+  // 上級編
+  {id:'adv-1', level:'adv', num:'#1', title:'独自モデル構築', sub:'シナリオスイッチ付き3Statement+NAV', file:'advanced-1-model-building.html', color:'#1a1a3e', icon:'🏗'},
+  {id:'adv-2', level:'adv', num:'#2', title:'Morning Briefの設計', sub:'テンプレート・時間管理・自動化', file:'advanced-2-morning-brief.html', color:'#1e40af', icon:'☀️'},
+  {id:'adv-3', level:'adv', num:'#3', title:'投資メモの書き方', sub:'BLUF原則・Convictionフレームワーク', file:'advanced-3-investment-memo.html', color:'#7c3aed', icon:'📝'},
+  {id:'adv-4', level:'adv', num:'#4-6', title:'IR面談・ポートフォリオ・年間WF', sub:'IR質問設計・4戦略別貢献・12ヶ月カレンダー', file:'advanced-4-5-6-ir-portfolio-workflow.html', color:'#059669', icon:'🎯'},
+  // 特別編
+  {id:'special-1', level:'special', num:'★', title:'バックテストの実践', sub:'8シグナル・Python/Excel実装・7つの落とし穴', file:'special-backtesting.html', color:'#f59e0b', icon:'🔬'},
+  // マインドマップ
+  {id:'map-all', level:'special', num:'🗺', title:'全セクターマインドマップ', sub:'8セクターのインタラクティブツリー', file:'all-sectors-mindmap.html', color:'#1a1a3e', icon:'🗺'},
+  {id:'map-oil', level:'special', num:'🗺', title:'原油精製マインドマップ', sub:'原油→7留分→誘導品→最終用途', file:'crude-oil-mindmap.html', color:'#dc2626', icon:'🛢'},
+];
+
+const SECTORS = [
+  {icon:'⛏', name:'石炭・鉱業', desc:'鉄鉱石/原料炭/一般炭/銅/金/ニッケル', color:'#f59e0b', lessonId:'intro-1'},
+  {icon:'🛢', name:'石油・エネルギー', desc:'原油→7留分→LNG', color:'#dc2626', lessonId:'intro-2'},
+  {icon:'🔩', name:'鉄鋼', desc:'高炉/電炉→薄板/条鋼/鋼管', color:'#3b82f6', lessonId:'intro-3'},
+  {icon:'🥇', name:'非鉄金属', desc:'銅/アルミ/ニッケル/亜鉛/電池材料', color:'#8b5cf6', lessonId:'intro-4'},
+  {icon:'🔌', name:'線材・ケーブル', desc:'電力ケーブル/光ファイバー/ハーネス', color:'#06b6d4', lessonId:'intro-5'},
+  {icon:'🏗', name:'ガラス・セメント', desc:'板ガラス/自動車/ディスプレイ+セメント', color:'#6b7280', lessonId:'intro-6'},
+  {icon:'📦', name:'紙・パッケージング', desc:'段ボール/機能材料/バイオマス', color:'#a16207', lessonId:'intro-7'},
+  {icon:'🚢', name:'海運', desc:'ドライバルク/タンカー/コンテナ/LNG', color:'#2563eb', lessonId:'intro-8'},
+];
+
+let currentLevel = 'map';
+const read = JSON.parse(localStorage.getItem('ikkyu-academy-read') || '[]');
+
+function switchLevel(level) {
+  currentLevel = level;
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  event.target.classList.add('active');
+  renderContent();
+}
+
+function renderContent() {
+  const el = document.getElementById('content');
+  if (currentLevel === 'map') {
+    el.innerHTML = renderMap();
+    return;
+  }
+  const filtered = currentLevel === 'all' ? LESSONS : LESSONS.filter(l => l.level === currentLevel);
+  const total = LESSONS.length;
+  const done = read.length;
+  let html = `
+    <div class="progress-bar">
+      <div class="progress-label">学習進捗</div>
+      <div class="progress-track"><div class="progress-fill" style="width:${(done/total*100)}%"></div></div>
+      <div class="progress-text">${done} / ${total} 完了</div>
+    </div>
+  `;
+  if (currentLevel === 'all') {
+    html += renderSection('入門編 — セクター構造と基礎知識', filtered.filter(l=>l.level==='intro'), 'intro');
+    html += renderSection('中級編 — 分析フレームワーク', filtered.filter(l=>l.level==='inter'), 'inter');
+    html += renderSection('上級編 — 仕事の型', filtered.filter(l=>l.level==='adv'), 'adv');
+    html += renderSection('特別編', filtered.filter(l=>l.level==='special'), 'special');
+  } else {
+    const labels = {intro:'入門編 — セクター構造と基礎知識', inter:'中級編 — 分析フレームワーク', adv:'上級編 — 仕事の型', special:'特別編'};
+    html += renderSection(labels[currentLevel], filtered, currentLevel);
+  }
+  el.innerHTML = html;
+}
+
+function renderMap() {
+  let html = '<div class="section-label">セクターマップ — タップで入門編へ</div>';
+  SECTORS.forEach(s => {
+    html += `
+      <div class="mindmap-card" onclick="openLesson('${s.lessonId}')">
+        <div class="mindmap-icon" style="background:${s.color}15;color:${s.color};">${s.icon}</div>
+        <div>
+          <div class="mindmap-name">${s.name}</div>
+          <div class="mindmap-desc">${s.desc}</div>
+        </div>
+        <div class="lesson-arrow">›</div>
+      </div>
+    `;
+  });
+  html += '<div class="section-label" style="margin-top:24px;">マインドマップ</div>';
+  const maps = LESSONS.filter(l => l.id.startsWith('map-'));
+  maps.forEach(l => {
+    html += renderCard(l, 'special');
+  });
+  html += '<div class="section-label" style="margin-top:24px;">分析フレームワーク・実践</div>';
+  html += `
+    <div class="mindmap-card" onclick="switchLevelTo('inter')">
+      <div class="mindmap-icon" style="background:rgba(139,92,246,0.1);color:#8b5cf6;">📐</div>
+      <div><div class="mindmap-name">中級編（7回）</div><div class="mindmap-desc">スプレッド・サイクル・決算・中国データ・バリュエーション</div></div>
+      <div class="lesson-arrow">›</div>
+    </div>
+    <div class="mindmap-card" onclick="switchLevelTo('adv')">
+      <div class="mindmap-icon" style="background:rgba(5,150,105,0.1);color:#059669;">🏗</div>
+      <div><div class="mindmap-name">上級編（6回）</div><div class="mindmap-desc">モデル構築・Morning Brief・投資メモ・年間WF</div></div>
+      <div class="lesson-arrow">›</div>
+    </div>
+    <div class="mindmap-card" onclick="switchLevelTo('special')">
+      <div class="mindmap-icon" style="background:rgba(245,158,11,0.1);color:#f59e0b;">🔬</div>
+      <div><div class="mindmap-name">特別編</div><div class="mindmap-desc">バックテストの実践</div></div>
+      <div class="lesson-arrow">›</div>
+    </div>
+  `;
+  return html;
+}
+
+function switchLevelTo(level) {
+  currentLevel = level;
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => { if(t.textContent.includes(level==='inter'?'中級':level==='adv'?'上級':'特別')) t.classList.add('active'); });
+  renderContent();
+  window.scrollTo(0, 0);
+}
+
+function renderSection(label, lessons, cls) {
+  let html = `<div class="section-label">${label}</div>`;
+  lessons.forEach(l => { html += renderCard(l, cls); });
+  return html;
+}
+
+function renderCard(l, cls) {
+  const isRead = read.includes(l.id);
+  return `
+    <div class="lesson-card ${cls}" onclick="openLesson('${l.id}')" style="${isRead?'opacity:0.6':''}">
+      <div class="lesson-num">${l.num}</div>
+      <div class="lesson-info">
+        <div class="lesson-title">${isRead?'✓ ':''}${l.title}</div>
+        <div class="lesson-sub">${l.sub}</div>
+      </div>
+      <div class="lesson-arrow">›</div>
+    </div>
+  `;
+}
+
+function openLesson(id) {
+  const lesson = LESSONS.find(l => l.id === id);
+  if (!lesson) return;
+  const frame = document.getElementById('viewerFrame');
+  frame.src = 'pages/' + lesson.file;
+  document.getElementById('viewer').classList.add('active');
+  document.getElementById('header').classList.add('viewing');
+  document.getElementById('backTitle').textContent = lesson.title;
+  // Mark as read
+  if (!read.includes(id)) {
+    read.push(id);
+    localStorage.setItem('ikkyu-academy-read', JSON.stringify(read));
+  }
+}
+
+function closeViewer() {
+  document.getElementById('viewer').classList.remove('active');
+  document.getElementById('header').classList.remove('viewing');
+  document.getElementById('viewerFrame').src = '';
+  renderContent();
+}
+
+// Init
+renderContent();
+</script>
+</body>
+</html>

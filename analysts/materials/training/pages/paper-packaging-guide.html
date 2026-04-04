@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>素材セクター入門 #7 — 紙・パッケージング（Paper & Packaging）</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#f5f5f7;--card:#fff;--text:#1d1d1f;--sub:#6e6e73;--accent:#2c2c2e;--radius:16px;--shadow:0 1px 3px rgba(0,0,0,0.04);--shadow-lg:0 4px 20px rgba(0,0,0,0.08);--pp-gradient:linear-gradient(135deg,#5c4033 0%,#8b6914 50%,#b8860b 100%);--print:#868e96;--board:#e8590c;--spec:#5c7cfa;--pack:#2b8a3e;--red:#c92a2a;--orange:#e8590c;--green:#2b8a3e;}
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{font-family:'DM Sans','Noto Sans JP',sans-serif;background:var(--bg);color:var(--text);line-height:1.7;padding:24px 16px 60px;max-width:800px;margin:0 auto;}
+  .header{text-align:center;margin-bottom:40px;padding:32px 20px;background:var(--pp-gradient);border-radius:var(--radius);color:#fff;position:relative;overflow:hidden;}
+  .header::before{content:'📦';position:absolute;font-size:120px;opacity:0.06;top:-10px;right:-10px;}
+  .header .series-tag{display:inline-block;background:rgba(255,255,255,0.15);padding:4px 14px;border-radius:20px;font-size:12px;letter-spacing:1px;text-transform:uppercase;margin-bottom:12px;}
+  .header h1{font-size:26px;font-weight:700;margin-bottom:8px;}
+  .header p{font-size:14px;opacity:0.7;}
+  .section{margin-bottom:32px;}
+  .section-title{font-size:18px;font-weight:700;margin-bottom:16px;display:flex;align-items:center;gap:8px;}
+  .section-title .icon{width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;}
+  .card{background:var(--card);border-radius:var(--radius);padding:20px;box-shadow:var(--shadow);margin-bottom:12px;}
+  .card p{font-size:14px;color:var(--sub);}
+  .card p strong{color:var(--text);}
+  .chain-container{overflow-x:auto;padding:8px 0;}
+  .chain{display:flex;align-items:stretch;gap:0;min-width:700px;}
+  .chain-step{flex:1;text-align:center;}
+  .chain-box{border-radius:12px;padding:14px 8px;box-shadow:var(--shadow);min-height:90px;display:flex;flex-direction:column;align-items:center;justify-content:center;border:2px solid transparent;}
+  .chain-box .emoji{font-size:22px;margin-bottom:4px;}
+  .chain-box .label{font-size:11px;font-weight:700;}
+  .chain-box .sub-label{font-size:9px;color:var(--sub);margin-top:2px;}
+  .chain-box.active{border-color:#8b6914;background:#fef9e7;}
+  .chain-arrow{display:flex;align-items:center;justify-content:center;width:24px;flex-shrink:0;color:var(--sub);font-size:14px;}
+  .tab-bar{display:flex;gap:4px;margin-bottom:16px;background:#e9ecef;border-radius:10px;padding:3px;overflow-x:auto;}
+  .tab-btn{flex:1;padding:8px 4px;border:none;background:transparent;border-radius:8px;font-family:inherit;font-size:11px;font-weight:600;color:var(--sub);cursor:pointer;transition:all 0.2s;white-space:nowrap;min-width:55px;}
+  .tab-btn.active{background:var(--card);color:var(--text);box-shadow:0 1px 3px rgba(0,0,0,0.08);}
+  .tab-content{display:none;}
+  .tab-content.active{display:block;}
+  .prod-profile{background:var(--card);border-radius:var(--radius);padding:20px;box-shadow:var(--shadow);border-top:4px solid;margin-bottom:12px;}
+  .prod-header{display:flex;align-items:center;gap:10px;margin-bottom:12px;}
+  .prod-badge{padding:4px 10px;border-radius:8px;font-size:11px;font-weight:700;color:#fff;}
+  .prod-profile h3{font-size:16px;font-weight:700;}
+  .prod-profile .prod-desc{font-size:13px;color:var(--sub);line-height:1.8;margin-bottom:12px;}
+  .prod-stats{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+  .stat-item{background:#f8f9fa;border-radius:8px;padding:10px;}
+  .stat-label{font-size:10px;color:var(--sub);font-weight:600;text-transform:uppercase;letter-spacing:0.5px;}
+  .stat-value{font-size:15px;font-weight:700;margin-top:2px;}
+  .stat-note{font-size:10px;color:var(--sub);margin-top:2px;}
+  .formula-box{background:var(--pp-gradient);border-radius:var(--radius);padding:24px;color:#fff;text-align:center;margin-bottom:12px;}
+  .formula-box .formula{font-size:15px;font-weight:700;margin-bottom:8px;}
+  .formula-box .formula .var{color:#fef3c7;}
+  .formula-box .formula .op{color:#ffd43b;margin:0 4px;}
+  .formula-box .note{font-size:12px;opacity:0.6;}
+  .spread-visual{background:var(--card);border-radius:var(--radius);padding:24px;box-shadow:var(--shadow);margin-bottom:12px;}
+  .spread-bar-container{margin:12px 0;}
+  .spread-bar{display:flex;height:40px;border-radius:10px;overflow:hidden;font-size:10px;font-weight:600;color:#fff;}
+  .spread-seg{display:flex;align-items:center;justify-content:center;padding:0 4px;white-space:nowrap;}
+  .spread-annotation{font-size:13px;color:var(--sub);text-align:center;margin-top:16px;padding-top:16px;border-top:1px solid #f1f3f5;line-height:1.8;}
+  .callout-box{border-radius:var(--radius);padding:24px;color:#fff;margin-bottom:12px;}
+  .callout-box h3{font-size:17px;font-weight:700;margin-bottom:10px;}
+  .callout-box p{font-size:13px;opacity:0.9;line-height:1.8;}
+  .kpi-table{width:100%;border-collapse:collapse;font-size:13px;}
+  .kpi-table th{text-align:left;padding:10px 12px;background:#f1f3f5;font-weight:600;}
+  .kpi-table td{padding:10px 12px;border-bottom:1px solid #f1f3f5;}
+  .kpi-table tr:last-child td{border-bottom:none;}
+  .kpi-table .kpi-name{font-weight:600;}
+  .kpi-table .kpi-why{color:var(--sub);font-size:12px;}
+  .risk-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+  .risk-item{background:var(--card);border-radius:12px;padding:14px;box-shadow:var(--shadow);border-left:4px solid;}
+  .risk-item.high{border-color:var(--red);}
+  .risk-item.mid{border-color:var(--orange);}
+  .risk-item.low{border-color:var(--green);}
+  .risk-item .risk-name{font-weight:700;font-size:13px;margin-bottom:4px;}
+  .risk-item .risk-desc{font-size:11px;color:var(--sub);}
+  .cov-table{width:100%;border-collapse:collapse;font-size:12px;background:var(--card);border-radius:12px;overflow:hidden;box-shadow:var(--shadow);}
+  .cov-table th{text-align:left;padding:10px 12px;background:#f1f3f5;font-weight:600;font-size:11px;}
+  .cov-table td{padding:10px 12px;border-bottom:1px solid #f1f3f5;}
+  .cov-table tr:last-child td{border-bottom:none;}
+  details{background:var(--card);border-radius:12px;padding:16px;box-shadow:var(--shadow);margin-bottom:10px;}
+  details summary{font-weight:700;font-size:14px;cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center;}
+  details summary::after{content:'▸';transition:transform 0.2s;}
+  details[open] summary::after{transform:rotate(90deg);}
+  details .detail-body{margin-top:12px;font-size:13px;color:var(--sub);line-height:1.8;}
+  .footnote{margin-top:40px;text-align:center;font-size:12px;color:var(--sub);}
+  @media(max-width:520px){.prod-stats,.risk-grid{grid-template-columns:1fr;}.chain{min-width:620px;}}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="series-tag">素材セクター入門 #7</div>
+  <h1>紙・パッケージング（Paper & Packaging）</h1>
+  <p>「紙は斜陽」は半分だけ正しい — 段ボールとESGが変える業界地図</p>
+</div>
+
+<!-- 1. Overview -->
+<div class="section">
+  <div class="section-title"><div class="icon" style="background:#fef3c7;">📖</div>セクター概観</div>
+  <div class="card">
+    <p>
+      紙・パッケージングセクターは大きく<strong>「印刷用紙（衰退）」と「板紙・段ボール（成長）」</strong>に二分される。
+      新聞・雑誌・コピー用紙はデジタル化で構造的に縮小。一方でEC拡大→段ボール需要増、
+      プラスチック代替→紙パッケージへのシフトで板紙・包装は底堅い。<br/><br/>
+      日本の製紙2大メーカー＝<strong>王子ホールディングス（3861）、日本製紙（3863）</strong>。
+      段ボール専業の<strong>レンゴー（3941）</strong>。
+      各社とも印刷用紙から板紙・パッケージング・機能材料への<strong>ポートフォリオ転換</strong>を急ピッチで進めている。
+    </p>
+  </div>
+</div>
+
+<!-- 2. Value Chain -->
+<div class="section">
+  <div class="section-title"><div class="icon" style="background:#fff3bf;">🔗</div>バリューチェーン</div>
+  <div class="chain-container">
+    <div class="chain">
+      <div class="chain-step">
+        <div class="chain-box">
+          <div class="emoji">🌲</div>
+          <div class="label">植林・チップ</div>
+          <div class="sub-label">Wood Chip</div>
+        </div>
+      </div>
+      <div class="chain-arrow">→</div>
+      <div class="chain-step">
+        <div class="chain-box active">
+          <div class="emoji">🔥</div>
+          <div class="label">パルプ化</div>
+          <div class="sub-label">Pulping（蒸解）</div>
+        </div>
+      </div>
+      <div class="chain-arrow">→</div>
+      <div class="chain-step">
+        <div class="chain-box active">
+          <div class="emoji">📄</div>
+          <div class="label">抄紙（しょうし）</div>
+          <div class="sub-label">Papermaking</div>
+        </div>
+      </div>
+      <div class="chain-arrow">→</div>
+      <div class="chain-step">
+        <div class="chain-box active">
+          <div class="emoji">✂️</div>
+          <div class="label">加工・製箱</div>
+          <div class="sub-label">Converting</div>
+        </div>
+      </div>
+      <div class="chain-arrow">→</div>
+      <div class="chain-step">
+        <div class="chain-box">
+          <div class="emoji">🏭</div>
+          <div class="label">需要家</div>
+          <div class="sub-label">印刷/食品/EC/物流</div>
+        </div>
+      </div>
+      <div class="chain-arrow">→</div>
+      <div class="chain-step">
+        <div class="chain-box">
+          <div class="emoji">♻️</div>
+          <div class="label">古紙回収</div>
+          <div class="sub-label">Recycling</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="card" style="margin-top:8px;">
+    <p>
+      <strong>古紙→パルプ→紙→古紙の循環構造</strong>が特徴。日本の段ボール原紙は古紙配合率90%超。
+      「木材チップ→パルプ」の工程で大量の蒸気（ボイラー）を使うため、<strong>エネルギーコスト比率は原価の20-30%</strong>。
+      黒液（パルプ化の副産物）を自家発電用バイオマス燃料として利用するのが製紙業の独自構造。
+    </p>
+  </div>
+</div>
+
+<!-- 3. Two Worlds -->
+<div class="section">
+  <div class="section-title"><div class="icon" style="background:#ffe3e3;">📊</div>「2つの世界」— 衰退と成長の共存</div>
+
+  <div class="callout-box" style="background:linear-gradient(135deg,#495057,#868e96);">
+    <h3>📉 衰退する世界：印刷用紙</h3>
+    <p>
+      新聞用紙は過去15年で需要が<strong>半減以下</strong>。雑誌・書籍用紙も年率5-8%減。コピー用紙もペーパーレス化で縮小。
+      抄紙機の停機・転換が各社で進行中。日本製紙は石巻工場の新聞用紙マシンを段ボール原紙に転換。
+      この領域は構造的に縮小するため、「いかに速やかにポートフォリオを入れ替えるか」が経営課題。
+    </p>
+  </div>
+
+  <div class="callout-box" style="background:linear-gradient(135deg,#5c4033,#b8860b);">
+    <h3>📈 成長する世界：段ボール・パッケージング</h3>
+    <p>
+      EC拡大→段ボール箱の需要増。食品包装→衛生意識の高まり。プラスチック規制→紙代替。
+      段ボール原紙の国内需要は<strong>年率1-2%の安定成長</strong>。
+      グローバルではアジア（特にインド・東南アジア）の段ボール需要が年率4-5%成長。
+      レンゴーの段ボール事業、王子の板紙・パッケージング事業がこの恩恵を受ける。
+    </p>
+  </div>
+</div>
+
+<!-- 4. Product segments -->
+<div class="section">
+  <div class="section-title"><div class="icon" style="background:#d3f9d8;">📦</div>製品セグメント</div>
+
+  <div class="tab-bar">
+    <button class="tab-btn active" onclick="switchTab('printing')">印刷用紙</button>
+    <button class="tab-btn" onclick="switchTab('board')">板紙・段ボール</button>
+    <button class="tab-btn" onclick="switchTab('tissue')">家庭紙</button>
+    <button class="tab-btn" onclick="switchTab('specpaper')">機能材料</button>
+  </div>
+
+  <!-- Printing Paper -->
+  <div class="tab-content active" id="tab-printing">
+    <div class="prod-profile" style="border-color:var(--print);">
+      <div class="prod-header">
+        <span class="prod-badge" style="background:var(--print);">📰</span>
+        <h3>印刷用紙・情報用紙 — 構造的縮小</h3>
+      </div>
+      <div class="prod-desc">
+        新聞用紙、非塗工印刷用紙（コピー紙等）、塗工紙（チラシ・カタログ）、PPC用紙（コピー機用）。
+        デジタルメディアの普及で先進国では不可逆的な需要減。
+        一方で輸出市場（東南アジア等）にはまだ需要が残存。価格はパルプ市況に連動。
+      </div>
+      <div class="prod-stats">
+        <div class="stat-item"><div class="stat-label">需要トレンド</div><div class="stat-value">年率 ▲3-5%</div><div class="stat-note">新聞用紙は年率▲7-10%のペースで急減</div></div>
+        <div class="stat-item"><div class="stat-label">対応策</div><div class="stat-value">抄紙機の停機・転換</div><div class="stat-note">段ボール原紙やCNF等への転換を進行中</div></div>
+        <div class="stat-item"><div class="stat-label">価格形成</div><div class="stat-value">パルプ価格＋値上げ交渉</div><div class="stat-note">NBKP（針葉樹パルプ）が指標。Fastmarkets RISI</div></div>
+        <div class="stat-item"><div class="stat-label">利益率</div><div class="stat-value">OPM 0-5%</div><div class="stat-note">需要減で稼働率低下→固定費負担増。赤字リスクも</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Containerboard -->
+  <div class="tab-content" id="tab-board">
+    <div class="prod-profile" style="border-color:var(--board);">
+      <div class="prod-header">
+        <span class="prod-badge" style="background:var(--board);">📦</span>
+        <h3>板紙・段ボール — 成長の柱</h3>
+      </div>
+      <div class="prod-desc">
+        <strong>段ボール原紙（ライナー＋中芯）→段ボールシート→段ボール箱</strong>の三段構造。
+        古紙を原料に、エネルギーを使って抄紙する。EC拡大で「ラストワンマイル」の包装材として不可欠。
+        食品・飲料・家電・日用品の物流にはほぼ全て段ボールが使われる。
+      </div>
+      <div class="prod-stats">
+        <div class="stat-item"><div class="stat-label">需要トレンド</div><div class="stat-value">国内+1-2%/年</div><div class="stat-note">EC拡大が下支え。人口減でも世帯当たり使用量増</div></div>
+        <div class="stat-item"><div class="stat-label">原料</div><div class="stat-value">古紙90%超</div><div class="stat-note">古紙価格と品質（異物混入率）が重要</div></div>
+        <div class="stat-item"><div class="stat-label">主要企業</div><div class="stat-value">レンゴー、王子、大王</div><div class="stat-note">レンゴーは段ボール原紙→製箱の一貫。国内シェア首位</div></div>
+        <div class="stat-item"><div class="stat-label">利益率</div><div class="stat-value">OPM 5-8%</div><div class="stat-note">安定的。値上げ浸透度＋古紙/エネルギーコストがカギ</div></div>
+      </div>
+    </div>
+
+    <details>
+      <summary>段ボールの価格転嫁メカニズム</summary>
+      <div class="detail-body">
+        <strong>① 段ボール原紙の値上げ：</strong>王子・レンゴー等が原紙価格を改定（年1-2回）。古紙・エネルギーコスト上昇を理由。<br/><br/>
+        <strong>② シート・箱の値上げ：</strong>原紙値上げを受けて、加工品（シート・箱）も値上げ。ただし食品メーカー等の顧客は抵抗。<br/><br/>
+        <strong>③ タイムラグ：</strong>原紙値上げ→箱値上げに2-3ヶ月のラグ。この間はコスト先行で利益が圧縮される。<br/><br/>
+        → レンゴーは原紙→シート→箱の一貫体制なので、コスト転嫁が比較的スムーズ。
+      </div>
+    </details>
+  </div>
+
+  <!-- Tissue -->
+  <div class="tab-content" id="tab-tissue">
+    <div class="prod-profile" style="border-color:var(--pack);">
+      <div class="prod-header">
+        <span class="prod-badge" style="background:var(--pack);">🧻</span>
+        <h3>家庭紙（ティッシュ・トイレットペーパー）</h3>
+      </div>
+      <div class="prod-desc">
+        生活必需品。景気感応度が低く安定的だが、参入障壁も低く価格競争が激しい。
+        日本製紙クレシア（日本製紙子会社）、大王製紙（エリエール）が大手。
+        パルプ価格高騰時に値上げできるかが利益を左右。コロナ禍での買い占め特需は一巡。
+      </div>
+      <div class="prod-stats">
+        <div class="stat-item"><div class="stat-label">需要特性</div><div class="stat-value">景気非感応・安定</div><div class="stat-note">人口減でもほぼ横ばい。高齢化で大人用おむつ増</div></div>
+        <div class="stat-item"><div class="stat-label">競争環境</div><div class="stat-value">価格競争が激しい</div><div class="stat-note">PB（プライベートブランド）の拡大が脅威</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Specialty / Functional -->
+  <div class="tab-content" id="tab-specpaper">
+    <div class="prod-profile" style="border-color:var(--spec);">
+      <div class="prod-header">
+        <span class="prod-badge" style="background:var(--spec);">🔬</span>
+        <h3>機能材料 — 製紙の未来</h3>
+      </div>
+      <div class="prod-desc">
+        製紙技術を応用した高付加価値製品群。各社がポートフォリオ転換の柱として注力。
+      </div>
+    </div>
+    <div class="prod-stats" style="background:var(--card);border-radius:var(--radius);padding:20px;box-shadow:var(--shadow);">
+      <div class="stat-item">
+        <div class="stat-label">CNF（セルロースナノファイバー）</div>
+        <div class="stat-value">木材由来の次世代素材</div>
+        <div class="stat-note">鉄の1/5の重さで5倍の強度。自動車・化粧品。日本製紙・王子が開発リード。まだ商業化初期。</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-label">化学品</div>
+        <div class="stat-value">溶解パルプ→レーヨン原料</div>
+        <div class="stat-note">テンセル等の再生繊維の原料。バイオマス化学品。日本製紙が注力。</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-label">バリアコート紙</div>
+        <div class="stat-value">プラ代替の紙コップ・容器</div>
+        <div class="stat-note">PE（ポリエチレン）ラミネートの代わりに水系バリアコート。脱プラの本命。王子が強い。</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-label">紙おむつ素材</div>
+        <div class="stat-value">SAP（高吸水性ポリマー）</div>
+        <div class="stat-note">大王製紙がおむつ→素材の川上統合。アジアの中間層拡大で需要増。</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 5. Profit structure -->
+<div class="section">
+  <div class="section-title"><div class="icon" style="background:#ffe3e3;">💰</div>利益構造</div>
+  <div class="formula-box">
+    <div class="formula">
+      <span class="var">利益</span><span class="op">=</span>
+      <span class="var">（製品単価 − 原料 − エネルギー − 物流）</span><span class="op">×</span>
+      <span class="var">出荷量</span><span class="op">−</span><span class="var">固定費</span>
+    </div>
+    <div class="note">原料＝木材チップ/古紙。エネルギー＝重油/石炭/LNG/黒液。物流費が嵩む重量物</div>
+  </div>
+
+  <div class="spread-visual">
+    <div style="font-weight:700;font-size:14px;margin-bottom:12px;">コスト構造比較</div>
+
+    <div style="font-size:12px;font-weight:600;margin-bottom:4px;color:var(--print);">印刷用紙</div>
+    <div class="spread-bar-container">
+      <div class="spread-bar">
+        <div class="spread-seg" style="width:30%;background:#8b6914;">原料（チップ/パルプ）</div>
+        <div class="spread-seg" style="width:25%;background:#e8590c;">エネルギー</div>
+        <div class="spread-seg" style="width:15%;background:#868e96;">薬品・水</div>
+        <div class="spread-seg" style="width:15%;background:#495057;">物流＋固定費</div>
+        <div class="spread-seg" style="width:15%;background:var(--red);">減価償却＋損失</div>
+      </div>
+      <div style="font-size:10px;color:var(--sub);margin-top:4px;margin-bottom:14px;">OPM 0-5% — 稼働率低下で赤字転落リスク</div>
+    </div>
+
+    <div style="font-size:12px;font-weight:600;margin-bottom:4px;color:var(--board);">段ボール原紙</div>
+    <div class="spread-bar-container">
+      <div class="spread-bar">
+        <div class="spread-seg" style="width:35%;background:#8b6914;">古紙</div>
+        <div class="spread-seg" style="width:22%;background:#e8590c;">エネルギー</div>
+        <div class="spread-seg" style="width:10%;background:#868e96;">薬品</div>
+        <div class="spread-seg" style="width:18%;background:#495057;">物流＋固定費</div>
+        <div class="spread-seg" style="width:15%;background:#2b8a3e;">利益</div>
+      </div>
+      <div style="font-size:10px;color:var(--sub);margin-top:4px;">OPM 5-8% — 古紙コスト＋値上げ転嫁がカギ</div>
+    </div>
+
+    <div class="spread-annotation">
+      製紙業は<strong>「エネルギー」と「原料」がコストの55-65%</strong>。<br/>
+      #2石油・エネルギーの価格変動がダイレクトに利益を左右する。<br/>
+      黒液（自家発燃料）で燃料費を一部自給できるのが製紙の強み。
+    </div>
+  </div>
+</div>
+
+<!-- 6. Key topics -->
+<div class="section">
+  <div class="section-title"><div class="icon" style="background:#d3f9d8;">♻️</div>重要テーマ</div>
+
+  <details>
+    <summary>パルプ市況の読み方</summary>
+    <div class="detail-body">
+      <strong>NBKP（針葉樹晒クラフトパルプ）：</strong>高品質パルプの国際指標。Fastmarkets RISIが価格公表。北欧・北米産。<br/>
+      <strong>LBKP（広葉樹晒クラフトパルプ）：</strong>ユーカリ原料。ブラジル・チリ・インドネシア産。段ボール原紙にも使用。<br/><br/>
+      パルプ価格は木材チップ供給、為替、中国需要、在庫水準で変動。
+      中国が世界のパルプ需要の約30%を占め、中国の在庫積み上がり/取り崩しが価格を左右する。
+    </div>
+  </details>
+
+  <details>
+    <summary>脱プラスチック — 紙パッケージの追い風</summary>
+    <div class="detail-body">
+      <strong>プラ規制：</strong>2022年プラスチック資源循環法。レジ袋有料化。EU使い捨てプラ規制。<br/>
+      <strong>紙代替：</strong>紙ストロー、紙コップ、バリアコート紙容器（PE ラミネートフリー）。<br/>
+      <strong>恩恵銘柄：</strong>王子のバリアコート紙、レンゴーの紙トレー、日本製紙のShieldPlus。<br/><br/>
+      ただし紙はプラスチックより重い→輸送コスト増、水に弱い→食品包装に限界、という弱点もある。
+      紙とプラの「適材適所」が現実的。
+    </div>
+  </details>
+
+  <details>
+    <summary>古紙リサイクルの構造</summary>
+    <div class="detail-body">
+      日本の古紙回収率は約80%で世界トップクラス。段ボール古紙はほぼ100%国内循環。<br/><br/>
+      <strong>古紙価格の変動要因：</strong><br/>
+      ・中国の輸入政策（2021年に古紙輸入を禁止→国際市場に余剰→価格下落）<br/>
+      ・東南アジアへの輸出需要<br/>
+      ・国内の段ボール生産量（需要増→古紙不足→価格上昇）<br/><br/>
+      古紙が安い＝段ボール原紙メーカーに有利。高い＝コスト増で不利。
+    </div>
+  </details>
+
+  <details>
+    <summary>バイオマス発電 — 製紙の隠れた収益源</summary>
+    <div class="detail-body">
+      製紙工場はパルプ化の副産物「黒液」を燃焼して自家発電。電力の自給率が高い。<br/>
+      さらにFIT（固定価格買取制度）を利用して余剰電力を売電。<br/><br/>
+      <strong>日本製紙：</strong>石巻・八代等で大規模バイオマス発電所。電力事業が利益の一部に。<br/>
+      <strong>王子：</strong>自社工場のエネルギー効率化。苫小牧でバイオマス発電。<br/><br/>
+      →「紙を作る会社」が「エネルギーも作る会社」になりつつある。
+    </div>
+  </details>
+</div>
+
+<!-- 7. KPIs -->
+<div class="section">
+  <div class="section-title"><div class="icon" style="background:#e8f4fd;">📊</div>アナリストが見るべきKPI</div>
+  <div class="card" style="padding:0;overflow:hidden;">
+    <table class="kpi-table">
+      <thead><tr><th>KPI</th><th>なぜ重要か</th></tr></thead>
+      <tbody>
+        <tr><td class="kpi-name">段ボール生産量（月次）</td><td class="kpi-why">段ボール工業会が発表。EC・物流活動の代理変数。前年比で需要トレンド。</td></tr>
+        <tr><td class="kpi-name">印刷用紙出荷量</td><td class="kpi-why">製紙連合会が月次発表。減少ペースの加速/鈍化を確認。</td></tr>
+        <tr><td class="kpi-name">パルプ価格（NBKP/LBKP）</td><td class="kpi-why">原料コストの最大ドライバー。中国在庫水準と連動。</td></tr>
+        <tr><td class="kpi-name">古紙価格</td><td class="kpi-why">段ボール原紙の主原料。古紙安→段ボールメーカーに有利。</td></tr>
+        <tr><td class="kpi-name">値上げ浸透度</td><td class="kpi-why">各社の決算説明会で値上げの浸透タイミングと率を確認。利益予想の精度に直結。</td></tr>
+        <tr><td class="kpi-name">エネルギーコスト</td><td class="kpi-why">石炭・LNG・重油価格。黒液の自家発比率が高いほどヘッジされる。</td></tr>
+        <tr><td class="kpi-name">海外売上比率</td><td class="kpi-why">王子はアジアパシフィックで成長。セグメント別の海外利益貢献度。</td></tr>
+        <tr><td class="kpi-name">設備投資（転換投資）</td><td class="kpi-why">印刷用紙→段ボール原紙への抄紙機転換の進捗。ポートフォリオ転換のスピード。</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- 8. Risks -->
+<div class="section">
+  <div class="section-title"><div class="icon" style="background:#ffe3e3;">⚠️</div>主なリスク要因</div>
+  <div class="risk-grid">
+    <div class="risk-item high">
+      <div class="risk-name">印刷用紙の需要崩壊加速</div>
+      <div class="risk-desc">デジタル化がさらに進行すれば減少ペースが加速。抄紙機の転換が追いつかないリスク。構造的な固定費負担。</div>
+    </div>
+    <div class="risk-item high">
+      <div class="risk-name">エネルギー・原料高</div>
+      <div class="risk-desc">石炭/LNG/パルプの高騰で利益が蒸発。2022年は各社とも大幅減益。値上げの浸透タイムラグが痛い。</div>
+    </div>
+    <div class="risk-item mid">
+      <div class="risk-name">中国の紙市況</div>
+      <div class="risk-desc">中国は世界最大の紙・板紙生産国。過剰生産→アジア市況を下押し。王子のアジア事業に影響。</div>
+    </div>
+    <div class="risk-item mid">
+      <div class="risk-name">物流コスト</div>
+      <div class="risk-desc">紙は重量物。トラック運賃上昇、2024年問題（ドライバー不足）でコスト増圧力。</div>
+    </div>
+    <div class="risk-item low">
+      <div class="risk-name">為替</div>
+      <div class="risk-desc">チップ・パルプはドル建て輸入。円安→コスト増。ただし輸出もあるため部分的にオフセット。</div>
+    </div>
+    <div class="risk-item low">
+      <div class="risk-name">代替素材</div>
+      <div class="risk-desc">デジタルサイネージvs紙広告、再利用プラvs紙。ただし段ボールの利便性は当面代替困難。</div>
+    </div>
+  </div>
+</div>
+
+<!-- 9. Coverage -->
+<div class="section">
+  <div class="section-title"><div class="icon" style="background:#f3e8ff;">🇯🇵</div>日本株カバレッジ対応表</div>
+  <div class="card" style="padding:0;overflow:hidden;">
+    <table class="cov-table">
+      <thead><tr><th>銘柄</th><th>ポジション</th><th>注目ポイント</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><strong>王子HD（3861）</strong></td>
+          <td>総合製紙最大手</td>
+          <td>板紙・パッケージ比率が高い。アジア展開（マレーシア、ベトナム、インド）。バリアコート紙。機能材料（粘着テープ等）。海外成長ストーリー。</td>
+        </tr>
+        <tr>
+          <td><strong>日本製紙（3863）</strong></td>
+          <td>総合製紙2位</td>
+          <td>印刷用紙比率がまだ高い→転換急務。ケミカル（溶解パルプ）、CNF、バイオマス発電。パッケージング転換の進捗がカギ。大王製紙との比較。</td>
+        </tr>
+        <tr>
+          <td><strong>レンゴー（3941）</strong></td>
+          <td>段ボール専業最大手</td>
+          <td>段ボール原紙→シート→箱の一貫体制。EC需要の恩恵。値上げ浸透力。軟包装にも展開。安定型の投資先。</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- 10. Cross sector -->
+<div class="section">
+  <div class="section-title"><div class="icon" style="background:#d3f9d8;">🔄</div>他セクターとのつながり</div>
+  <details>
+    <summary>石油・エネルギー（#2）→ 製紙 — 燃料コスト＋ナフサ</summary>
+    <div class="detail-body">
+      製紙工場のボイラーは石炭/重油/LNGを使用。エネルギーコストは原価の20-30%。また、PE（ポリエチレン）ラミネート原料のナフサ価格も包装材のコストに影響。
+    </div>
+  </details>
+  <details>
+    <summary>ガラス・セメント（#6）→ 製紙 — 同じ「エネルギー被害者」</summary>
+    <div class="detail-body">
+      セメント・ガラス・製紙はいずれもエネルギー多消費型産業。燃料価格高騰時は同時に減益になる傾向。炭素税導入時のコスト増インパクトも共通の課題。
+    </div>
+  </details>
+  <details>
+    <summary>海運（#8予定）→ 製紙 — 木材チップの輸送</summary>
+    <div class="detail-body">
+      木材チップは豪州・東南アジア・南米からチップ船で輸入。バルク船の運賃（BDI等）が原料のランディングコストに影響。王子HD等は自社チップ船も保有。
+    </div>
+  </details>
+</div>
+
+<!-- Global -->
+<div class="section">
+  <div class="section-title"><div class="icon" style="background:#e8f4fd;">🌍</div>グローバルの参考プレーヤー</div>
+  <div class="card">
+    <p>
+      <strong>International Paper</strong>（米）— 段ボール原紙世界最大手。北米中心。DS Smithを買収。<br/>
+      <strong>Smurfit WestRock</strong>（アイルランド/米）— Smurfit KappaとWestRockの合併で世界最大級の段ボール企業。<br/>
+      <strong>UPM</strong>（フィンランド）— 印刷用紙から特殊紙・バイオ化学品への転換リーダー。<br/>
+      <strong>Suzano</strong>（ブラジル）— ユーカリパルプ世界最大手。低コスト。LBKP価格形成力。<br/>
+      <strong>九龍紙業</strong>（中国/香港上場）— 段ボール原紙で中国最大手。アジア市況のベンチマーク。<br/><br/>
+      → Suzanoのパルプ価格見通し、IP/Smurfitの段ボール市況見通しが日本の製紙セクターの先行指標。
+    </p>
+  </div>
+</div>
+
+<div class="footnote">
+  素材セクター入門シリーズ #7 / 8<br/>
+  次回：#8 海運（Shipping）
+</div>
+
+<script>
+function switchTab(id){
+  document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('tab-'+id).classList.add('active');
+  event.target.classList.add('active');
+}
+</script>
+</body>
+</html>

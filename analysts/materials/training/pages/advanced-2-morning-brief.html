@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>素材セクター上級編 #2 — Morning Briefの設計</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#f5f5f7;--card:#fff;--text:#1d1d1f;--sub:#6e6e73;--radius:16px;--shadow:0 1px 3px rgba(0,0,0,0.04);--gradient:linear-gradient(135deg,#0f172a 0%,#1e40af 50%,#3b82f6 100%);--red:#dc2626;--green:#059669;--blue:#3b82f6;--purple:#7c3aed;--gold:#f59e0b;--orange:#e8590c;}
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{font-family:'DM Sans','Noto Sans JP',sans-serif;background:var(--bg);color:var(--text);line-height:1.7;padding:24px 16px 60px;max-width:800px;margin:0 auto;}
+  .header{text-align:center;margin-bottom:40px;padding:32px 20px;background:var(--gradient);border-radius:var(--radius);color:#fff;position:relative;overflow:hidden;}
+  .header::before{content:'☀️';position:absolute;font-size:120px;opacity:0.06;top:-10px;right:-10px;}
+  .header .series-tag{display:inline-block;background:rgba(255,255,255,0.15);padding:4px 14px;border-radius:20px;font-size:12px;letter-spacing:1px;text-transform:uppercase;margin-bottom:12px;}
+  .header h1{font-size:24px;font-weight:700;margin-bottom:8px;}
+  .header p{font-size:14px;opacity:0.7;}
+  .section{margin-bottom:32px;}
+  .section-title{font-size:18px;font-weight:700;margin-bottom:16px;display:flex;align-items:center;gap:8px;}
+  .section-title .icon{width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;}
+  .card{background:var(--card);border-radius:var(--radius);padding:20px;box-shadow:var(--shadow);margin-bottom:12px;}
+  .card p{font-size:14px;color:var(--sub);}
+  .card p strong{color:var(--text);}
+
+  /* Timeline */
+  .timeline{background:var(--card);border-radius:var(--radius);padding:20px;box-shadow:var(--shadow);margin-bottom:16px;}
+  .timeline-title{font-weight:700;font-size:15px;margin-bottom:16px;}
+  .tl-item{display:flex;gap:12px;padding:10px 0;border-bottom:1px solid #f1f3f5;align-items:flex-start;}
+  .tl-item:last-child{border-bottom:none;}
+  .tl-time{font-weight:700;font-size:13px;color:var(--blue);min-width:55px;flex-shrink:0;}
+  .tl-content{font-size:13px;color:var(--sub);line-height:1.6;}
+  .tl-content strong{color:var(--text);}
+
+  /* Template mockup */
+  .template{background:#1e293b;border-radius:var(--radius);padding:24px;color:#e2e8f0;margin-bottom:16px;font-size:12px;line-height:1.9;}
+  .template .t-header{color:#60a5fa;font-weight:700;font-size:15px;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid rgba(255,255,255,0.1);}
+  .template .t-section{color:#fbbf24;font-weight:700;font-size:13px;margin-top:14px;margin-bottom:6px;}
+  .template .t-data{color:#94a3b8;}
+  .template .t-up{color:#4ade80;}
+  .template .t-down{color:#f87171;}
+  .template .t-action{color:#c084fc;font-weight:600;}
+  .template .t-divider{border-top:1px solid rgba(255,255,255,0.06);margin:10px 0;}
+
+  .tip-box{background:#fffbeb;border:1px solid #fcd34d;border-radius:12px;padding:16px;margin-bottom:12px;}
+  .tip-box .tip-title{font-weight:700;font-size:13px;color:#92400e;margin-bottom:6px;}
+  .tip-box .tip-body{font-size:12px;color:#78350f;line-height:1.7;}
+  .warn-box{background:#fef2f2;border:1px solid #fca5a5;border-radius:12px;padding:16px;margin-bottom:12px;}
+  .warn-box .warn-title{font-weight:700;font-size:13px;color:#991b1b;margin-bottom:6px;}
+  .warn-box .warn-body{font-size:12px;color:#7f1d1d;line-height:1.7;}
+
+  details{background:var(--card);border-radius:12px;padding:16px;box-shadow:var(--shadow);margin-bottom:10px;}
+  details summary{font-weight:700;font-size:14px;cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center;}
+  details summary::after{content:'▸';transition:transform 0.2s;}
+  details[open] summary::after{transform:rotate(90deg);}
+  details .detail-body{margin-top:12px;font-size:13px;color:var(--sub);line-height:1.8;}
+  .footnote{margin-top:40px;text-align:center;font-size:12px;color:var(--sub);}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="series-tag">素材セクター上級編 #2</div>
+  <h1>Morning Briefの設計</h1>
+  <p>毎朝FMに出す1ページブリーフの構成・時間管理・テンプレート</p>
+</div>
+
+<!-- 1. Purpose -->
+<div class="section">
+  <div class="section-title"><div class="icon" style="background:#dbeafe;">📖</div>Morning Briefの目的</div>
+  <div class="card">
+    <p>
+      Morning Brief＝毎朝FMに提供する<strong>「今日、素材セクターで何を意識すべきか」</strong>のサマリー。
+      FMは複数セクターのアナリストから情報を受ける。<strong>1分で読めて、1つのアクションに繋がる</strong>ものが理想。
+      長文レポートではなく、<strong>エッセンスを凝縮した箇条書き</strong>。
+    </p>
+  </div>
+
+  <div class="warn-box">
+    <div class="warn-title">⚠ FMが嫌うMorning Brief</div>
+    <div class="warn-body">
+      ❌ ニュースの羅列だけで「So what?」がない<br/>
+      ❌ 長すぎて読む気が失せる（A4で2ページ以上）<br/>
+      ❌ 毎日同じフォーマットで変化がない（マーケットデータのコピペだけ）<br/>
+      ❌ アクションに繋がるインプリケーションがない
+    </div>
+  </div>
+</div>
+
+<!-- 2. Morning Timeline -->
+<div class="section">
+  <div class="section-title"><div class="icon" style="background:#fef3c7;">⏰</div>朝のタイムライン</div>
+  <div class="timeline">
+    <div class="timeline-title">素材アナリストの朝ルーティン（6:00-8:30）</div>
+    <div class="tl-item"><div class="tl-time">6:00</div><div class="tl-content"><strong>起床→スマホでヘッドラインチェック</strong><br/>Bloomberg FIRST、Reuters、日経。overnight のコモディティ価格を確認（LME/COMEX/WTI）</div></div>
+    <div class="tl-item"><div class="tl-time">6:15</div><div class="tl-content"><strong>CEO Portal（PWA）でデータ確認</strong><br/>Fear & Greed Index、前日のBDI/SHFE HRC。Morning Brief Datawarehouseの自動取得データ</div></div>
+    <div class="tl-item"><div class="tl-time">6:30</div><div class="tl-content"><strong>コモディティ価格をExcelに入力</strong><br/>鉄鉱石/原料炭/LME銅/金/原油/ナフサ/BDI/SCFI。前日比を自動計算。異常値にフラグ</div></div>
+    <div class="tl-item"><div class="tl-time">6:45</div><div class="tl-content"><strong>セルサイドのオーバーナイトレポートをスキャン</strong><br/>BHP/Rio/ArcelorMittalの海外決算、OPECニュース、中国PMI（月初）。2-3分で要点抽出</div></div>
+    <div class="tl-item"><div class="tl-time">7:00</div><div class="tl-content"><strong>Morning Briefを執筆（15-20分）</strong><br/>テンプレートに沿って記入。「今日のポイント」→「市況」→「ニュース」→「アクション」</div></div>
+    <div class="tl-item"><div class="tl-time">7:30</div><div class="tl-content"><strong>FMにメール/Slack送信</strong><br/>市場オープンの1時間前が理想。FMの朝会に間に合うように</div></div>
+    <div class="tl-item"><div class="tl-time">8:00</div><div class="tl-content"><strong>チーム朝会（あれば）</strong><br/>Morning Briefの口頭補足。質疑応答。1-2分で自セクターのポイントを共有</div></div>
+    <div class="tl-item"><div class="tl-time">8:30</div><div class="tl-content"><strong>市場オープン前の最終チェック</strong><br/>寄り付き前の気配値。異常な値動きがあればFMにアラート</div></div>
+  </div>
+</div>
+
+<!-- 3. Template -->
+<div class="section">
+  <div class="section-title"><div class="icon" style="background:#d1fae5;">📝</div>テンプレート</div>
+
+  <div class="template">
+    <div class="t-header">素材セクター Morning Brief — 2025/XX/XX（月）</div>
+
+    <div class="t-section">🎯 Today's Call（今日のポイント — 最重要。これだけ読めばOK）</div>
+    <span class="t-action">• 鉄鉱石が一晩で$5急落（$108→$103）。中国の粗鋼減産観測。日本製鉄に▲100億円程度のコスト改善要因だが、鋼材市況の連れ安リスクに注意。スプレッドはやや改善方向。</span><br/>
+    <span class="t-action">• フジクラ：Corningの決算でDCガラス需要が前年比+18%。光接続の需要環境が引き続き強いことを確認。フジクラへのReadthrough positive。</span>
+
+    <div class="t-divider"></div>
+    <div class="t-section">📊 市況データ（前日比）</div>
+    <span class="t-data">鉄鉱石62%Fe  </span><span class="t-down">$103.2 (▲4.5%)</span><br/>
+    <span class="t-data">原料炭HCC    </span><span class="t-up">$228 (+1.2%)</span><br/>
+    <span class="t-data">LME銅 3M     </span><span class="t-up">$9,340 (+0.8%)</span><br/>
+    <span class="t-data">金 COMEX     </span><span class="t-up">$2,385 (+0.3%)</span><br/>
+    <span class="t-data">原油 Dubai   </span><span class="t-down">$79.5 (▲1.1%)</span><br/>
+    <span class="t-data">BDI          </span><span class="t-up">1,842 (+32)</span><br/>
+    <span class="t-data">SCFI         </span><span class="t-data">1,025 (横ばい)</span><br/>
+    <span class="t-data">USD/JPY      </span><span class="t-data">¥149.8</span><br/>
+    <span class="t-data">SHFE HRC先物 </span><span class="t-down">¥3,580/t (▲1.8%)</span>
+
+    <div class="t-divider"></div>
+    <div class="t-section">📰 ニュース & イベント</div>
+    • 中国：工信部が粗鋼減産の方針を示唆（証券時報）。具体的な数量目標は未発表。→鉄鉱石下落の背景<br/>
+    • OPEC+：来月の生産枠を据え置きの見通し（Reuters）→原油は小幅安<br/>
+    • Corning Q3決算：ディスプレイガラス売上+8%。光ファイバー売上+22%。DC向け好調コメント<br/>
+    • 本日：太平洋セメント決算発表（15:00）
+
+    <div class="t-divider"></div>
+    <div class="t-section">🎬 Action / Watch（今日の注目点）</div>
+    <span class="t-action">• 太平洋セメント決算（15:00）：コンセンサスOP ¥680億。燃料費の前提と廃棄物処理量をチェック</span><br/>
+    <span class="t-action">• 鉄鉱石続落なら日本製鉄/JFEに短期プレッシャーだが、中期ではコスト改善。スプレッドの方向を注視</span>
+  </div>
+
+  <div class="tip-box">
+    <div class="tip-title">💡 テンプレートの鉄則</div>
+    <div class="tip-body">
+      <strong>① Today's Callが全体の50%の価値。</strong>ここだけ読むFMが大半。最も重要なメッセージを最初に。<br/>
+      <strong>② 市況データは毎日同じ位置・同じ順番。</strong>FMが目を慣らせるように。異常値だけ太字/色付き。<br/>
+      <strong>③ ニュースは「So what?」を1文添える。</strong>「〇〇が発表」だけでなく「→ △△への影響は□□」。<br/>
+      <strong>④ 全体でA4の半分以下。</strong>長くなったら削る。FMは忙しい。
+    </div>
+  </div>
+</div>
+
+<!-- 4. Automation -->
+<div class="section">
+  <div class="section-title"><div class="icon" style="background:#ede9fe;">⚡</div>自動化のポイント</div>
+  <div class="card">
+    <p>
+      市況データの取得は<strong>CEO Portal（PWA）のDatawarehouse</strong>で自動化済み。
+      GitHub Actionsで毎朝6:30 JSTにFear & Greed/暗号通貨F&G等を取得。<br/><br/>
+      追加で自動化すべき項目：<br/>
+      <strong>① Bloomberg Excel API</strong>（6月〜）：BDH関数で前日のLME/鉄鉱石/原油を自動取得→Morning Brief Excelに反映<br/>
+      <strong>② J-Quants API</strong>：日本株の前日終値・出来高を自動取得<br/>
+      <strong>③ テンプレートのExcel化</strong>：市況データ部分を自動入力。Today's CallとActionだけ手書き<br/><br/>
+      <strong>目標：</strong>手書き部分を15分以下に。データ入力は全自動。
+    </p>
+  </div>
+</div>
+
+<!-- 5. What makes a great brief -->
+<div class="section">
+  <div class="section-title"><div class="icon" style="background:#fee2e2;">⭐</div>「刺さる」Morning Briefの条件</div>
+  <details>
+    <summary>① 「今日だけの」情報がある</summary>
+    <div class="detail-body">毎日同じコモディティデータを並べるだけでは読まれなくなる。「昨日と何が違うのか」「今日何が起きるのか」の差分情報を必ず入れる。何も変わらない日は「特段の変化なし。太平洋セメント決算に注目」と1行でOK。</div>
+  </details>
+  <details>
+    <summary>② クロスセクターの視点がある</summary>
+    <div class="detail-body">「鉄鉱石下落」だけでなく「→日本製鉄にはコスト改善だが、BHP持分を持つ商社にはマイナス」のように、1つのニュースの複数銘柄への波及を示す。これが#6クロスセクター分析の実践。</div>
+  </details>
+  <details>
+    <summary>③ FMのポートフォリオに紐づいたインプリケーション</summary>
+    <div class="detail-body">「FMが日本製鉄をOWしている」なら、鉄鉱石の動きは特に丁寧に解説。FMの保有銘柄を把握して、ポートフォリオ目線でのインパクトを優先的に伝える。</div>
+  </details>
+  <details>
+    <summary>④ 数字がある</summary>
+    <div class="detail-body">「鉄鉱石が下がった」ではなく「鉄鉱石が$5下落→日本製鉄のコスト改善約¥100億/四半期」と定量化。中級編#3の感応度分析が活きる。</div>
+  </details>
+</div>
+
+<div class="footnote">
+  素材セクター上級編 #2 / 6<br/>
+  次回：#3 投資メモの書き方
+</div>
+</body>
+</html>

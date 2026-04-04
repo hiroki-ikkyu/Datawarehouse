@@ -1,0 +1,913 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>素材セクター入門 #2 — 石油・エネルギー</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f5f5f7;
+    --card: #ffffff;
+    --text: #1d1d1f;
+    --sub: #6e6e73;
+    --accent: #2c2c2e;
+    --radius: 16px;
+    --shadow: 0 1px 3px rgba(0,0,0,0.04);
+    --shadow-lg: 0 4px 20px rgba(0,0,0,0.08);
+    --oil-dark: #1a1a2e;
+    --oil-gradient: linear-gradient(135deg, #1a1a2e 0%, #2d1b4e 50%, #4a1942 100%);
+    --upstream: #e8590c;
+    --midstream: #5c7cfa;
+    --downstream: #2b8a3e;
+    --lng: #0c8599;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    font-family: 'DM Sans','Noto Sans JP',sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.7;
+    padding: 24px 16px 60px;
+    max-width: 800px;
+    margin: 0 auto;
+  }
+
+  .header {
+    text-align: center;
+    margin-bottom: 40px;
+    padding: 32px 20px;
+    background: var(--oil-gradient);
+    border-radius: var(--radius);
+    color: #fff;
+    position: relative;
+    overflow: hidden;
+  }
+  .header::before {
+    content: '🛢';
+    position: absolute;
+    font-size: 120px;
+    opacity: 0.06;
+    top: -10px;
+    right: -10px;
+  }
+  .header .series-tag {
+    display: inline-block;
+    background: rgba(255,255,255,0.15);
+    padding: 4px 14px;
+    border-radius: 20px;
+    font-size: 12px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+  .header h1 { font-size: 28px; font-weight: 700; margin-bottom: 8px; }
+  .header p { font-size: 14px; opacity: 0.7; }
+
+  .section { margin-bottom: 32px; }
+  .section-title {
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .section-title .icon {
+    width: 28px; height: 28px; border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; flex-shrink: 0;
+  }
+
+  .card {
+    background: var(--card);
+    border-radius: var(--radius);
+    padding: 20px;
+    box-shadow: var(--shadow);
+    margin-bottom: 12px;
+  }
+  .card p { font-size: 14px; color: var(--sub); }
+  .card p strong { color: var(--text); }
+
+  /* Stream cards */
+  .stream-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  .stream-card {
+    background: var(--card);
+    border-radius: var(--radius);
+    padding: 20px;
+    box-shadow: var(--shadow);
+    border-top: 4px solid;
+    position: relative;
+  }
+  .stream-card.upstream { border-color: var(--upstream); }
+  .stream-card.midstream { border-color: var(--midstream); }
+  .stream-card.downstream { border-color: var(--downstream); }
+
+  .stream-card .stream-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+  .stream-badge {
+    padding: 4px 10px;
+    border-radius: 8px;
+    font-size: 11px;
+    font-weight: 700;
+    color: #fff;
+  }
+  .stream-badge.up { background: var(--upstream); }
+  .stream-badge.mid { background: var(--midstream); }
+  .stream-badge.down { background: var(--downstream); }
+
+  .stream-card h3 { font-size: 16px; font-weight: 700; }
+  .stream-card .stream-desc { font-size: 13px; color: var(--sub); margin-bottom: 12px; line-height: 1.8; }
+
+  .stream-metrics {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .metric-chip {
+    background: #f1f3f5;
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--accent);
+  }
+
+  /* Value chain horizontal */
+  .chain-container {
+    overflow-x: auto;
+    padding: 8px 0;
+  }
+  .chain {
+    display: flex;
+    align-items: stretch;
+    gap: 0;
+    min-width: 650px;
+  }
+  .chain-step {
+    flex: 1;
+    text-align: center;
+  }
+  .chain-box {
+    border-radius: 12px;
+    padding: 14px 10px;
+    box-shadow: var(--shadow);
+    min-height: 100px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    cursor: default;
+  }
+  .chain-box .emoji { font-size: 24px; margin-bottom: 4px; }
+  .chain-box .label { font-size: 12px; font-weight: 700; }
+  .chain-box .sub-label { font-size: 10px; color: var(--sub); margin-top: 2px; }
+
+  .chain-box.up-box { background: #fff4e6; border: 2px solid var(--upstream); }
+  .chain-box.mid-box { background: #edf2ff; border: 2px solid var(--midstream); }
+  .chain-box.down-box { background: #ebfbee; border: 2px solid var(--downstream); }
+
+  .chain-arrow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    flex-shrink: 0;
+    color: var(--sub);
+    font-size: 16px;
+  }
+
+  /* Benchmark box */
+  .benchmark-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 10px;
+  }
+  .bench-item {
+    background: var(--card);
+    border-radius: 12px;
+    padding: 16px;
+    box-shadow: var(--shadow);
+    text-align: center;
+  }
+  .bench-item .bench-name { font-weight: 700; font-size: 14px; margin-bottom: 4px; }
+  .bench-item .bench-region { font-size: 11px; color: var(--sub); margin-bottom: 8px; }
+  .bench-item .bench-note { font-size: 11px; color: var(--sub); line-height: 1.5; }
+
+  /* Profit drivers */
+  .driver-list { display: flex; flex-direction: column; gap: 10px; }
+  .driver {
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+    background: var(--card);
+    border-radius: 12px;
+    padding: 16px;
+    box-shadow: var(--shadow);
+  }
+  .driver-num {
+    width: 32px; height: 32px; border-radius: 50%;
+    background: var(--accent); color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; font-weight: 700; flex-shrink: 0;
+  }
+  .driver-content .driver-title { font-weight: 700; font-size: 14px; margin-bottom: 4px; }
+  .driver-content .driver-desc { font-size: 13px; color: var(--sub); }
+
+  /* Formula */
+  .formula-box {
+    background: var(--oil-gradient);
+    border-radius: var(--radius);
+    padding: 24px;
+    color: #fff;
+    text-align: center;
+    margin-bottom: 12px;
+  }
+  .formula-box .formula { font-size: 16px; font-weight: 700; margin-bottom: 8px; }
+  .formula-box .formula .var { color: #74c0fc; }
+  .formula-box .formula .op { color: #ffd43b; margin: 0 4px; }
+  .formula-box .note { font-size: 12px; opacity: 0.6; }
+  .formula-box + .formula-box { margin-top: 8px; }
+
+  /* LNG section */
+  .lng-card {
+    background: linear-gradient(135deg, #0c8599 0%, #1098ad 100%);
+    border-radius: var(--radius);
+    padding: 24px;
+    color: #fff;
+    margin-bottom: 12px;
+  }
+  .lng-card h3 { font-size: 17px; font-weight: 700; margin-bottom: 10px; }
+  .lng-card p { font-size: 13px; opacity: 0.85; line-height: 1.8; }
+
+  /* Comparison table */
+  .comp-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    background: var(--card);
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: var(--shadow);
+  }
+  .comp-table th {
+    text-align: left;
+    padding: 12px;
+    background: #f1f3f5;
+    font-weight: 600;
+    font-size: 12px;
+  }
+  .comp-table td {
+    padding: 10px 12px;
+    border-bottom: 1px solid #f1f3f5;
+    font-size: 12px;
+  }
+  .comp-table tr:last-child td { border-bottom: none; }
+
+  /* Risk */
+  .risk-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  .risk-item {
+    background: var(--card);
+    border-radius: 12px;
+    padding: 14px;
+    box-shadow: var(--shadow);
+    border-left: 4px solid;
+  }
+  .risk-item.high { border-color: #c92a2a; }
+  .risk-item.mid { border-color: #e8590c; }
+  .risk-item.low { border-color: #2b8a3e; }
+  .risk-item .risk-name { font-weight: 700; font-size: 13px; margin-bottom: 4px; }
+  .risk-item .risk-desc { font-size: 11px; color: var(--sub); }
+
+  /* KPI table */
+  .kpi-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+  .kpi-table th {
+    text-align: left;
+    padding: 10px 12px;
+    background: #f1f3f5;
+    font-weight: 600;
+  }
+  .kpi-table td {
+    padding: 10px 12px;
+    border-bottom: 1px solid #f1f3f5;
+  }
+  .kpi-table tr:last-child td { border-bottom: none; }
+  .kpi-table .kpi-name { font-weight: 600; }
+  .kpi-table .kpi-why { color: var(--sub); font-size: 12px; }
+
+  /* Expandable */
+  details {
+    background: var(--card);
+    border-radius: 12px;
+    padding: 16px;
+    box-shadow: var(--shadow);
+    margin-bottom: 10px;
+  }
+  details summary {
+    font-weight: 700;
+    font-size: 14px;
+    cursor: pointer;
+    list-style: none;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  details summary::after { content: '▸'; transition: transform 0.2s; }
+  details[open] summary::after { transform: rotate(90deg); }
+  details .detail-body {
+    margin-top: 12px;
+    font-size: 13px;
+    color: var(--sub);
+    line-height: 1.8;
+  }
+
+  /* Tabs */
+  .tab-bar {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 16px;
+    background: #e9ecef;
+    border-radius: 10px;
+    padding: 3px;
+  }
+  .tab-btn {
+    flex: 1;
+    padding: 8px 4px;
+    border: none;
+    background: transparent;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--sub);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .tab-btn.active {
+    background: var(--card);
+    color: var(--text);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  }
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+
+  .footnote {
+    margin-top: 40px;
+    text-align: center;
+    font-size: 12px;
+    color: var(--sub);
+  }
+
+  @media (max-width: 500px) {
+    .benchmark-grid { grid-template-columns: 1fr; }
+    .risk-grid { grid-template-columns: 1fr; }
+    .chain { min-width: 580px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="series-tag">素材セクター入門 #2</div>
+  <h1>石油・エネルギー（Oil & Energy）</h1>
+  <p>世界経済の血液 — 上流・中流・下流の三層構造</p>
+</div>
+
+<!-- 1. Overview -->
+<div class="section">
+  <div class="section-title">
+    <div class="icon" style="background:#e8f4fd;">📖</div>
+    石油・エネルギーセクターとは
+  </div>
+  <div class="card">
+    <p>
+      <strong>原油・天然ガス（LNG含む）</strong>の探鉱・生産から、輸送、精製、販売までを担う巨大産業。
+      世界のエネルギー供給の約<strong>55%</strong>を石油＋天然ガスが占める。
+      カバレッジでは<strong>ENEOS（5020）、出光興産（5019）、INPEX（1605）</strong>等が該当し、
+      ナフサ→石化の原料コスト、船舶燃料→海運コスト、発電用燃料→電力コストなど、
+      他の全サブセクターに波及する「コストの震源地」。
+    </p>
+  </div>
+</div>
+
+<!-- 2. Value Chain -->
+<div class="section">
+  <div class="section-title">
+    <div class="icon" style="background:#fff3bf;">🔗</div>
+    バリューチェーン（上流→中流→下流）
+  </div>
+  <div class="chain-container">
+    <div class="chain">
+      <div class="chain-step">
+        <div class="chain-box up-box">
+          <div class="emoji">🔍</div>
+          <div class="label">探鉱</div>
+          <div class="sub-label">Exploration</div>
+        </div>
+      </div>
+      <div class="chain-arrow">→</div>
+      <div class="chain-step">
+        <div class="chain-box up-box">
+          <div class="emoji">🛢</div>
+          <div class="label">開発・生産</div>
+          <div class="sub-label">Development & Production</div>
+        </div>
+      </div>
+      <div class="chain-arrow">→</div>
+      <div class="chain-step">
+        <div class="chain-box mid-box">
+          <div class="emoji">🚢</div>
+          <div class="label">輸送・貯蔵</div>
+          <div class="sub-label">Midstream</div>
+        </div>
+      </div>
+      <div class="chain-arrow">→</div>
+      <div class="chain-step">
+        <div class="chain-box down-box">
+          <div class="emoji">🏭</div>
+          <div class="label">精製</div>
+          <div class="sub-label">Refining</div>
+        </div>
+      </div>
+      <div class="chain-arrow">→</div>
+      <div class="chain-step">
+        <div class="chain-box down-box">
+          <div class="emoji">⛽</div>
+          <div class="label">販売</div>
+          <div class="sub-label">Marketing</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 3. Three streams detail -->
+<div class="section">
+  <div class="section-title">
+    <div class="icon" style="background:#ffe3e3;">🏗</div>
+    三層構造の詳細
+  </div>
+
+  <div class="tab-bar">
+    <button class="tab-btn active" onclick="switchTab('upstream')">上流 E&P</button>
+    <button class="tab-btn" onclick="switchTab('midstream')">中流</button>
+    <button class="tab-btn" onclick="switchTab('downstream')">下流 精製</button>
+    <button class="tab-btn" onclick="switchTab('lng')">LNG</button>
+  </div>
+
+  <!-- Upstream -->
+  <div class="tab-content active" id="tab-upstream">
+    <div class="stream-card upstream">
+      <div class="stream-header">
+        <span class="stream-badge up">UPSTREAM</span>
+        <h3>上流（E&P: Exploration & Production）</h3>
+      </div>
+      <div class="stream-desc">
+        油田・ガス田を<strong>探す→掘る→生産する</strong>セグメント。最もリスクが高く、最もリターンも大きい。
+        探鉱の成功率は約10-30%。1つの油田が見つかれば数十年のキャッシュフローを生むが、
+        ドライホール（空振り）なら数十億〜数百億円が消える。<br/><br/>
+        <strong>日本株では INPEX（1605）</strong>が純粋なE&P。豪州イクシスLNG、アブダビ油田が柱。
+        石油資源開発（1662）も上流専業。商社の資源権益（三井物産のLNG等）もここに分類。
+      </div>
+      <div class="stream-metrics">
+        <div class="metric-chip">原油価格に直結</div>
+        <div class="metric-chip">高いオペレーティングレバレッジ</div>
+        <div class="metric-chip">長期投資（10年超）</div>
+        <div class="metric-chip">政府ロイヤリティ</div>
+      </div>
+    </div>
+
+    <div class="formula-box" style="margin-top: 12px;">
+      <div class="formula">
+        <span class="var">E&P利益</span>
+        <span class="op">=</span>
+        <span class="var">（原油/ガス価格 − リフティングコスト）</span>
+        <span class="op">×</span>
+        <span class="var">生産量</span>
+        <span class="op">−</span>
+        <span class="var">探鉱費・DD&A</span>
+      </div>
+      <div class="note">リフティングコスト＝油田から原油を汲み上げるコスト。中東$5-10/bbl vs 深海$30-50/bbl</div>
+    </div>
+
+    <details>
+      <summary>生産コスト曲線（鉱業と同じ概念）</summary>
+      <div class="detail-body">
+        <strong>低コスト順：</strong><br/>
+        ① 中東陸上（$5-15/bbl）→ サウジ・UAE・クウェート<br/>
+        ② ロシア陸上（$15-25）<br/>
+        ③ 米国シェール（$35-55）→ ブレークイーブン大幅改善中<br/>
+        ④ 深海（$40-60）→ ブラジル・メキシコ湾・西アフリカ<br/>
+        ⑤ オイルサンド（$50-70）→ カナダ<br/><br/>
+        原油価格がコスト曲線のどこを切るかで、どの油田が生き残れるかが決まる。
+        $60/bbl以上ならほぼ全員黒字、$40以下なら高コスト油田が採算割れ。
+      </div>
+    </details>
+  </div>
+
+  <!-- Midstream -->
+  <div class="tab-content" id="tab-midstream">
+    <div class="stream-card midstream">
+      <div class="stream-header">
+        <span class="stream-badge mid">MIDSTREAM</span>
+        <h3>中流（輸送・貯蔵・トレーディング）</h3>
+      </div>
+      <div class="stream-desc">
+        原油・ガスを<strong>産地から消費地まで運ぶ</strong>インフラ。パイプライン、タンカー、貯蔵タンク、LNGターミナルが中核資産。
+        米国ではMLP（Master Limited Partnership）として独立上場が多いが、日本ではJERA等の発電・ガス会社が一部機能を担う。<br/><br/>
+        <strong>特徴：</strong>原油価格そのものよりも<strong>輸送量（スループット）</strong>に収益が連動。
+        長期契約ベースでキャッシュフローが安定。「通行料ビジネス」に近い。
+      </div>
+      <div class="stream-metrics">
+        <div class="metric-chip">安定CF（トール型）</div>
+        <div class="metric-chip">長期契約ベース</div>
+        <div class="metric-chip">インフラ資産</div>
+        <div class="metric-chip">規制リスク</div>
+      </div>
+    </div>
+
+    <details>
+      <summary>日本のカバレッジとの関連</summary>
+      <div class="detail-body">
+        日本に純粋なMidstream上場企業は少ないが、以下で関連：<br/><br/>
+        <strong>・タンカー（海運）：</strong>商船三井、日本郵船のタンカー部門。VLCC（超大型原油タンカー）運賃はOPEC政策で変動。<br/>
+        <strong>・LNG受入基地：</strong>JERA、東京ガス、大阪ガスが保有。受入契約条件（Take-or-Pay）が固定費化。<br/>
+        <strong>・石油備蓄：</strong>国家備蓄＋民間備蓄で約200日分。コスモエネルギー等が民間備蓄義務。
+      </div>
+    </details>
+  </div>
+
+  <!-- Downstream -->
+  <div class="tab-content" id="tab-downstream">
+    <div class="stream-card downstream">
+      <div class="stream-header">
+        <span class="stream-badge down">DOWNSTREAM</span>
+        <h3>下流（精製・販売）</h3>
+      </div>
+      <div class="stream-desc">
+        原油を<strong>蒸留・分解して石油製品に加工し、販売する</strong>セグメント。
+        日本のカバレッジの中心はここ。ENEOS（5020）、出光興産（5019）、コスモエネルギー（5021）。<br/><br/>
+        <strong>核心は「精製マージン」</strong>＝石油製品の販売価格 − 原油購入価格。
+        原油価格そのものよりも、このスプレッドが利益を決める。
+        原油が上がっても製品価格を転嫁できれば利益は減らない。
+      </div>
+      <div class="stream-metrics">
+        <div class="metric-chip">精製マージンが最重要</div>
+        <div class="metric-chip">在庫評価損益に注意</div>
+        <div class="metric-chip">設備稼働率</div>
+        <div class="metric-chip">構造的需要減</div>
+      </div>
+    </div>
+
+    <div class="formula-box" style="margin-top: 12px;">
+      <div class="formula">
+        <span class="var">精製利益</span>
+        <span class="op">=</span>
+        <span class="var">精製マージン</span>
+        <span class="op">×</span>
+        <span class="var">処理量</span>
+        <span class="op">±</span>
+        <span class="var">在庫評価影響</span>
+      </div>
+      <div class="note">在庫評価：原油価格上昇期は含み益（でも実力ではない）、下落期は評価損</div>
+    </div>
+
+    <details>
+      <summary>⚠ 在庫評価損益のワナ（超重要）</summary>
+      <div class="detail-body">
+        日本の元売は原油を<strong>約2ヶ月分</strong>在庫として保有。原油価格が四半期中に上がれば、
+        安く仕入れた在庫が高く売れるため見かけ上の利益が膨らむ（<strong>在庫評価益</strong>）。
+        逆に下がれば評価損。<br/><br/>
+        <strong>→ アナリストは必ず「在庫影響除きの実力ベース」で利益を見る。</strong><br/>
+        ENEOS等の決算では「在庫影響を除く営業利益」を別途開示している。
+        これを見ないと、原油上昇期に「好決算」と誤認してしまう。
+      </div>
+    </details>
+
+    <details>
+      <summary>日本の石油精製の構造問題</summary>
+      <div class="detail-body">
+        <strong>需要減：</strong>人口減・EV普及・省エネでガソリン需要は年率1-2%減少。ピーク比で3割減。<br/>
+        <strong>能力過剰：</strong>精製能力の削減（トッパー廃棄）が進むがまだ過剰。稼働率80%台。<br/>
+        <strong>再編：</strong>JX＋東燃→ENEOS、出光＋昭和シェル統合。3社体制に集約済み。<br/>
+        <strong>転換：</strong>各社とも再エネ・水素・SAF・EV充電へ投資を加速。脱石油依存が戦略課題。
+      </div>
+    </details>
+  </div>
+
+  <!-- LNG -->
+  <div class="tab-content" id="tab-lng">
+    <div class="lng-card">
+      <h3>🧊 LNG（液化天然ガス）— 第3のエネルギー</h3>
+      <p>
+        天然ガスを−162℃に冷却して液化。体積が1/600に。パイプラインのないアジアでは<strong>船で運ぶLNG</strong>が主力。
+        日本は世界最大級のLNG輸入国（年間約7,000万トン）。石炭→LNGへの燃料転換は脱炭素の「橋渡し」として需要増。
+      </p>
+    </div>
+
+    <details>
+      <summary>LNGの価格形成メカニズム</summary>
+      <div class="detail-body">
+        <strong>3つの価格体系が併存：</strong><br/><br/>
+        ① <strong>JKM（Japan Korea Marker）</strong>— アジアスポット価格。Plattsが算出。近年の主流指標。<br/>
+        ② <strong>原油リンク契約</strong>— 伝統的な長期契約は原油価格×係数（0.12〜0.15程度）で決まる。INPEX等。<br/>
+        ③ <strong>Henry Hub連動</strong>— 米国産LNGは米国ガス価格＋液化費＋輸送費。構造的に安い。<br/><br/>
+        2022年のウクライナ危機でスポット価格が$80/MMBtu超まで急騰。平常時は$10-15程度。
+        長期契約 vs スポットの比率がリスク管理の鍵。
+      </div>
+    </details>
+
+    <details>
+      <summary>日本株カバレッジとLNG</summary>
+      <div class="detail-body">
+        <strong>INPEX（1605）：</strong>イクシスLNG（豪州）の共同オペレーター。LNG生産が利益の柱。<br/>
+        <strong>商社：</strong>三菱商事（モザンビーク）、三井物産（サハリン、カメロン）がLNG権益保有。<br/>
+        <strong>電力・ガス：</strong>東京ガス、大阪ガスが長期LNG調達契約を保有。Take-or-Pay義務。<br/>
+        <strong>海運：</strong>商船三井、日本郵船がLNG船を運航。長期契約で安定収益。<br/><br/>
+        → LNG価格の変動は、ガスセクターだけでなく<strong>電力料金→製造業全体のコスト</strong>に波及。
+      </div>
+    </details>
+  </div>
+</div>
+
+<!-- 4. Crude oil benchmarks -->
+<div class="section">
+  <div class="section-title">
+    <div class="icon" style="background:#fff3bf;">📈</div>
+    原油価格の3大指標
+  </div>
+  <div class="benchmark-grid">
+    <div class="bench-item">
+      <div class="bench-name">🇺🇸 WTI</div>
+      <div class="bench-region">West Texas Intermediate</div>
+      <div class="bench-note">NYMEX上場。米国の軽質スイート原油。シェール革命後は米国産の指標。世界の金融市場で最も取引量が多い。</div>
+    </div>
+    <div class="bench-item">
+      <div class="bench-name">🇬🇧 Brent</div>
+      <div class="bench-region">North Sea Brent</div>
+      <div class="bench-note">ICE上場。国際取引の標準。世界の原油取引の約2/3がブレント連動。アジア向け中東原油もブレント基準に移行中。</div>
+    </div>
+    <div class="bench-item">
+      <div class="bench-name">🇦🇪 Dubai</div>
+      <div class="bench-region">Dubai / Oman</div>
+      <div class="bench-note">Platts算出。アジア向け中東産原油の基準。日本の原油輸入価格はドバイ原油が基本。中質・サワー。</div>
+    </div>
+  </div>
+  <div class="card" style="margin-top: 12px;">
+    <p>
+      <strong>WTI ≈ Brent − $3〜5</strong>（WTIは内陸原油のため若干安い）。<br/>
+      <strong>日本のアナリストはドバイ原油</strong>を主にウォッチ。ENEOS等の決算前提もドバイ。
+      ただし金融市場のセンチメント指標としてはWTI/Brentも重要。
+    </p>
+  </div>
+</div>
+
+<!-- 5. OPEC -->
+<div class="section">
+  <div class="section-title">
+    <div class="icon" style="background:#ffe3e3;">🏛</div>
+    OPECとOPEC+（価格の支配者）
+  </div>
+  <div class="card">
+    <p>
+      <strong>OPEC</strong>（石油輸出国機構）＝サウジ主導の13カ国。世界の原油供給の約<strong>35%</strong>を支配。<br/>
+      <strong>OPEC+</strong>＝OPEC＋ロシア等の非OPEC産油国。合計で世界供給の約<strong>55%</strong>。<br/><br/>
+      <strong>生産枠（クォータ）</strong>を設定し、価格を調整。減産すれば価格上昇、増産すれば下落。
+      毎月の<strong>JMMC（合同閣僚監視委員会）</strong>の声明がマーケット材料。<br/><br/>
+      サウジの<strong>財政均衡油価</strong>は約$80-90/bbl。これを下回ると減産圧力、上回ると増産余地。
+      → OPECの政策スタンスは、カバレッジ全体の原料コストに影響するため常にウォッチが必要。
+    </p>
+  </div>
+</div>
+
+<!-- 6. KPIs -->
+<div class="section">
+  <div class="section-title">
+    <div class="icon" style="background:#e8f4fd;">📊</div>
+    セグメント別 注目KPI
+  </div>
+  <div class="card" style="padding: 0; overflow: hidden;">
+    <table class="kpi-table">
+      <thead>
+        <tr><th>KPI</th><th>対象</th><th>なぜ重要か</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="kpi-name">リフティングコスト</td>
+          <td>上流</td>
+          <td class="kpi-why">$/bbl。原油を汲み上げるコスト。低いほど価格下落耐性。</td>
+        </tr>
+        <tr>
+          <td class="kpi-name">埋蔵量置換率（RRR）</td>
+          <td>上流</td>
+          <td class="kpi-why">生産分を新規発見で補えているか。100%超が理想。</td>
+        </tr>
+        <tr>
+          <td class="kpi-name">精製マージン</td>
+          <td>下流</td>
+          <td class="kpi-why">製品価格−原油価格。シンガポール複合精製マージンが指標。</td>
+        </tr>
+        <tr>
+          <td class="kpi-name">在庫影響除き営業利益</td>
+          <td>下流</td>
+          <td class="kpi-why">日本元売の「実力ベース」利益。在庫評価を除く。</td>
+        </tr>
+        <tr>
+          <td class="kpi-name">トッパー稼働率</td>
+          <td>下流</td>
+          <td class="kpi-why">常圧蒸留装置の稼働率。日本平均80%台。高いほど効率的。</td>
+        </tr>
+        <tr>
+          <td class="kpi-name">ネルソン指数</td>
+          <td>下流</td>
+          <td class="kpi-why">製油所の「複雑度」。高い＝重質油を軽質化できる＝付加価値高い。</td>
+        </tr>
+        <tr>
+          <td class="kpi-name">DD&A / boe</td>
+          <td>上流</td>
+          <td class="kpi-why">探鉱・開発投資の償却費を1バレル当たりで見る。資本効率の指標。</td>
+        </tr>
+        <tr>
+          <td class="kpi-name">FCF / 株主還元率</td>
+          <td>全体</td>
+          <td class="kpi-why">高油価→高FCF。還元（配当＋自社株買い）の持続性を見る。</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- 7. Risks -->
+<div class="section">
+  <div class="section-title">
+    <div class="icon" style="background:#ffe3e3;">⚠️</div>
+    主なリスク要因
+  </div>
+  <div class="risk-grid">
+    <div class="risk-item high">
+      <div class="risk-name">原油価格変動</div>
+      <div class="risk-desc">最大のリスク。$10/bblの変動でINPEXの年間利益が数百億円変動。OPEC政策・地政学・需給で乱高下。</div>
+    </div>
+    <div class="risk-item high">
+      <div class="risk-name">地政学リスク</div>
+      <div class="risk-desc">中東紛争、ロシア制裁、ホルムズ海峡封鎖リスク。日本の原油輸入の約9割が中東依存。</div>
+    </div>
+    <div class="risk-item mid">
+      <div class="risk-name">エネルギー転換</div>
+      <div class="risk-desc">EV普及→ガソリン需要減。再エネ拡大→石油火力縮小。長期的な需要ピーク論。座礁資産リスク。</div>
+    </div>
+    <div class="risk-item mid">
+      <div class="risk-name">為替（USD/JPY）</div>
+      <div class="risk-desc">原油はドル建て。円安→輸入コスト増→元売は価格転嫁可能だが、タイムラグで在庫影響。</div>
+    </div>
+    <div class="risk-item mid">
+      <div class="risk-name">規制・炭素税</div>
+      <div class="risk-desc">排出権取引・炭素税の導入。GX推進法下で日本も2028年から化石燃料賦課金の可能性。</div>
+    </div>
+    <div class="risk-item low">
+      <div class="risk-name">精製事故・定期修繕</div>
+      <div class="risk-desc">製油所の火災・設備トラブル。SDM（定期修繕）時期に供給タイトに。マージン改善要因にもなる。</div>
+    </div>
+  </div>
+</div>
+
+<!-- 8. Global majors -->
+<div class="section">
+  <div class="section-title">
+    <div class="icon" style="background:#e8f4fd;">🌍</div>
+    グローバル・エネルギーメジャー（参考）
+  </div>
+  <div class="card">
+    <p>
+      <strong>ExxonMobil</strong>（米）— 上流〜下流統合。時価総額最大級。ガイアナ深海が成長ドライバー。<br/>
+      <strong>Chevron</strong>（米）— パーミアン盆地＋豪州LNG。Hess買収で規模拡大。<br/>
+      <strong>Shell</strong>（英/蘭）— LNGトレーディング世界最大。統合型＋新エネ投資。<br/>
+      <strong>TotalEnergies</strong>（仏）— LNG＋再エネ統合。欧州メジャーで最も新エネ積極的。<br/>
+      <strong>bp</strong>（英）— 上流回帰に転換。一時は再エネ重視だったが方針修正。<br/>
+      <strong>Saudi Aramco</strong>（サウジ）— 世界最大の石油会社。リフティングコスト$3/bbl。国家と一体。
+    </p>
+    <p style="margin-top: 10px;">
+      → メジャーの設備投資動向＝将来の供給見通し。Capexガイダンスは必ずチェック。
+    </p>
+  </div>
+</div>
+
+<!-- 9. Japan coverage mapping -->
+<div class="section">
+  <div class="section-title">
+    <div class="icon" style="background:#f3e8ff;">🇯🇵</div>
+    日本株カバレッジとの対応表
+  </div>
+  <div class="card" style="padding: 0; overflow: hidden;">
+    <table class="comp-table">
+      <thead>
+        <tr><th>銘柄</th><th>ポジション</th><th>注目ポイント</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>INPEX（1605）</strong></td>
+          <td>純粋E&P（上流）</td>
+          <td>イクシスLNG、アブダビ。油価感応度が最大。Net Zero 2050宣言。</td>
+        </tr>
+        <tr>
+          <td><strong>ENEOS HD（5020）</strong></td>
+          <td>下流＋金属＋新エネ</td>
+          <td>精製マージン・在庫影響・銅（JX金属）・水素。国内シェア5割。</td>
+        </tr>
+        <tr>
+          <td><strong>出光興産（5019）</strong></td>
+          <td>下流＋機能材</td>
+          <td>全固体電池材料・有機EL材料への転換。昭和シェル統合完了。</td>
+        </tr>
+        <tr>
+          <td><strong>コスモエネルギー（5021）</strong></td>
+          <td>下流＋風力</td>
+          <td>洋上風力に注力。旧村上ファンド系が株主。株主還元圧力。</td>
+        </tr>
+        <tr>
+          <td><strong>石油資源開発（1662）</strong></td>
+          <td>上流（国内＋海外）</td>
+          <td>国内天然ガス生産。規模は小さいがINPEXとの比較対象。</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- 10. Cross sector -->
+<div class="section">
+  <div class="section-title">
+    <div class="icon" style="background:#d3f9d8;">🔄</div>
+    他セクターへの波及（クロスセクター分析）
+  </div>
+  <details>
+    <summary>鉄鋼 — 原料炭・コークス価格</summary>
+    <div class="detail-body">
+      鉄鋼の製造にはコークス（原料炭由来）が不可欠。エネルギーコスト全般も原油・LNG価格に連動。
+      原油高→電炉の電力コスト上昇→高炉との相対競争力が変化。
+    </div>
+  </details>
+  <details>
+    <summary>化学 — ナフサ価格（最重要）</summary>
+    <div class="detail-body">
+      日本の石化はナフサクラッカーが主流。<strong>ナフサ価格≒原油価格×係数（0.065程度）</strong>で連動。
+      ナフサ価格が上がれば石化製品の原料コスト増。ただし製品市況にも転嫁されるため、
+      見るべきは「石化スプレッド」（エチレン価格−ナフサ価格）。
+    </div>
+  </details>
+  <details>
+    <summary>海運 — 燃料コスト＋タンカー需給</summary>
+    <div class="detail-body">
+      船舶燃料（VLSFO/MGO）は原油連動。燃料費は海運コストの3-4割を占める。
+      一方でタンカー（原油輸送）はOPECの増減産で荷動きが変動。
+      コンタンゴ（先物＞現物）なら洋上貯蔵需要でタンカー需要増。
+    </div>
+  </details>
+  <details>
+    <summary>紙・パッケージング — 燃料・電力コスト</summary>
+    <div class="detail-body">
+      製紙工場は大量の蒸気を使う。重油・石炭・黒液（自家発）の価格が製造コストに直結。
+      LNG転換を進める工場も増加中。
+    </div>
+  </details>
+  <details>
+    <summary>ガラス・セメント — 熱エネルギー</summary>
+    <div class="detail-body">
+      セメントのキルン（焼成窯）は1,450℃で稼働。石炭・石油コークス・廃棄物が燃料。
+      ガラス溶融炉もLNG/重油が主燃料。エネルギーコスト比率が非常に高い。
+    </div>
+  </details>
+</div>
+
+<div class="footnote">
+  素材セクター入門シリーズ #2 / 8<br/>
+  次回：#3 鉄鋼（Steel）
+</div>
+
+<script>
+function switchTab(id) {
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + id).classList.add('active');
+  event.target.classList.add('active');
+}
+</script>
+</body>
+</html>

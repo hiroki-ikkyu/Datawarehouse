@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>素材セクター上級編 #1 — 独自モデル構築</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#f5f5f7;--card:#fff;--text:#1d1d1f;--sub:#6e6e73;--radius:16px;--shadow:0 1px 3px rgba(0,0,0,0.04);--gradient:linear-gradient(135deg,#0c0c1d 0%,#1a1a3e 50%,#2d1b69 100%);--red:#dc2626;--green:#059669;--blue:#3b82f6;--purple:#7c3aed;--gold:#f59e0b;--orange:#e8590c;}
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{font-family:'DM Sans','Noto Sans JP',sans-serif;background:var(--bg);color:var(--text);line-height:1.7;padding:24px 16px 60px;max-width:800px;margin:0 auto;}
+  .header{text-align:center;margin-bottom:40px;padding:32px 20px;background:var(--gradient);border-radius:var(--radius);color:#fff;position:relative;overflow:hidden;}
+  .header::before{content:'🏗';position:absolute;font-size:120px;opacity:0.06;top:-10px;right:-10px;}
+  .header .series-tag{display:inline-block;background:rgba(255,255,255,0.15);padding:4px 14px;border-radius:20px;font-size:12px;letter-spacing:1px;text-transform:uppercase;margin-bottom:12px;}
+  .header h1{font-size:24px;font-weight:700;margin-bottom:8px;}
+  .header p{font-size:14px;opacity:0.7;}
+  .section{margin-bottom:36px;}
+  .section-title{font-size:18px;font-weight:700;margin-bottom:16px;display:flex;align-items:center;gap:8px;}
+  .section-title .icon{width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;}
+  .card{background:var(--card);border-radius:var(--radius);padding:20px;box-shadow:var(--shadow);margin-bottom:12px;}
+  .card p{font-size:14px;color:var(--sub);}
+  .card p strong{color:var(--text);}
+
+  /* Sheet architecture */
+  .sheet-grid{display:flex;flex-direction:column;gap:8px;margin-bottom:16px;}
+  .sheet-row{display:flex;gap:8px;align-items:stretch;}
+  .sheet-tab{border-radius:10px;padding:12px 16px;font-size:12px;font-weight:600;color:#fff;flex:1;position:relative;}
+  .sheet-tab .sheet-name{font-size:14px;font-weight:700;margin-bottom:2px;}
+  .sheet-tab .sheet-desc{font-size:10px;opacity:0.8;line-height:1.4;}
+  .sheet-tab.input{background:var(--blue);}
+  .sheet-tab.calc{background:var(--purple);}
+  .sheet-tab.output{background:var(--green);}
+  .sheet-tab.data{background:var(--gold);}
+  .sheet-tab.scenario{background:var(--red);}
+  .sheet-connector{text-align:center;color:var(--sub);font-size:12px;padding:2px 0;}
+
+  /* Model component */
+  .model-block{background:var(--card);border-radius:var(--radius);padding:20px;box-shadow:var(--shadow);border-left:4px solid;margin-bottom:12px;}
+  .model-block h3{font-size:15px;font-weight:700;margin-bottom:8px;}
+  .model-block .model-desc{font-size:13px;color:var(--sub);line-height:1.8;margin-bottom:10px;}
+  .model-items{font-size:12px;color:var(--sub);line-height:2;}
+  .model-items strong{color:var(--text);}
+
+  /* Excel formula box */
+  .excel-box{background:#1e293b;border-radius:12px;padding:16px;margin-bottom:12px;font-family:'Courier New',monospace;color:#4ade80;font-size:11px;line-height:2;overflow-x:auto;}
+  .excel-box .excel-title{color:#86efac;font-weight:700;font-size:13px;margin-bottom:8px;font-family:'DM Sans','Noto Sans JP',sans-serif;}
+  .excel-comment{color:#64748b;}
+  .excel-func{color:#fbbf24;}
+  .excel-ref{color:#60a5fa;}
+
+  .tip-box{background:#fffbeb;border:1px solid #fcd34d;border-radius:12px;padding:16px;margin-bottom:12px;}
+  .tip-box .tip-title{font-weight:700;font-size:13px;color:#92400e;margin-bottom:6px;}
+  .tip-box .tip-body{font-size:12px;color:#78350f;line-height:1.7;}
+  .warn-box{background:#fef2f2;border:1px solid #fca5a5;border-radius:12px;padding:16px;margin-bottom:12px;}
+  .warn-box .warn-title{font-weight:700;font-size:13px;color:#991b1b;margin-bottom:6px;}
+  .warn-box .warn-body{font-size:12px;color:#7f1d1d;line-height:1.7;}
+
+  .checklist{background:var(--card);border-radius:var(--radius);padding:20px;box-shadow:var(--shadow);margin-bottom:12px;}
+  .checklist-title{font-weight:700;font-size:15px;margin-bottom:12px;}
+  .check-item{display:flex;gap:10px;padding:8px 0;border-bottom:1px solid #f1f3f5;font-size:13px;align-items:flex-start;}
+  .check-item:last-child{border-bottom:none;}
+  .check-num{width:24px;height:24px;border-radius:50%;color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;}
+  .check-text{color:var(--sub);line-height:1.6;}
+  .check-text strong{color:var(--text);}
+
+  details{background:var(--card);border-radius:12px;padding:16px;box-shadow:var(--shadow);margin-bottom:10px;}
+  details summary{font-weight:700;font-size:14px;cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center;}
+  details summary::after{content:'▸';transition:transform 0.2s;}
+  details[open] summary::after{transform:rotate(90deg);}
+  details .detail-body{margin-top:12px;font-size:13px;color:var(--sub);line-height:1.8;}
+  .footnote{margin-top:40px;text-align:center;font-size:12px;color:var(--sub);}
+  @media(max-width:520px){.sheet-row{flex-direction:column;}}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="series-tag">素材セクター上級編 #1</div>
+  <h1>独自モデル構築</h1>
+  <p>シナリオスイッチ付き3Statementモデル＋NAVモデルの設計思想</p>
+</div>
+
+<!-- 1. Philosophy -->
+<div class="section">
+  <div class="section-title"><div class="icon" style="background:#ede9fe;">📖</div>モデル設計の哲学</div>
+  <div class="card">
+    <p>
+      素材セクターのモデルは「精緻さ」より<strong>「柔軟性」</strong>が命。
+      コモディティ価格が$10動けば利益が数百億変わる世界で、
+      小数点以下の精度を追うより<strong>「前提を変えたら結果がどう変わるか」を即座に見れる構造</strong>が重要。<br/><br/>
+      <strong>3つの設計原則：</strong><br/>
+      ① <strong>Input-Calc-Output分離：</strong>前提（Input）と計算（Calc）と結果（Output）を明確に分ける<br/>
+      ② <strong>シナリオスイッチ：</strong>Bull/Base/Bearの3シナリオをワンクリックで切替え<br/>
+      ③ <strong>感応度の可視化：</strong>コモディティ$10変動でEPSが何円動くかをモデル構造に組み込む
+    </p>
+  </div>
+</div>
+
+<!-- 2. Sheet Architecture -->
+<div class="section">
+  <div class="section-title"><div class="icon" style="background:#dbeafe;">📋</div>シートアーキテクチャ（推奨構成）</div>
+
+  <div class="sheet-grid">
+    <div class="sheet-row">
+      <div class="sheet-tab scenario">
+        <div class="sheet-name">① Scenario</div>
+        <div class="sheet-desc">シナリオスイッチ。Bull/Base/Bear選択。全モデルの起点</div>
+      </div>
+      <div class="sheet-tab input">
+        <div class="sheet-name">② Assumptions</div>
+        <div class="sheet-desc">コモディティ価格/為替/生産量/値上げ率の前提</div>
+      </div>
+    </div>
+    <div class="sheet-connector">↓ 前提が全シートに連動</div>
+    <div class="sheet-row">
+      <div class="sheet-tab calc">
+        <div class="sheet-name">③ Revenue</div>
+        <div class="sheet-desc">セグメント別売上。数量×単価。銅パススルー除き</div>
+      </div>
+      <div class="sheet-tab calc">
+        <div class="sheet-name">④ Cost</div>
+        <div class="sheet-desc">原料コスト（鉄鉱石×1.6等）。エネルギー。固定費</div>
+      </div>
+    </div>
+    <div class="sheet-connector">↓</div>
+    <div class="sheet-row">
+      <div class="sheet-tab calc">
+        <div class="sheet-name">⑤ PL</div>
+        <div class="sheet-desc">損益計算書。在庫影響の分離行を入れる</div>
+      </div>
+      <div class="sheet-tab calc">
+        <div class="sheet-name">⑥ BS</div>
+        <div class="sheet-desc">貸借対照表。運転資本（在庫/売掛/買掛）を精緻に</div>
+      </div>
+      <div class="sheet-tab calc">
+        <div class="sheet-name">⑦ CF</div>
+        <div class="sheet-desc">キャッシュフロー計算書。FCFが配当/自社株買いの原資</div>
+      </div>
+    </div>
+    <div class="sheet-connector">↓</div>
+    <div class="sheet-row">
+      <div class="sheet-tab output">
+        <div class="sheet-name">⑧ Valuation</div>
+        <div class="sheet-desc">EV/EBITDA、ミッドサイクルPE、SOTP、感応度テーブル</div>
+      </div>
+      <div class="sheet-tab output">
+        <div class="sheet-name">⑨ Summary</div>
+        <div class="sheet-desc">1ページダッシュボード。KPI/チャート/TP/Rating</div>
+      </div>
+    </div>
+    <div class="sheet-connector">+ 補助シート</div>
+    <div class="sheet-row">
+      <div class="sheet-tab data">
+        <div class="sheet-name">⑩ Data</div>
+        <div class="sheet-desc">Bloomberg BDH/BDP取得。コモディティ時系列。為替</div>
+      </div>
+      <div class="sheet-tab data">
+        <div class="sheet-name">⑪ Comps</div>
+        <div class="sheet-desc">Peer比較テーブル。EV/EBITDA、PBR等の横比較</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="tip-box">
+    <div class="tip-title">💡 色分けルール（モデリングの業界標準）</div>
+    <div class="tip-body">
+      <strong>青字：</strong>手入力（ハードコード）。前提条件、過去実績<br/>
+      <strong>黒字：</strong>数式（他セルを参照）。計算結果<br/>
+      <strong>緑字：</strong>他シートからのリンク<br/>
+      <strong>赤字：</strong>要確認/エラーチェック<br/><br/>
+      この色分けを守るだけで、どこが前提（変えていいところ）でどこが計算（触ってはいけないところ）か一目でわかる。
+    </div>
+  </div>
+</div>
+
+<!-- 3. Scenario Switch -->
+<div class="section">
+  <div class="section-title"><div class="icon" style="background:#fee2e2;">🔄</div>シナリオスイッチの実装</div>
+
+  <div class="card">
+    <p>
+      <strong>最も重要な機能。</strong>Scenarioシートにドロップダウン（1=Bull, 2=Base, 3=Bear）を1つ置き、
+      Assumptionsシートの全前提がこのスイッチで切り替わるようにする。
+      FMに「ベアケースならEPSはいくら？」と聞かれたら5秒で答えられる。
+    </p>
+  </div>
+
+  <div class="excel-box">
+    <div class="excel-title">📝 Scenarioシートの構造</div>
+    <span class="excel-comment">' --- セル B1: シナリオ選択（ドロップダウン: 1, 2, 3）---</span><br/>
+    <span class="excel-comment">' --- 前提テーブル ---</span><br/>
+    <span class="excel-ref">       </span>  <span class="excel-func">Bull(1)</span>  <span class="excel-func">Base(2)</span>  <span class="excel-func">Bear(3)</span>  <span class="excel-func">→ Active</span><br/>
+    鉄鉱石  <span class="excel-ref">$120</span>     <span class="excel-ref">$100</span>     <span class="excel-ref">$75</span>      <span class="excel-func">=INDEX(B3:D3,$B$1)</span><br/>
+    原料炭  <span class="excel-ref">$280</span>     <span class="excel-ref">$230</span>     <span class="excel-ref">$180</span>     <span class="excel-func">=INDEX(B4:D4,$B$1)</span><br/>
+    LME銅  <span class="excel-ref">$10,500</span>  <span class="excel-ref">$9,000</span>  <span class="excel-ref">$7,500</span>  <span class="excel-func">=INDEX(B5:D5,$B$1)</span><br/>
+    原油    <span class="excel-ref">$95</span>      <span class="excel-ref">$80</span>     <span class="excel-ref">$60</span>      <span class="excel-func">=INDEX(B6:D6,$B$1)</span><br/>
+    USD/JPY <span class="excel-ref">¥160</span>     <span class="excel-ref">¥150</span>    <span class="excel-ref">¥135</span>    <span class="excel-func">=INDEX(B7:D7,$B$1)</span><br/><br/>
+    <span class="excel-comment">' Active列をAssumptionsシートが参照 → 全モデルに波及</span>
+  </div>
+
+  <div class="excel-box">
+    <div class="excel-title">📝 Assumptions → Costシートへの連携例</div>
+    <span class="excel-comment">' --- Costシート: 鉄鉱石コスト計算 ---</span><br/>
+    粗鋼生産量(万t)     <span class="excel-func">=Assumptions!B10</span> <span class="excel-comment">' 例: 4,000</span><br/>
+    鉄鉱石所要係数       <span class="excel-ref">1.60</span> <span class="excel-comment">' ハードコード</span><br/>
+    鉄鉱石使用量(万t)   <span class="excel-func">=B2*B3</span> <span class="excel-comment">' 6,400</span><br/>
+    鉄鉱石単価($/t)     <span class="excel-func">=Scenario!E3</span> <span class="excel-comment">' Activeシナリオの値</span><br/>
+    為替(円/$)           <span class="excel-func">=Scenario!E7</span><br/>
+    鉄鉱石コスト(億円)  <span class="excel-func">=B4*B5*B6/10000</span> <span class="excel-comment">' 自動計算</span>
+  </div>
+</div>
+
+<!-- 4. Materials-specific adjustments -->
+<div class="section">
+  <div class="section-title"><div class="icon" style="background:#d1fae5;">⚙️</div>素材セクター特有のモデル調整</div>
+
+  <div class="model-block" style="border-color:var(--red);">
+    <h3>① 在庫影響の分離行</h3>
+    <div class="model-desc">
+      PLシートの営業利益の下に「在庫評価影響」を独立行として設ける。
+      報告ベース営業利益 − 在庫影響 ＝ 実力ベース営業利益を自動計算。
+    </div>
+    <div class="model-items">
+      <strong>推定ロジック：</strong>（期末在庫数量 × 期末単価）−（期首在庫数量 × 期首単価）で概算。
+      元売は原油在庫約2ヶ月分、非鉄は地金在庫1-2ヶ月分を前提に計算。
+    </div>
+  </div>
+
+  <div class="model-block" style="border-color:var(--blue);">
+    <h3>② セグメント別PL</h3>
+    <div class="model-desc">
+      全社PLとは別に、セグメント別のPLを構築。各セグメントに異なるドライバーを紐付ける。
+    </div>
+    <div class="model-items">
+      <strong>例（ENEOS）：</strong><br/>
+      ・エネルギーセグメント → 精製マージン × 処理量 ± 在庫影響<br/>
+      ・石油開発セグメント → 原油価格 × 生産量 − リフティングコスト<br/>
+      ・金属セグメント → LME銅 × TC/RC + 副産物<br/>
+      → 各セグメントの合計 ≒ 全社営業利益（消去調整あり）
+    </div>
+  </div>
+
+  <div class="model-block" style="border-color:var(--purple);">
+    <h3>③ 紐付き/店売りのラグモデル</h3>
+    <div class="model-desc">
+      鉄鋼メーカーの売上は紐付き（四半期遅れ）と店売り（即時反映）の加重平均。
+      原料コストも仕入時期ラグを考慮。
+    </div>
+    <div class="model-items">
+      <strong>簡易実装：</strong>「当四半期の鋼材単価 ＝ 紐付き比率×前四半期価格 + 店売り比率×当四半期価格」<br/>
+      「当四半期の原料コスト ＝ 前四半期の平均鉄鉱石価格 × 1.6（1-2ヶ月ラグ）」
+    </div>
+  </div>
+
+  <div class="model-block" style="border-color:var(--gold);">
+    <h3>④ 感応度テーブルの自動生成</h3>
+    <div class="model-desc">
+      Excelのデータテーブル機能（What-If分析）を使って、コモディティ価格×為替のマトリクスで
+      EPSがどう変わるかを自動計算。
+    </div>
+    <div class="model-items">
+      <strong>実装：</strong>データ→What-If分析→データテーブル。行入力セル＝鉄鉱石価格、列入力セル＝USD/JPY。
+      結果セル＝EPS。これで「鉄鉱石$80-120 × USD/JPY 135-160」の全組み合わせのEPSが一覧化。
+    </div>
+  </div>
+
+  <div class="model-block" style="border-color:var(--green);">
+    <h3>⑤ FCF→株主還元の連動</h3>
+    <div class="model-desc">
+      素材セクターはFCFベースの還元（配当＋自社株買い）がカタリスト。
+      FCFから配当性向/総還元性向を適用して配当予想を出す。
+    </div>
+    <div class="model-items">
+      <strong>ロジック：</strong>FCF ＝ 営業CF − Capex。配当 ＝ EPS × 配当性向。
+      自社株買い ＝ 総還元額 − 配当。配当利回り ＝ DPS / 株価。
+      素材各社はコンテナバブル後の余剰CFで大型還元→配当利回りが投資判断のカタリストになりやすい。
+    </div>
+  </div>
+</div>
+
+<!-- 5. Model types by company -->
+<div class="section">
+  <div class="section-title"><div class="icon" style="background:#fef3c7;">🏢</div>銘柄別・推奨モデルタイプ</div>
+
+  <div class="checklist">
+    <div class="checklist-title">どの銘柄にどのモデルを作るか</div>
+    <div class="check-item"><div class="check-num" style="background:var(--blue);">1</div><div class="check-text"><strong>日本製鉄/JFE：</strong>セグメント別PL＋スプレッドモデル。鉄鉱石×1.6＋原料炭×0.5のコスト構造。紐付きラグ。単価×数量の分解。</div></div>
+    <div class="check-item"><div class="check-num" style="background:var(--purple);">2</div><div class="check-text"><strong>INPEX：</strong>NAVモデル（各権益のDCF合算）＋簡易PL。油価×生産量。イクシスLNG/アブダビを個別にDCF。</div></div>
+    <div class="check-item"><div class="check-num" style="background:var(--green);">3</div><div class="check-text"><strong>住友鉱山：</strong>資源/製錬/材料の3セグメント。資源＝LME×生産量−C1コスト。製錬＝TC/RC＋副産物。金/銅/ニッケル別に分解。</div></div>
+    <div class="check-item"><div class="check-num" style="background:var(--red);">4</div><div class="check-text"><strong>ENEOS：</strong>SOTPモデル。エネルギー（精製マージン×処理量±在庫影響）＋E&P（油価連動）＋金属（JX金属の銅）。在庫影響の分離が最重要。</div></div>
+    <div class="check-item"><div class="check-num" style="background:var(--gold);">5</div><div class="check-text"><strong>フジクラ：</strong>セグメント別売上成長率モデル。光接続＝DC Capex連動。ハイパースケーラーCapex→光接続売上の回帰分析。利益率はミックス改善でトレンド推定。</div></div>
+    <div class="check-item"><div class="check-num" style="background:var(--orange);">6</div><div class="check-text"><strong>商船三井：</strong>船種別モデル。ドライバルク（BDI連動）＋タンカー（WS連動）＋LNG（長期契約で安定）＋ONE持分法＋自動車船。長期契約比率で安定CFを分離。</div></div>
+  </div>
+</div>
+
+<!-- 6. NAV Model -->
+<div class="section">
+  <div class="section-title"><div class="icon" style="background:#ede9fe;">💎</div>NAVモデルの構造（INPEX/住友鉱山用）</div>
+
+  <div class="excel-box">
+    <div class="excel-title">📝 NAVモデルの基本構造</div>
+    <span class="excel-comment">' === 各資産のDCFを積み上げ ===</span><br/>
+    <span class="excel-comment">' Asset 1: イクシスLNG</span><br/>
+    生産量(万boe/日)   <span class="excel-ref">[年次プロファイル]</span><br/>
+    価格前提($/boe)    <span class="excel-func">=Scenario!E6</span> <span class="excel-comment">' 油価連動</span><br/>
+    Opex($/boe)        <span class="excel-ref">$12</span><br/>
+    税率(豪州)          <span class="excel-ref">30%</span><br/>
+    Net CF/年           <span class="excel-func">=(生産×価格−Opex)×(1−税率)</span><br/>
+    DCF(WACC 8%)        <span class="excel-func">=NPV(0.08, CF1:CF25)</span><br/>
+    持分比率             <span class="excel-ref">66.245%</span><br/>
+    INPEX持分DCF        <span class="excel-func">=DCF×持分比率</span><br/><br/>
+    <span class="excel-comment">' === 全資産を合算 ===</span><br/>
+    Σ 各資産DCF         <span class="excel-func">=SUM(各資産)</span><br/>
+    + 現金                <span class="excel-func">=BS!現金</span><br/>
+    − 有利子負債          <span class="excel-func">=BS!負債</span><br/>
+    − 探鉱コスト前払      <span class="excel-ref">[推定]</span><br/>
+    = NAV                 <span class="excel-func">=自動計算</span><br/>
+    NAV/株               <span class="excel-func">=NAV÷発行済株式数</span><br/>
+    P/NAV                <span class="excel-func">=現在株価÷NAV/株</span>
+  </div>
+
+  <div class="warn-box">
+    <div class="warn-title">⚠ NAVモデルの最大の落とし穴</div>
+    <div class="warn-body">
+      NAVの値は<strong>油価/銅価の前提で2倍以上変わる</strong>。
+      $80前提でNAV ¥2,000、$60前提でNAV ¥1,200。
+      必ずBull/Base/BearでNAVを3通り出し、P/NAVの幅を示す。
+      「ベースケースでP/NAV 0.9x」ではなく「0.7x〜1.2xのレンジ。ベースで0.9x」と表現する。
+    </div>
+  </div>
+</div>
+
+<!-- 7. Practical tips -->
+<div class="section">
+  <div class="section-title"><div class="icon" style="background:#d1fae5;">💡</div>実務Tips：モデル構築の7つの鉄則</div>
+
+  <div class="checklist">
+    <div class="checklist-title">守るべきモデリングルール</div>
+    <div class="check-item"><div class="check-num" style="background:var(--blue);">1</div><div class="check-text"><strong>1セルに1数式：</strong>複雑な計算は中間セルに分ける。デバッグが10倍速くなる。</div></div>
+    <div class="check-item"><div class="check-num" style="background:var(--blue);">2</div><div class="check-text"><strong>ハードコードは青字：</strong>前提を変えていいセルが一目でわかる。他の人がモデルを使う時にも必須。</div></div>
+    <div class="check-item"><div class="check-num" style="background:var(--blue);">3</div><div class="check-text"><strong>単位行を必ず入れる：</strong>百万円？億円？$/t？$/bbl？単位の混在はモデル崩壊の最大原因。</div></div>
+    <div class="check-item"><div class="check-num" style="background:var(--blue);">4</div><div class="check-text"><strong>循環参照を避ける：</strong>利息→BS→CF→利息の循環は手動イテレーションで解決。VBA不要。</div></div>
+    <div class="check-item"><div class="check-num" style="background:var(--blue);">5</div><div class="check-text"><strong>四半期モデルを先に作る：</strong>決算は四半期ごと。四半期モデルから年次を自動集計する構造がベスト。</div></div>
+    <div class="check-item"><div class="check-num" style="background:var(--blue);">6</div><div class="check-text"><strong>実績と予想を同じ構造にする：</strong>実績列と予想列のレイアウトを完全一致させる。決算発表時に実績を上書きするだけで比較できる。</div></div>
+    <div class="check-item"><div class="check-num" style="background:var(--blue);">7</div><div class="check-text"><strong>BSのバランスチェック：</strong>資産合計＝負債＋資本合計をチェックセルで常時監視。不一致ならモデルにエラーがある。</div></div>
+  </div>
+</div>
+
+<!-- 8. Build priority -->
+<div class="section">
+  <div class="section-title"><div class="icon" style="background:#fef3c7;">🎯</div>最初の3ヶ月のモデル構築優先順位</div>
+
+  <div class="card">
+    <p>
+      45銘柄全部のモデルを一度に作るのは不可能。優先順位をつける：<br/><br/>
+      <strong>Month 1（最優先3銘柄）：</strong>日本製鉄、INPEX、住友鉱山<br/>
+      → セクターの中核。鉄鋼/E&P/非鉄の3つの型を学べる。FMの関心も高い。<br/><br/>
+      <strong>Month 2（次の3銘柄）：</strong>ENEOS、フジクラ、商船三井<br/>
+      → 石油精製/テック成長/海運の型。SOTPの実践。<br/><br/>
+      <strong>Month 3（残りの主要銘柄）：</strong>JFE、AGC、太平洋セメント、レンゴー、東京製鐵<br/>
+      → Month 1-2の型を応用して効率的に展開。<br/><br/>
+      <strong>残りのカバレッジ：</strong>簡易モデル（PL+感応度のみ）で十分。フルモデルはTier 1のみ。
+    </p>
+  </div>
+
+  <div class="tip-box">
+    <div class="tip-title">💡 既にBHPと信越化学のモデルがある</div>
+    <div class="tip-body">
+      入門編で構築したBHP/信越化学(4063)/日本製鉄(5401)のExcelモデルがベースとして使える。
+      これらの3statement構造を今回のシナリオスイッチ付きにアップグレードするのが最も効率的。
+      ゼロから作るより既存モデルを拡張する方が圧倒的に速い。
+    </div>
+  </div>
+</div>
+
+<div class="footnote">
+  素材セクター上級編 #1 / 6<br/>
+  次回：#2 Morning Briefの設計
+</div>
+</body>
+</html>

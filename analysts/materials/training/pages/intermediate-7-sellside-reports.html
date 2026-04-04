@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>素材セクター中級編 #7 — セルサイドレポートの読み方・使い方</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#f5f5f7;--card:#fff;--text:#1d1d1f;--sub:#6e6e73;--radius:16px;--shadow:0 1px 3px rgba(0,0,0,0.04);--gradient:linear-gradient(135deg,#0f172a 0%,#1e3a5f 50%,#3b82f6 100%);--red:#dc2626;--orange:#e8590c;--green:#059669;--blue:#3b82f6;--purple:#7c3aed;--gold:#f59e0b;}
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{font-family:'DM Sans','Noto Sans JP',sans-serif;background:var(--bg);color:var(--text);line-height:1.7;padding:24px 16px 60px;max-width:800px;margin:0 auto;}
+  .header{text-align:center;margin-bottom:40px;padding:32px 20px;background:var(--gradient);border-radius:var(--radius);color:#fff;position:relative;overflow:hidden;}
+  .header::before{content:'📑';position:absolute;font-size:120px;opacity:0.06;top:-10px;right:-10px;}
+  .header .series-tag{display:inline-block;background:rgba(255,255,255,0.15);padding:4px 14px;border-radius:20px;font-size:12px;letter-spacing:1px;text-transform:uppercase;margin-bottom:12px;}
+  .header h1{font-size:24px;font-weight:700;margin-bottom:8px;}
+  .header p{font-size:14px;opacity:0.7;}
+  .section{margin-bottom:36px;}
+  .section-title{font-size:18px;font-weight:700;margin-bottom:16px;display:flex;align-items:center;gap:8px;}
+  .section-title .icon{width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;}
+  .card{background:var(--card);border-radius:var(--radius);padding:20px;box-shadow:var(--shadow);margin-bottom:12px;}
+  .card p{font-size:14px;color:var(--sub);}
+  .card p strong{color:var(--text);}
+
+  /* Report anatomy */
+  .anatomy{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;margin-bottom:16px;}
+  .anatomy-section{padding:16px 20px;border-bottom:1px solid #f1f3f5;display:flex;gap:12px;align-items:flex-start;}
+  .anatomy-section:last-child{border-bottom:none;}
+  .anatomy-num{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;color:#fff;}
+  .anatomy-content{flex:1;}
+  .anatomy-content h4{font-size:14px;font-weight:700;margin-bottom:4px;}
+  .anatomy-content p{font-size:12px;color:var(--sub);line-height:1.7;}
+  .anatomy-priority{font-size:10px;font-weight:600;padding:2px 8px;border-radius:4px;float:right;}
+  .pri-must{background:#d1fae5;color:#065f46;}
+  .pri-scan{background:#fef3c7;color:#92400e;}
+  .pri-skip{background:#f1f3f5;color:#6b7280;}
+
+  /* Do/Don't */
+  .do-dont{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;}
+  .do-card,.dont-card{background:var(--card);border-radius:var(--radius);padding:16px;box-shadow:var(--shadow);border-top:4px solid;}
+  .do-card{border-color:var(--green);}
+  .dont-card{border-color:var(--red);}
+  .do-card h4,.dont-card h4{font-size:14px;font-weight:700;margin-bottom:8px;}
+  .do-card h4{color:var(--green);}
+  .dont-card h4{color:var(--red);}
+  .dd-item{font-size:12px;color:var(--sub);padding:4px 0;line-height:1.6;border-bottom:1px solid #f1f3f5;}
+  .dd-item:last-child{border-bottom:none;}
+
+  /* Analyst types */
+  .type-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+  .type-card{background:var(--card);border-radius:12px;padding:16px;box-shadow:var(--shadow);border-left:4px solid;}
+  .type-card h4{font-size:14px;font-weight:700;margin-bottom:6px;}
+  .type-card p{font-size:12px;color:var(--sub);line-height:1.7;}
+
+  .tip-box{background:#fffbeb;border:1px solid #fcd34d;border-radius:12px;padding:16px;margin-bottom:12px;}
+  .tip-box .tip-title{font-weight:700;font-size:13px;color:#92400e;margin-bottom:6px;}
+  .tip-box .tip-body{font-size:12px;color:#78350f;line-height:1.7;}
+  .warn-box{background:#fef2f2;border:1px solid #fca5a5;border-radius:12px;padding:16px;margin-bottom:12px;}
+  .warn-box .warn-title{font-weight:700;font-size:13px;color:#991b1b;margin-bottom:6px;}
+  .warn-box .warn-body{font-size:12px;color:#7f1d1d;line-height:1.7;}
+
+  .checklist{background:var(--card);border-radius:var(--radius);padding:20px;box-shadow:var(--shadow);margin-bottom:12px;}
+  .checklist-title{font-weight:700;font-size:15px;margin-bottom:12px;}
+  .check-item{display:flex;gap:10px;padding:8px 0;border-bottom:1px solid #f1f3f5;font-size:13px;align-items:flex-start;}
+  .check-item:last-child{border-bottom:none;}
+  .check-num{width:24px;height:24px;border-radius:50%;background:var(--blue);color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;}
+  .check-text{color:var(--sub);line-height:1.6;}
+  .check-text strong{color:var(--text);}
+
+  .bbg-box{background:#1a1a2e;border-radius:12px;padding:16px;margin-bottom:12px;font-family:'DM Sans',monospace;color:#ff6600;font-size:12px;line-height:2;}
+  .bbg-box .bbg-title{color:#ff9933;font-weight:700;font-size:13px;margin-bottom:8px;}
+  .bbg-cmd{color:#ffcc00;}
+  .bbg-comment{color:#666;}
+
+  .callout-box{border-radius:var(--radius);padding:24px;color:#fff;margin-bottom:12px;}
+  .callout-box h3{font-size:17px;font-weight:700;margin-bottom:10px;}
+  .callout-box p{font-size:13px;opacity:0.9;line-height:1.8;}
+
+  .final-box{background:linear-gradient(135deg,#1a1a2e,#16213e,#0f3460);border-radius:var(--radius);padding:28px;color:#fff;text-align:center;margin-top:48px;}
+  .final-box h2{font-size:22px;margin-bottom:12px;}
+  .final-box p{font-size:13px;opacity:0.7;line-height:1.8;}
+
+  details{background:var(--card);border-radius:12px;padding:16px;box-shadow:var(--shadow);margin-bottom:10px;}
+  details summary{font-weight:700;font-size:14px;cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center;}
+  details summary::after{content:'▸';transition:transform 0.2s;}
+  details[open] summary::after{transform:rotate(90deg);}
+  details .detail-body{margin-top:12px;font-size:13px;color:var(--sub);line-height:1.8;}
+  .footnote{margin-top:40px;text-align:center;font-size:12px;color:var(--sub);}
+  @media(max-width:520px){.do-dont,.type-grid{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="series-tag">素材セクター中級編 #7（最終回）</div>
+  <h1>セルサイドレポートの読み方・使い方</h1>
+  <p>情報の宝庫を効率的に活用し、自分の分析に差をつける</p>
+</div>
+
+<!-- 1. Why sell-side matters -->
+<div class="section">
+  <div class="section-title"><div class="icon" style="background:#dbeafe;">📖</div>バイサイドにとってのセルサイドの価値</div>
+  <div class="card">
+    <p>
+      セルサイド（証券会社のアナリスト）は<strong>情報のインフラ</strong>。
+      企業取材、工場見学、業界データの収集を個人でゼロから行うのは不可能。
+      セルサイドのレポートは<strong>「原材料」</strong>であり、それを自分の分析に加工して
+      <strong>独自の投資判断＝バイサイドの付加価値</strong>に変えるのが仕事。<br/><br/>
+      ただし、セルサイドの結論（Buy/Sell/TP）をそのまま使うのは<strong>素人の仕事</strong>。
+      プロのバイサイドアナリストは「データと分析を借り、結論は自分で出す」。
+    </p>
+  </div>
+</div>
+
+<!-- 2. Anatomy of a report -->
+<div class="section">
+  <div class="section-title"><div class="icon" style="background:#fef3c7;">📄</div>レポートの解剖 — どこを読むか</div>
+
+  <div class="anatomy">
+    <div class="anatomy-section">
+      <div class="anatomy-num" style="background:var(--green);">1</div>
+      <div class="anatomy-content">
+        <span class="anatomy-priority pri-must">必読</span>
+        <h4>前提条件（Assumptions）</h4>
+        <p>コモディティ価格前提（鉄鉱石/銅/原油/為替）、生産量前提。<strong>レポートの結論は前提で決まる。</strong>前提が自分と異なれば結論も異なって当然。前提を見ずに結論だけ読むのは無意味。</p>
+      </div>
+    </div>
+    <div class="anatomy-section">
+      <div class="anatomy-num" style="background:var(--green);">2</div>
+      <div class="anatomy-content">
+        <span class="anatomy-priority pri-must">必読</span>
+        <h4>利益予想の変更とその理由</h4>
+        <p>EPS予想を上方/下方修正した場合、その<strong>理由</strong>が最も重要。「鉄鉱石前提を$100→$110に変更したため」なら市況要因。「コスト削減の進捗を上方修正」なら構造改善。</p>
+      </div>
+    </div>
+    <div class="anatomy-section">
+      <div class="anatomy-num" style="background:var(--green);">3</div>
+      <div class="anatomy-content">
+        <span class="anatomy-priority pri-must">必読</span>
+        <h4>バリュエーション手法とTP導出</h4>
+        <p>TP（目標株価）がどの手法で出されているか。EV/EBITDA何倍？ミッドサイクルPE？SOTP？ <strong>同じ手法で自分のTPと比較。</strong>差異があれば原因を特定（前提の違い？倍率の違い？）。</p>
+      </div>
+    </div>
+    <div class="anatomy-section">
+      <div class="anatomy-num" style="background:var(--blue);">4</div>
+      <div class="anatomy-content">
+        <span class="anatomy-priority pri-scan">スキャン</span>
+        <h4>業界データ・チャート</h4>
+        <p>コスト曲線、需給バランス、在庫推移、価格チャート。<strong>データ自体は非常に有用。</strong>自分のExcelに取り込んで蓄積する。セルサイドのデータ収集力はバイサイドを超える。</p>
+      </div>
+    </div>
+    <div class="anatomy-section">
+      <div class="anatomy-num" style="background:var(--blue);">5</div>
+      <div class="anatomy-content">
+        <span class="anatomy-priority pri-scan">スキャン</span>
+        <h4>投資テーマ・ナラティブ</h4>
+        <p>「脱炭素でグリーンスチールに追い風」「DC投資で光ファイバー爆発」等の定性ストーリー。参考にはなるが、セルサイドのナラティブは<strong>バイアスがかかりやすい</strong>。鵜呑みにしない。</p>
+      </div>
+    </div>
+    <div class="anatomy-section">
+      <div class="anatomy-num" style="background:#94a3b8;">6</div>
+      <div class="anatomy-content">
+        <span class="anatomy-priority pri-skip">後回し可</span>
+        <h4>投資判断（Buy/Sell）とターゲット価格</h4>
+        <p>矛盾するようだが、<strong>最後に読むべきパート</strong>。結論を先に見ると確証バイアスが働く。前提→分析→結論の順に自分で判断してから、セルサイドの結論と比較する。</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="tip-box">
+    <div class="tip-title">💡 「結論を最後に読む」訓練</div>
+    <div class="tip-body">
+      新しいレポートを開いたら、まず<strong>Buy/Sell/TPを見ないで</strong>前提条件と利益予想だけ読む。
+      自分の頭で「これなら自分のTPはいくらか」を考えてから、初めてセルサイドのTPを見る。
+      この習慣が「自分の分析力」を鍛える最も効果的なトレーニング。
+    </div>
+  </div>
+</div>
+
+<!-- 3. What to extract -->
+<div class="section">
+  <div class="section-title"><div class="icon" style="background:#d1fae5;">🎯</div>レポートから「盗む」べきもの</div>
+
+  <div class="do-dont">
+    <div class="do-card">
+      <h4>✅ 積極的に活用</h4>
+      <div class="dd-item"><strong>業界データ・統計：</strong>コスト曲線、需給バランス表、在庫グラフ。自分では集められないデータ。</div>
+      <div class="dd-item"><strong>企業取材の定性情報：</strong>「経営陣は来期の値上げに自信」「新工場の稼働が3ヶ月遅延」等。IRでは出ない情報。</div>
+      <div class="dd-item"><strong>感応度分析：</strong>「鉄鉱石$10でEPS ¥X変動」等の定量感応度。自分の推定と照合。</div>
+      <div class="dd-item"><strong>グローバルPeer比較：</strong>BHP/ArcelorMittal/Corning等の海外同業との比較データ。</div>
+      <div class="dd-item"><strong>バリュエーション手法：</strong>他のアナリストがどの手法でどの倍率を使っているか。</div>
+    </div>
+    <div class="dont-card">
+      <h4>❌ 鵜呑みにしない</h4>
+      <div class="dd-item"><strong>Buy/Sell判断：</strong>セルサイドは9割がBuy。構造的にBuyバイアスがある。</div>
+      <div class="dd-item"><strong>ターゲット価格：</strong>前提次第で自由に動く。合理的な根拠を自分で検証する。</div>
+      <div class="dd-item"><strong>強いナラティブ：</strong>「スーパーサイクル」「構造的成長」等。バイアスチェックが必要。</div>
+      <div class="dd-item"><strong>短期の市場見通し：</strong>「来週は上がる/下がる」的な予測は誰にもできない。</div>
+      <div class="dd-item"><strong>他の投資家の動向推測：</strong>「ロングが積まれている」等のポジション推測は不確実。</div>
+    </div>
+  </div>
+</div>
+
+<!-- 4. Sell-side bias -->
+<div class="section">
+  <div class="section-title"><div class="icon" style="background:#fee2e2;">⚠️</div>セルサイドのバイアスを理解する</div>
+
+  <div class="callout-box" style="background:linear-gradient(135deg,#991b1b,#dc2626);">
+    <h3>なぜセルサイドは90%がBuyなのか</h3>
+    <p>
+      ① <strong>IB（投資銀行）との利益相反：</strong>カバレッジ企業にSellを出すと、エクイティファイナンスやM&Aアドバイザリーの受注に悪影響。<br/>
+      ② <strong>企業IRとの関係維持：</strong>Sellを出すとIRアクセスが制限されるリスク。取材拒否されるとレポートが書けない。<br/>
+      ③ <strong>人間心理：</strong>「悪いニュース」を書くより「良いニュース」を書く方が心理的に楽。<br/><br/>
+      <strong>→ 「Buy」は「普通」。「Hold」は「やや弱気」。「Sell」は「よほど確信がある時」と読み替える。</strong>
+    </p>
+  </div>
+
+  <details>
+    <summary>バイアスの逆手を取る方法</summary>
+    <div class="detail-body">
+      <strong>① コンセンサスの「Sell」を探す：</strong>大半がBuyの中でSellを出しているアナリストがいたら、その理由を精読。独自の洞察がある可能性が高い。<br/><br/>
+      <strong>② 予想修正の方向を見る：</strong>レーティングがBuyのまま据え置きでも、EPSを下方修正していれば実質的に弱気化。レーティングより<strong>予想数字の方向</strong>が信頼できる。<br/><br/>
+      <strong>③ トーンの変化を感じ取る：</strong>以前は「成長加速」と書いていたアナリストが「底堅い」に変わったら、レーティングは同じでもセンチメントが弱気化している。<br/><br/>
+      <strong>④ 「Conviction」の強弱：</strong>同じBuyでも「Top Pick」と「ベンチマーク並み」では意味が全く異なる。
+    </div>
+  </details>
+</div>
+
+<!-- 5. Types of reports -->
+<div class="section">
+  <div class="section-title"><div class="icon" style="background:#ede9fe;">📚</div>レポートの種類と使い分け</div>
+
+  <div class="type-grid">
+    <div class="type-card" style="border-color:var(--green);">
+      <h4>🔬 イニシエーション（カバレッジ開始）</h4>
+      <p>30-80ページの大作。業界概要、ビジネスモデル、競争優位性、バリュエーション。<strong>新しい銘柄を学ぶ時の最良の教材。</strong>保存して何度も参照する。</p>
+    </div>
+    <div class="type-card" style="border-color:var(--blue);">
+      <h4>📊 決算レビュー</h4>
+      <p>決算発表直後に出る5-15ページ。実績 vs 予想の比較、ガイダンスの評価。<strong>速報性が価値。</strong>自分の分析と照合する。</p>
+    </div>
+    <div class="type-card" style="border-color:var(--purple);">
+      <h4>🏗 セクターレポート</h4>
+      <p>業界全体のテーマ/見通しを論じる。コモディティ価格見通し、需給バランス、Peer比較。<strong>データの宝庫。</strong>チャートとデータ表を保存。</p>
+    </div>
+    <div class="type-card" style="border-color:var(--gold);">
+      <h4>📝 テーマレポート</h4>
+      <p>「脱炭素と鉄鋼」「EV化と銅需要」等の特定テーマ。<strong>投資ストーリーのヒント。</strong>自分のテーマ分析の出発点にする。</p>
+    </div>
+    <div class="type-card" style="border-color:var(--orange);">
+      <h4>⚡ フラッシュノート</h4>
+      <p>ニュース速報への反応。1-3ページ。「OPEC減産発表→影響分析」等。<strong>即時性が命。</strong>朝のブリーフに活用。</p>
+    </div>
+    <div class="type-card" style="border-color:#94a3b8;">
+      <h4>📅 定期モニタリング</h4>
+      <p>週次/月次の市況レビュー。鉄鋼価格動向、在庫推移等。<strong>定点観測のペースメーカー。</strong>自分の定期レポートのインプット。</p>
+    </div>
+  </div>
+</div>
+
+<!-- 6. Consensus -->
+<div class="section">
+  <div class="section-title"><div class="icon" style="background:#dbeafe;">📈</div>コンセンサスの使い方</div>
+
+  <div class="card">
+    <p>
+      <strong>コンセンサス＝セルサイドアナリスト予想の中央値/平均値。</strong>
+      Bloomberg ANR、QUICKコンセンサス、IFIS等で確認。
+      バイサイドアナリストにとってコンセンサスは<strong>「市場の期待値」</strong>。
+      自分の予想がコンセンサスより上か下かが投資判断の出発点。
+    </p>
+  </div>
+
+  <div class="checklist">
+    <div class="checklist-title">コンセンサスの実践的な使い方</div>
+    <div class="check-item"><div class="check-num">1</div><div class="check-text"><strong>自分の予想とコンセンサスの差を定量化：</strong>「自分のEPS ¥320 vs コンセンサス ¥290 → 10%上振れ予想」。この差が投資判断の根拠になる。</div></div>
+    <div class="check-item"><div class="check-num">2</div><div class="check-text"><strong>コンセンサスの分散（レンジ）を見る：</strong>最高¥400、最低¥200なら不確実性が高い。レンジが狭い銘柄はサプライズが起きにくい。</div></div>
+    <div class="check-item"><div class="check-num">3</div><div class="check-text"><strong>コンセンサスの修正方向（Revision）を追跡：</strong>上方修正が続いている銘柄は株価にモメンタム。下方修正が続いていれば底入れを待つ。</div></div>
+    <div class="check-item"><div class="check-num">4</div><div class="check-text"><strong>決算発表前に「Beat/Miss」の確率を推定：</strong>自分のモデルで「コンセンサスに対してBeat」と判断すれば、決算前にポジションを提案。</div></div>
+    <div class="check-item"><div class="check-num">5</div><div class="check-text"><strong>コンセンサスの前提を分解する：</strong>「なぜコンセンサスは¥290なのか」を各証券会社のレポートから分解。前提の違い（鉄鉱石前提、為替前提）を特定すれば、自分の予想との差異が論理的に説明できる。</div></div>
+  </div>
+
+  <div class="bbg-box">
+    <div class="bbg-title">コンセンサス関連のBloombergコマンド</div>
+    <span class="bbg-cmd">5401 JP Equity ANR &lt;GO&gt;</span> <span class="bbg-comment">← アナリスト予想一覧（EPS/TP/Rating）</span><br/>
+    <span class="bbg-cmd">5401 JP Equity ERN &lt;GO&gt;</span> <span class="bbg-comment">← 決算スケジュール＋EPS Surprise履歴</span><br/>
+    <span class="bbg-cmd">5401 JP Equity EEST &lt;GO&gt;</span> <span class="bbg-comment">← 予想修正（Revision）トレンド</span><br/>
+    <span class="bbg-cmd">MOST &lt;GO&gt;</span> <span class="bbg-comment">← 最も読まれているリサーチ（市場センチメント）</span><br/>
+    <span class="bbg-cmd">BRC &lt;GO&gt;</span> <span class="bbg-comment">← Broker推奨の変更一覧（Rating変更を一覧）</span><br/>
+    <span class="bbg-comment">-- QUICKコンセンサスは日本株特化。日本語で比較しやすい</span>
+  </div>
+</div>
+
+<!-- 7. Building relationships -->
+<div class="section">
+  <div class="section-title"><div class="icon" style="background:#fce7f3;">🤝</div>セルサイドアナリストとの関係構築</div>
+
+  <div class="card">
+    <p>
+      レポートを読むだけでなく、セルサイドアナリストとの<strong>対話</strong>から得られる情報が最も価値が高い。
+      レポートに書けない定性情報（経営陣のトーン変化、他のバイサイドの動向、非公開の業界感覚）は
+      電話やミーティングでしか得られない。
+    </p>
+  </div>
+
+  <div class="do-dont">
+    <div class="do-card">
+      <h4>✅ 良い関係の作り方</h4>
+      <div class="dd-item"><strong>具体的な質問をする：</strong>「TC/RCの見通しは？」ではなく「TC/RCが$30を下回るシナリオで住友鉱山の利益感応度をどう見ますか？」</div>
+      <div class="dd-item"><strong>自分の仮説をぶつける：</strong>「私は中国HRC先物から来期スプレッド改善と見ていますが、あなたは？」→ 対話が深まる。</div>
+      <div class="dd-item"><strong>フィードバックを返す：</strong>「先日のレポートのコスト曲線データ、モデルに組み込みました。非常に参考になりました」</div>
+      <div class="dd-item"><strong>適切な頻度で連絡：</strong>決算前後、大きなニュースの時に短い電話/メール。月1-2回で十分。</div>
+    </div>
+    <div class="dont-card">
+      <h4>❌ 避けるべきこと</h4>
+      <div class="dd-item"><strong>「BuyかSellか教えて」：</strong>結論だけ聞くのは失礼。自分の分析をぶつけた上で議論する。</div>
+      <div class="dd-item"><strong>MNPI（重要未公開情報）を求める：</strong>インサイダー規制に抵触。「次の決算はどうなりそう？」も危険。</div>
+      <div class="dd-item"><strong>複数の証券会社から同じ質問：</strong>情報を横流しして競わせるのは信頼を失う。</div>
+      <div class="dd-item"><strong>一方的に情報を取るだけ：</strong>情報は双方向。自分の見方も共有すると関係が深まる。</div>
+    </div>
+  </div>
+
+  <details>
+    <summary>新人アナリストが最初の3ヶ月でやるべきこと</summary>
+    <div class="detail-body">
+      <strong>① カバレッジ銘柄の主要セルサイドアナリストをリストアップ：</strong>
+      Bloomberg ANRで日本製鉄のカバーアナリスト一覧→Analyst Trackerに入力。各社の素材セクター担当を10-15名リスト化。<br/><br/>
+      <strong>② イニシエーションレポートを全部読む：</strong>
+      各証券会社の過去1年のカバレッジ開始レポートを入手。業界の見方の違いを理解。<br/><br/>
+      <strong>③ セルサイドのセクターセミナー/カンファレンスに参加：</strong>
+      大和/みずほ/JPM等が開催するマテリアルズセクターカンファレンスに参加。アナリストとの最初の接点。<br/><br/>
+      <strong>④ 1社に1つ「鋭い質問」を準備：</strong>
+      最初の電話/ミーティングで「このアナリストは考えて聞いてくる」と思ってもらえれば、次から情報が増える。
+    </div>
+  </details>
+</div>
+
+<!-- 8. Disagreeing with consensus -->
+<div class="section">
+  <div class="section-title"><div class="icon" style="background:#d1fae5;">💡</div>コンセンサスと「建設的に」意見が違う方法</div>
+
+  <div class="card">
+    <p>
+      バイサイドアナリストの価値は<strong>「コンセンサスと異なる正しい見解を持つ」</strong>ことに尽きる。
+      コンセンサスと同じなら、自分がいなくてもETFを買えば同じ。
+      差別化するのは「コンセンサスが見落としている何か」を発見すること。
+    </p>
+  </div>
+
+  <div class="checklist">
+    <div class="checklist-title">コンセンサスに差をつけるための5つの視点</div>
+    <div class="check-item"><div class="check-num">1</div><div class="check-text"><strong>前提条件の差異：</strong>コンセンサスが鉄鉱石$100前提で自分は$85前提なら、その根拠（中国の供給過剰→#4中国データ）を明確に示す。</div></div>
+    <div class="check-item"><div class="check-num">2</div><div class="check-text"><strong>サイクルの位置判断の違い：</strong>コンセンサスがPhase 1（回復初期）と見ているのに、自分はPhase 2（ピーク近い）と見るなら、#2のフレームワークで根拠を示す。</div></div>
+    <div class="check-item"><div class="check-num">3</div><div class="check-text"><strong>クロスセクターの洞察：</strong>鉄鋼アナリストは鉄鋼しか見ていないことが多い。「銅TC/RCの動向から、住友鉱山の非鉄利益が想定以上に悪化する」等のクロスセクターの視点。</div></div>
+    <div class="check-item"><div class="check-num">4</div><div class="check-text"><strong>タイムラグの見積もり：</strong>値上げ浸透のタイミング、原料コスト反映の四半期ズレなど、多くのアナリストが「平均的なラグ」を想定する中で、個別企業の契約構造から精密にラグを推定する。</div></div>
+    <div class="check-item"><div class="check-num">5</div><div class="check-text"><strong>ボトムアップの積み上げ：</strong>セルサイドがトップダウン（コモディティ価格→利益）で推定する中で、セグメント別・製品別にボトムアップで積み上げれば精度で勝てる。</div></div>
+  </div>
+
+  <div class="tip-box">
+    <div class="tip-title">💡 「自分だけが知っていること」を常に1つ持つ</div>
+    <div class="tip-body">
+      カバレッジ45銘柄全部で差別化するのは無理。でも<strong>「この銘柄については誰よりも詳しい」と言える銘柄を3-5つ</strong>持つ。
+      その銘柄については工場見学もし、IRとの関係も深く、セグメント別の精緻なモデルも持つ。
+      FMは「この銘柄についてはこのアナリストに聞けば間違いない」と思ってくれれば、それが信頼の基盤になる。
+    </div>
+  </div>
+</div>
+
+<!-- Summary -->
+<div class="section">
+  <div class="section-title"><div class="icon" style="background:#e8f4fd;">✅</div>まとめ：セルサイドとの付き合い方5原則</div>
+  <div class="card">
+    <p>
+      <strong>原則1：データを借り、結論は自分で出す。</strong>セルサイドのBuy/Sellをそのまま使わない。<br/><br/>
+      <strong>原則2：前提条件を最初に読む。</strong>レポートの結論は前提で決まる。前提が自分と違えば結論は異なって当然。<br/><br/>
+      <strong>原則3：Buyバイアスを常に意識する。</strong>90%がBuy。HoldはやわらかいSell。レーティングより予想修正の方向が正直。<br/><br/>
+      <strong>原則4：対話から得る情報はレポートの10倍。</strong>具体的な仮説をぶつけて議論する。一方的に聞くだけは✕。<br/><br/>
+      <strong>原則5：コンセンサスと違う見解を持つことがバイサイドの存在意義。</strong>同じなら自分は不要。差別化の源泉を常に探す。
+    </p>
+  </div>
+</div>
+
+<!-- FINAL: Series complete -->
+<div class="final-box">
+  <h2>🎓 素材セクター 入門＋中級編 — 全15回完了</h2>
+  <p>
+    <strong>【入門編 8回】</strong><br/>
+    #1 石炭・鉱業 → #2 石油・エネルギー → #3 鉄鋼 → #4 非鉄金属<br/>
+    #5 線材・ケーブル → #6 ガラス・セメント → #7 紙・パッケージング → #8 海運<br/><br/>
+    <strong>【中級編 7回】</strong><br/>
+    #1 スプレッド分析 → #2 コモディティサイクル → #3 決算分析 → #4 中国データ<br/>
+    #5 バリュエーション → #6 クロスセクター連鎖 → #7 セルサイドレポート<br/><br/>
+    セクターの構造を理解し（入門）、分析手法を身につけ（中級）、<br/>
+    独自の投資判断を出せるアナリストになるための土台が完成。<br/>
+    あとは<strong>実践あるのみ</strong>。
+  </p>
+</div>
+
+<div class="footnote">
+  素材セクター中級編 #7 / 7（完）<br/>
+  入門編＋中級編 全15回 完了
+</div>
+</body>
+</html>

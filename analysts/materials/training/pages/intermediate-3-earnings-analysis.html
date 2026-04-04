@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>素材セクター中級編 #3 — 決算分析テクニック</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#f5f5f7;--card:#fff;--text:#1d1d1f;--sub:#6e6e73;--accent:#2c2c2e;--radius:16px;--shadow:0 1px 3px rgba(0,0,0,0.04);--gradient:linear-gradient(135deg,#1a1a2e 0%,#4a1942 50%,#c92a2a 100%);--red:#c92a2a;--orange:#e8590c;--green:#2b8a3e;--blue:#3b82f6;--purple:#8b5cf6;}
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{font-family:'DM Sans','Noto Sans JP',sans-serif;background:var(--bg);color:var(--text);line-height:1.7;padding:24px 16px 60px;max-width:800px;margin:0 auto;}
+  .header{text-align:center;margin-bottom:40px;padding:32px 20px;background:var(--gradient);border-radius:var(--radius);color:#fff;position:relative;overflow:hidden;}
+  .header::before{content:'📊';position:absolute;font-size:120px;opacity:0.06;top:-10px;right:-10px;}
+  .header .series-tag{display:inline-block;background:rgba(255,255,255,0.15);padding:4px 14px;border-radius:20px;font-size:12px;letter-spacing:1px;text-transform:uppercase;margin-bottom:12px;}
+  .header h1{font-size:26px;font-weight:700;margin-bottom:8px;}
+  .header p{font-size:14px;opacity:0.7;}
+  .section{margin-bottom:36px;}
+  .section-title{font-size:18px;font-weight:700;margin-bottom:16px;display:flex;align-items:center;gap:8px;}
+  .section-title .icon{width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;}
+  .card{background:var(--card);border-radius:var(--radius);padding:20px;box-shadow:var(--shadow);margin-bottom:12px;}
+  .card p{font-size:14px;color:var(--sub);}
+  .card p strong{color:var(--text);}
+  .tab-bar{display:flex;gap:4px;margin-bottom:16px;background:#e9ecef;border-radius:10px;padding:3px;overflow-x:auto;}
+  .tab-btn{flex:1;padding:8px 4px;border:none;background:transparent;border-radius:8px;font-family:inherit;font-size:11px;font-weight:600;color:var(--sub);cursor:pointer;transition:all 0.2s;white-space:nowrap;min-width:50px;}
+  .tab-btn.active{background:var(--card);color:var(--text);box-shadow:0 1px 3px rgba(0,0,0,0.08);}
+  .tab-content{display:none;}
+  .tab-content.active{display:block;}
+
+  /* Dark calc box */
+  .calc-box{background:#1e293b;border-radius:var(--radius);padding:20px;color:#e2e8f0;margin-bottom:12px;font-size:13px;line-height:2;}
+  .calc-box .calc-title{font-weight:700;font-size:14px;color:#93c5fd;margin-bottom:10px;}
+  .calc-row{display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:1px solid rgba(255,255,255,0.06);}
+  .calc-row:last-child{border-bottom:none;}
+  .calc-row .calc-label{color:#94a3b8;flex:1;}
+  .calc-row .calc-value{font-weight:700;font-family:'DM Sans',monospace;text-align:right;min-width:100px;}
+  .calc-row.result{background:rgba(59,130,246,0.1);border-radius:8px;padding:8px 12px;margin-top:8px;border:1px solid rgba(59,130,246,0.2);}
+  .calc-row.result .calc-label{color:#93c5fd;font-weight:600;}
+  .calc-row.result .calc-value{color:#60a5fa;font-size:16px;}
+  .calc-row.negative{background:rgba(239,68,68,0.08);border-radius:8px;padding:8px 12px;margin-top:4px;border:1px solid rgba(239,68,68,0.15);}
+  .calc-row.negative .calc-value{color:#f87171;}
+  .calc-row.positive{background:rgba(34,197,94,0.08);border-radius:8px;padding:8px 12px;margin-top:4px;border:1px solid rgba(34,197,94,0.15);}
+  .calc-row.positive .calc-value{color:#4ade80;}
+
+  /* Bridge chart */
+  .bridge{background:var(--card);border-radius:var(--radius);padding:20px;box-shadow:var(--shadow);margin-bottom:12px;overflow-x:auto;}
+  .bridge-title{font-weight:700;font-size:14px;margin-bottom:16px;}
+  .bridge-bars{display:flex;align-items:flex-end;gap:4px;height:200px;min-width:500px;padding:0 4px;}
+  .bridge-bar{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;}
+  .bridge-bar .bar{width:100%;border-radius:4px;min-height:4px;position:relative;}
+  .bridge-bar .bar-val{font-size:10px;font-weight:700;margin-bottom:3px;white-space:nowrap;}
+  .bridge-bar .bar-label{font-size:8px;color:var(--sub);margin-top:5px;text-align:center;line-height:1.2;white-space:nowrap;}
+  .bar-base{background:var(--blue);}
+  .bar-pos{background:var(--green);}
+  .bar-neg{background:var(--red);}
+  .bar-result{background:var(--purple);}
+  .bar-neutral{background:#94a3b8;}
+  /* Spacer for bridge floating bars */
+  .bridge-bar .bar-spacer{width:100%;}
+
+  .formula-box{border-radius:var(--radius);padding:24px;color:#fff;text-align:center;margin-bottom:16px;}
+  .formula-box .formula{font-size:15px;font-weight:700;margin-bottom:8px;}
+  .formula-box .formula .var{color:#93c5fd;}
+  .formula-box .formula .op{color:#fcd34d;margin:0 4px;}
+  .formula-box .note{font-size:12px;opacity:0.6;line-height:1.6;}
+
+  .tip-box{background:#fffbeb;border:1px solid #fcd34d;border-radius:12px;padding:16px;margin-bottom:12px;}
+  .tip-box .tip-title{font-weight:700;font-size:13px;color:#92400e;margin-bottom:6px;}
+  .tip-box .tip-body{font-size:12px;color:#78350f;line-height:1.7;}
+  .warn-box{background:#fef2f2;border:1px solid #fca5a5;border-radius:12px;padding:16px;margin-bottom:12px;}
+  .warn-box .warn-title{font-weight:700;font-size:13px;color:#991b1b;margin-bottom:6px;}
+  .warn-box .warn-body{font-size:12px;color:#7f1d1d;line-height:1.7;}
+
+  /* Checklist */
+  .checklist{background:var(--card);border-radius:var(--radius);padding:20px;box-shadow:var(--shadow);margin-bottom:12px;}
+  .checklist-title{font-weight:700;font-size:15px;margin-bottom:12px;}
+  .check-item{display:flex;gap:10px;padding:8px 0;border-bottom:1px solid #f1f3f5;font-size:13px;align-items:flex-start;}
+  .check-item:last-child{border-bottom:none;}
+  .check-num{width:24px;height:24px;border-radius:50%;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;}
+  .check-text{color:var(--sub);line-height:1.6;}
+  .check-text strong{color:var(--text);}
+
+  .bbg-box{background:#1a1a2e;border-radius:12px;padding:16px;margin-bottom:12px;font-family:'DM Sans',monospace;color:#ff6600;font-size:12px;line-height:2;}
+  .bbg-box .bbg-title{color:#ff9933;font-weight:700;font-size:13px;margin-bottom:8px;}
+  .bbg-cmd{color:#ffcc00;}
+  .bbg-comment{color:#666;}
+
+  /* Sensitivity table */
+  .sens-table{width:100%;border-collapse:collapse;font-size:12px;background:var(--card);border-radius:12px;overflow:hidden;box-shadow:var(--shadow);}
+  .sens-table th{text-align:left;padding:10px 12px;background:#f1f3f5;font-weight:600;font-size:11px;}
+  .sens-table td{padding:10px 12px;border-bottom:1px solid #f1f3f5;text-align:right;}
+  .sens-table td:first-child{text-align:left;font-weight:600;}
+  .sens-table tr:last-child td{border-bottom:none;}
+  .sens-up{color:var(--green);font-weight:600;}
+  .sens-down{color:var(--red);font-weight:600;}
+
+  details{background:var(--card);border-radius:12px;padding:16px;box-shadow:var(--shadow);margin-bottom:10px;}
+  details summary{font-weight:700;font-size:14px;cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center;}
+  details summary::after{content:'▸';transition:transform 0.2s;}
+  details[open] summary::after{transform:rotate(90deg);}
+  details .detail-body{margin-top:12px;font-size:13px;color:var(--sub);line-height:1.8;}
+  .footnote{margin-top:40px;text-align:center;font-size:12px;color:var(--sub);}
+  @media(max-width:520px){.bridge-bars{height:160px;min-width:440px;}}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="series-tag">素材セクター中級編 #3</div>
+  <h1>決算分析テクニック</h1>
+  <p>在庫影響の除去・セグメント分解・感応度分析・ブリッジチャートの読み方</p>
+</div>
+
+<!-- 0. Overview -->
+<div class="section">
+  <div class="section-title"><div class="icon" style="background:#e8f4fd;">📖</div>素材セクター決算の「クセ」</div>
+  <div class="card">
+    <p>
+      素材セクターの決算は、テック企業やサービス業とは全く異なる「クセ」がある。
+      <strong>在庫評価の影響、コモディティ価格の前提、為替前提、セグメントの複雑さ</strong>を正しく処理しないと、
+      「好決算に見えて実は悪い」「悪決算に見えて実は良い」と判断を誤る。<br/><br/>
+      この回では5つのテクニックを具体例で解説する：<br/>
+      <strong>① 在庫影響の除去 ② ブリッジチャートの読み方 ③ セグメント分解 ④ 感応度分析 ⑤ 決算前チェックリスト</strong>
+    </p>
+  </div>
+</div>
+
+<!-- TABS -->
+<div class="tab-bar">
+  <button class="tab-btn active" onclick="switchTab('inv')">在庫影響除去</button>
+  <button class="tab-btn" onclick="switchTab('bridge')">ブリッジ</button>
+  <button class="tab-btn" onclick="switchTab('segment')">セグメント</button>
+  <button class="tab-btn" onclick="switchTab('sens')">感応度</button>
+  <button class="tab-btn" onclick="switchTab('checklist')">チェックリスト</button>
+</div>
+
+<!-- ==================== 1. INVENTORY ==================== -->
+<div class="tab-content active" id="tab-inv">
+<div class="section">
+  <div class="section-title"><div class="icon" style="background:#fee2e2;">🛢</div>テクニック①：在庫影響の除去</div>
+
+  <div class="formula-box" style="background:linear-gradient(135deg,#7f1d1d,#dc2626);">
+    <div class="formula">
+      <span class="var">実力ベース営業利益</span>
+      <span class="op">=</span>
+      <span class="var">報告ベース営業利益</span>
+      <span class="op">−</span>
+      <span class="var">在庫評価影響</span>
+    </div>
+    <div class="note">石油元売・非鉄金属で必須。これを知らないと分析が100%狂う</div>
+  </div>
+
+  <div class="card">
+    <p>
+      <strong>なぜ在庫影響が出るのか：</strong>
+      石油元売は原油を約2ヶ月分在庫として保有。原油価格が上がると、安い時に仕入れた在庫を
+      高い価格で売ったことになり「在庫評価益」が発生。逆に下がれば「評価損」。
+      これは実際の事業の実力ではなく、<strong>たまたまの価格変動による会計上の利益</strong>。
+    </p>
+  </div>
+
+  <div class="calc-box">
+    <div class="calc-title">📝 実践例：ENEOS 2024年3月期（架空の数字で解説）</div>
+    <div class="calc-row"><span class="calc-label">報告ベース営業利益</span><span class="calc-value">¥4,200億</span></div>
+    <div class="calc-row negative"><span class="calc-label">うち在庫評価益（原油上昇による）</span><span class="calc-value">+¥1,500億</span></div>
+    <div class="calc-row result"><span class="calc-label">実力ベース営業利益</span><span class="calc-value">¥2,700億</span></div>
+  </div>
+
+  <div class="warn-box">
+    <div class="warn-title">⚠ 報告ベースだけ見ると何が起きるか</div>
+    <div class="warn-body">
+      報告ベース¥4,200億 → 「前年比+50%の好決算！」と見える。<br/>
+      でも在庫益¥1,500億を除くと実力は¥2,700億 → 「前年の実力¥2,900億から実は減益」。<br/><br/>
+      <strong>メディアは報告ベースで報じる。アナリストは実力ベースで判断する。この差が投資判断の分かれ目。</strong>
+    </div>
+  </div>
+
+  <div class="tip-box">
+    <div class="tip-title">💡 在庫影響が出る銘柄リスト</div>
+    <div class="tip-body">
+      <strong>大きい：</strong>ENEOS（5020）、出光興産（5019）、コスモエネルギー（5021）— 原油在庫2ヶ月分<br/>
+      <strong>中程度：</strong>住友金属鉱山（5713）、三菱マテリアル（5711）— LME金属の在庫評価<br/>
+      <strong>小さい：</strong>鉄鋼（日本製鉄等）— 鉄鉱石/原料炭の在庫影響はあるが元売ほど大きくない<br/>
+      <strong>ほぼなし：</strong>線材・ケーブル（銅パススルー型）、セメント、製紙<br/><br/>
+      各社の決算資料で「在庫影響を除く」の数字を探す。ENEOSは明示。住友鉱山はIR資料の「数量差・価格差分析」で分解。
+    </div>
+  </div>
+
+  <details>
+    <summary>在庫評価方法：総平均法 vs 個別法</summary>
+    <div class="detail-body">
+      <strong>総平均法：</strong>期首在庫＋当期仕入の平均単価で原価を計算。価格変動の影響が平均化される。日本の石油元売はこの方法が多い。<br/><br/>
+      <strong>LIFO（後入先出法）：</strong>直近の仕入価格で原価を計算。在庫影響が小さい。日本基準では禁止（IFRS/米国基準は任意）。<br/><br/>
+      <strong>実務的な対応：</strong>ENEOSは「在庫影響」として明示的に開示。
+      自分で推定する場合は「期中の原油価格変動幅 × 在庫数量」で概算できる。
+      原油が四半期中に$10/bbl上がり、在庫が5,000万バレルなら、在庫影響 ≈ $5億（約¥750億@150円）。
+    </div>
+  </details>
+</div>
+</div>
+
+<!-- ==================== 2. BRIDGE CHART ==================== -->
+<div class="tab-content" id="tab-bridge">
+<div class="section">
+  <div class="section-title"><div class="icon" style="background:#dbeafe;">📊</div>テクニック②：ブリッジチャート（増減分析）の読み方</div>
+
+  <div class="card">
+    <p>
+      素材セクターの決算説明会で最も重要なスライドが<strong>ブリッジチャート（ウォーターフォール）</strong>。
+      前期→今期の利益変動を要因別に分解して表示する。
+      「なぜ増えたのか/減ったのか」を一目で把握できる。
+    </p>
+  </div>
+
+  <!-- Bridge chart example -->
+  <div class="bridge">
+    <div class="bridge-title">例：日本製鉄 事業利益ブリッジ（イメージ）</div>
+    <div class="bridge-bars">
+      <div class="bridge-bar">
+        <div class="bar-val" style="color:var(--blue);">5,800</div>
+        <div class="bar bar-base" style="height:72%;"></div>
+        <div class="bar-label">前期<br/>事業利益</div>
+      </div>
+      <div class="bridge-bar">
+        <div class="bar-val" style="color:var(--green);">+1,200</div>
+        <div class="bar-spacer" style="height:72%;"></div>
+        <div class="bar bar-pos" style="height:15%;"></div>
+        <div class="bar-label">マージン<br/>改善</div>
+      </div>
+      <div class="bridge-bar">
+        <div class="bar-val" style="color:var(--red);">−800</div>
+        <div class="bar-spacer" style="height:77%;"></div>
+        <div class="bar bar-neg" style="height:10%;"></div>
+        <div class="bar-label">原料<br/>コスト増</div>
+      </div>
+      <div class="bridge-bar">
+        <div class="bar-val" style="color:var(--red);">−400</div>
+        <div class="bar-spacer" style="height:82%;"></div>
+        <div class="bar bar-neg" style="height:5%;"></div>
+        <div class="bar-label">数量<br/>減</div>
+      </div>
+      <div class="bridge-bar">
+        <div class="bar-val" style="color:var(--green);">+600</div>
+        <div class="bar-spacer" style="height:77%;"></div>
+        <div class="bar bar-pos" style="height:7.5%;"></div>
+        <div class="bar-label">為替<br/>円安効果</div>
+      </div>
+      <div class="bridge-bar">
+        <div class="bar-val" style="color:var(--green);">+300</div>
+        <div class="bar-spacer" style="height:77%;"></div>
+        <div class="bar bar-pos" style="height:3.7%;"></div>
+        <div class="bar-label">コスト<br/>削減</div>
+      </div>
+      <div class="bridge-bar">
+        <div class="bar-val" style="color:var(--red);">−200</div>
+        <div class="bar-spacer" style="height:83%;"></div>
+        <div class="bar bar-neg" style="height:2.5%;"></div>
+        <div class="bar-label">その他<br/>/一時費用</div>
+      </div>
+      <div class="bridge-bar">
+        <div class="bar-val" style="color:var(--purple);">6,500</div>
+        <div class="bar bar-result" style="height:81%;"></div>
+        <div class="bar-label">今期<br/>事業利益</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="tip-box">
+    <div class="tip-title">💡 ブリッジの読み方：3つの核心質問</div>
+    <div class="tip-body">
+      <strong>Q1：「マージン改善」は持続的か一時的か？</strong><br/>
+      → 鋼材値上げの浸透なら持続的。在庫評価益なら一時的。紐付き価格改定の時期効果か確認。<br/><br/>
+      <strong>Q2：「原料コスト増」は今後も続くか？</strong><br/>
+      → 鉄鉱石/原料炭の四半期平均が来期も高止まりするか、ピークアウトするかでスプレッドの方向が変わる。#1のスプレッド分析と連動。<br/><br/>
+      <strong>Q3：「数量減」は一時的か構造的か？</strong><br/>
+      → 定期修繕による一時的な減産か、需要の構造的減少か。前者なら来期は回復。
+    </div>
+  </div>
+
+  <details>
+    <summary>各社のブリッジの典型パターン</summary>
+    <div class="detail-body">
+      <strong>日本製鉄：</strong>「マージン改善」「原料コスト差」「数量差」「為替」「コスト削減」「海外グループ」に分解。マージン改善＝値上げ効果を重視。橋本社長の「適正マージンの確保」方針の進捗を見る。<br/><br/>
+      <strong>ENEOS：</strong>「在庫影響」「石油精製マージン」「石化マージン」「金属（JX金属）」「その他」。必ず在庫影響を除いた実力ベースを確認。<br/><br/>
+      <strong>住友金属鉱山：</strong>「数量差」「価格差」「為替差」「コスト差」に分解。価格差＝LME銅/ニッケル/金の変動。為替差＝USD/JPYの影響。価格差と為替差が利益変動の大半を占める。<br/><br/>
+      <strong>商船三井：</strong>「ドライバルク」「タンカー」「LNG」「自動車船」「ONE持分法」「不動産/その他」。ONE持分法利益の変動が最大のスイングファクター。
+    </div>
+  </details>
+</div>
+</div>
+
+<!-- ==================== 3. SEGMENT ==================== -->
+<div class="tab-content" id="tab-segment">
+<div class="section">
+  <div class="section-title"><div class="icon" style="background:#d1fae5;">🧩</div>テクニック③：セグメント分解</div>
+
+  <div class="card">
+    <p>
+      素材セクターの大手は複数のセグメントを持つ複合企業が多い。
+      <strong>全社の数字だけ見ると本質を見失う。</strong>セグメント別に分解して「どこで稼いでいるか」「どこが足を引っ張っているか」を特定する。
+    </p>
+  </div>
+
+  <div class="calc-box">
+    <div class="calc-title">📝 例：AGC（5201）のセグメント分解</div>
+    <div class="calc-row"><span class="calc-label">建築用ガラス</span><span class="calc-value">OPM 6% 📉</span></div>
+    <div class="calc-row"><span class="calc-label">自動車用ガラス</span><span class="calc-value">OPM 5% →</span></div>
+    <div class="calc-row"><span class="calc-label">ディスプレイ用ガラス</span><span class="calc-value">OPM 18% 📈</span></div>
+    <div class="calc-row"><span class="calc-label">化学品（フッ素/電子材料）</span><span class="calc-value">OPM 15% 📈</span></div>
+    <div class="calc-row result"><span class="calc-label">→ 利益の半分以上がディスプレイ＋化学品</span><span class="calc-value">高付加価値シフト</span></div>
+  </div>
+
+  <div class="calc-box">
+    <div class="calc-title">📝 例：神戸製鋼所（5406）のセグメント分解</div>
+    <div class="calc-row"><span class="calc-label">鉄鋼アルミ</span><span class="calc-value">OPM 4% — 市況連動</span></div>
+    <div class="calc-row"><span class="calc-label">溶接</span><span class="calc-value">OPM 10% — 安定</span></div>
+    <div class="calc-row"><span class="calc-label">機械（コベルコ建機）</span><span class="calc-value">OPM 7% — 中国低迷</span></div>
+    <div class="calc-row"><span class="calc-label">電力</span><span class="calc-value">OPM 12% — 安定CF</span></div>
+    <div class="calc-row result"><span class="calc-label">→ 「鉄鋼会社」だが利益の半分は非鉄鋼</span><span class="calc-value">多角化に注意</span></div>
+  </div>
+
+  <div class="tip-box">
+    <div class="tip-title">💡 セグメント分解の実務ポイント</div>
+    <div class="tip-body">
+      <strong>① 利益構成比率の変化をトラッキング：</strong>四半期ごとにセグメント利益の構成比を追う。構成比が変わっていれば「製品ミックスが変化している」→バリュエーションにも影響。<br/><br/>
+      <strong>② セグメント間消去に注意：</strong>セグメント利益の合計≠全社利益。セグメント間取引の消去や本社費用の配賦がある。差額が大きい場合は理由を確認。<br/><br/>
+      <strong>③ Sum-of-the-Parts（SOTP）バリュエーション：</strong>セグメントごとに異なる倍率を適用して合算する。AGCのガラスは6-8x EV/EBITDA、化学品は10-12xなど。一律の倍率で見ると価値を見誤る。→ #5バリュエーション手法で詳しく扱う。
+    </div>
+  </div>
+
+  <details>
+    <summary>カバレッジ主要銘柄のセグメント構造一覧</summary>
+    <div class="detail-body">
+      <strong>日本製鉄：</strong>製鉄/エンジニアリング/ケミカル/新素材 — 製鉄が9割<br/>
+      <strong>JFE HD：</strong>鉄鋼/エンジニアリング/商事 — 鉄鋼が7割<br/>
+      <strong>神戸製鋼：</strong>鉄鋼アルミ/溶接/機械/エンジ/電力 — 分散型<br/>
+      <strong>ENEOS：</strong>エネルギー/石油・天然ガス開発/金属 — JX金属（銅）が利益貢献大<br/>
+      <strong>住友鉱山：</strong>資源/製錬/材料 — 資源（鉱山）の利益変動が最大<br/>
+      <strong>住友電工：</strong>自動車/情報通信/電子ワイヤー/環境エネルギー/産業素材 — 自動車4割<br/>
+      <strong>フジクラ：</strong>エネルギー・情報通信/電子電装/自動車電装/不動産 — 情報通信が急拡大<br/>
+      <strong>商船三井：</strong>ドライバルク/タンカー/LNG・海洋/製品輸送/ONE — LNG安定＋ONE変動<br/><br/>
+      → 決算分析では「全社の増益/減益」ではなく「どのセグメントが動いたか」を必ず分解する。
+    </div>
+  </details>
+</div>
+</div>
+
+<!-- ==================== 4. SENSITIVITY ==================== -->
+<div class="tab-content" id="tab-sens">
+<div class="section">
+  <div class="section-title"><div class="icon" style="background:#ede9fe;">📐</div>テクニック④：感応度分析（Sensitivity Analysis）</div>
+
+  <div class="card">
+    <p>
+      素材セクターの利益は「原料価格」「為替」「生産量」で大きく振れる。
+      <strong>「鉄鉱石が$10上がったら利益はいくら変わるか？」</strong>を定量化するのが感応度分析。
+      多くの企業がIR資料で公表しているが、自分で推定できるようになることが重要。
+    </p>
+  </div>
+
+  <div class="card" style="padding:0;overflow:hidden;">
+    <table class="sens-table">
+      <thead><tr><th>変動要因</th><th>変動幅</th><th>日本製鉄</th><th>INPEX</th><th>住友鉱山</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>鉄鉱石</td><td>+$10/t</td>
+          <td class="sens-down">▲350億円</td><td>—</td><td>—</td>
+        </tr>
+        <tr>
+          <td>原料炭</td><td>+$10/t</td>
+          <td class="sens-down">▲150億円</td><td>—</td><td>—</td>
+        </tr>
+        <tr>
+          <td>原油（ドバイ）</td><td>+$1/bbl</td>
+          <td>—</td><td class="sens-up">+50億円</td><td>—</td>
+        </tr>
+        <tr>
+          <td>LME銅</td><td>+$100/t</td>
+          <td>—</td><td>—</td><td class="sens-up">+25億円</td>
+        </tr>
+        <tr>
+          <td>金</td><td>+$100/oz</td>
+          <td>—</td><td>—</td><td class="sens-up">+80億円</td>
+        </tr>
+        <tr>
+          <td>為替 USD/JPY</td><td>+1円</td>
+          <td class="sens-up">+30億円</td><td class="sens-up">+20億円</td><td class="sens-up">+15億円</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card" style="font-size:11px;color:var(--sub);">
+    <p>※ 数字はイメージ。実際のIR資料やアナリスト説明会資料で最新の感応度を確認すること。各社の年度決算説明資料の「前提条件」ページに記載されていることが多い。</p>
+  </div>
+
+  <div class="tip-box">
+    <div class="tip-title">💡 感応度を使った利益予想の調整法</div>
+    <div class="tip-body">
+      <strong>手順：</strong><br/>
+      ① 会社予想の前提条件を確認（ドバイ原油$75、USD/JPY 145円、鉄鉱石$110/t 等）<br/>
+      ② 実際の市況と前提の乖離を計算（例：実際のドバイ原油が$85→$10乖離）<br/>
+      ③ 感応度を適用（$10 × +50億/ドル = +500億円の上振れ）<br/>
+      ④ 全変動要因の上振れ/下振れを合算→会社予想からの修正額を算出<br/><br/>
+      <strong>→ これだけで「会社予想に対してどの程度の上振れ/下振れリスクがあるか」を定量的に示せる。</strong>
+      ファンドマネージャーへのコミュニケーションで最も説得力のある分析手法。
+    </div>
+  </div>
+
+  <details>
+    <summary>自分で感応度を推定する方法</summary>
+    <div class="detail-body">
+      IR資料に感応度が出ていない場合の推定方法：<br/><br/>
+      <strong>鉄鉱石感応度（鉄鋼メーカー）：</strong><br/>
+      年間鉄鉱石使用量（粗鋼生産量 × 1.6t）× $10/t × 為替レート ＝ 年間コスト変動<br/>
+      例：日本製鉄の粗鋼4,000万t → 鉄鉱石6,400万t → $10変動 → $6.4億 → ¥960億（@¥150）<br/>
+      ただし契約条件やラグを考慮して7-8割程度に割り引く → ¥350億程度が妥当な推定。<br/><br/>
+      <strong>銅価格感応度（住友鉱山）：</strong><br/>
+      鉱山産銅量（年間15万t程度）× $100/t ＝ $1,500万 → ¥22.5億（@¥150）<br/>
+      ＋製錬在庫の評価影響を加味 → ¥25億程度。<br/><br/>
+      <strong>為替感応度：</strong><br/>
+      海外売上高×営業利益率の変化で推定。またはドル建て資産・負債の差額から推定。
+    </div>
+  </details>
+
+  <div class="bbg-box">
+    <div class="bbg-title">Bloombergで前提条件を確認する方法</div>
+    <span class="bbg-cmd">5401 JP Equity BDVD &lt;GO&gt;</span> <span class="bbg-comment">← 日本製鉄の決算データ</span><br/>
+    <span class="bbg-cmd">FA &lt;GO&gt;</span> <span class="bbg-comment">← 財務分析画面（セグメント含む）</span><br/>
+    <span class="bbg-cmd">ERN &lt;GO&gt;</span> <span class="bbg-comment">← 決算日程＋コンセンサス</span><br/>
+    <span class="bbg-cmd">ANR &lt;GO&gt;</span> <span class="bbg-comment">← アナリスト予想一覧＋ターゲット価格</span><br/>
+    <span class="bbg-comment">-- 感応度はIR資料PDF（TDnetまたは企業HP）で確認が最も確実</span>
+  </div>
+</div>
+</div>
+
+<!-- ==================== 5. CHECKLIST ==================== -->
+<div class="tab-content" id="tab-checklist">
+<div class="section">
+  <div class="section-title"><div class="icon" style="background:#fef3c7;">✅</div>テクニック⑤：決算前チェックリスト</div>
+
+  <div class="card">
+    <p>決算発表の<strong>1-2週間前</strong>に以下を準備しておくと、発表当日に即座に分析・レポート作成ができる。</p>
+  </div>
+
+  <div class="checklist">
+    <div class="checklist-title">🔍 決算発表前の準備（Pre-Earnings Checklist）</div>
+    <div class="check-item"><div class="check-num">1</div><div class="check-text"><strong>会社予想の前提条件を確認：</strong>原油/鉄鉱石/LME銅/為替の前提価格。「会社予想は何を織り込んでいるか」</div></div>
+    <div class="check-item"><div class="check-num">2</div><div class="check-text"><strong>実際の市況との乖離を計算：</strong>四半期中の平均原油/鉄鉱石/銅価格と前提の差。為替の実績平均。</div></div>
+    <div class="check-item"><div class="check-num">3</div><div class="check-text"><strong>感応度テーブルで上振れ/下振れを推定：</strong>Step2の乖離×感応度＝修正額。自分の利益予想を更新。</div></div>
+    <div class="check-item"><div class="check-num">4</div><div class="check-text"><strong>コンセンサス予想を確認：</strong>Bloomberg ANR、QUICKコンセンサス。自分の予想がコンセンサスの上/下どちらか。</div></div>
+    <div class="check-item"><div class="check-num">5</div><div class="check-text"><strong>前四半期の決算説明会のQ&Aを再読：</strong>経営陣が示した見通し・定性コメント。「前回言ったことが実現しているか」</div></div>
+    <div class="check-item"><div class="check-num">6</div><div class="check-text"><strong>セグメント別の予想を用意：</strong>全社だけでなくセグメント別の利益予想。発表当日にセグメントのサプライズを検知。</div></div>
+    <div class="check-item"><div class="check-num">7</div><div class="check-text"><strong>注目イベントリスト：</strong>期中に起きた特殊要因（鉱山事故/値上げ発表/M&A/設備トラブル/為替急変動）。ブリッジのどこに出るか。</div></div>
+  </div>
+
+  <div class="checklist">
+    <div class="checklist-title">📋 決算発表当日の分析手順（Post-Earnings Workflow）</div>
+    <div class="check-item"><div class="check-num">1</div><div class="check-text"><strong>ヘッドライン数字を即時チェック：</strong>売上/営業利益/純利益 vs コンセンサス。Beat/Miss/Inline？</div></div>
+    <div class="check-item"><div class="check-num">2</div><div class="check-text"><strong>在庫影響を即時除去：</strong>実力ベースの営業利益を計算。報告ベースのBeatが実力ベースでもBeatか確認。</div></div>
+    <div class="check-item"><div class="check-num">3</div><div class="check-text"><strong>ブリッジチャートを読む：</strong>利益変動の主因は？マージン？数量？原料？為替？持続的か一時的か？</div></div>
+    <div class="check-item"><div class="check-num">4</div><div class="check-text"><strong>通期ガイダンスの修正を確認：</strong>上方/下方修正？ 修正額の内訳は？ 前提条件の変更は？</div></div>
+    <div class="check-item"><div class="check-num">5</div><div class="check-text"><strong>配当/還元方針を確認：</strong>増配？自社株買い？配当性向の変更？素材セクターは還元がカタリストになりやすい。</div></div>
+    <div class="check-item"><div class="check-num">6</div><div class="check-text"><strong>決算説明会のQ&Aに注目：</strong>経営陣の定性コメント。市況見通し、設備投資計画、M&A方針。数字に出ない情報がここにある。</div></div>
+    <div class="check-item"><div class="check-num">7</div><div class="check-text"><strong>翌朝までにモデル更新＋レポート作成：</strong>Excelモデルを実績で更新→来期予想を修正→Morning Briefに組み込み。</div></div>
+  </div>
+
+  <div class="tip-box">
+    <div class="tip-title">💡 決算シーズンの時間管理</div>
+    <div class="tip-body">
+      カバレッジ45銘柄が2-3週間に集中して決算発表する。全部を同じ深さで見るのは不可能。<br/><br/>
+      <strong>Tier 1（即日分析）：</strong>日本製鉄、ENEOS、住友鉱山、フジクラ、商船三井 → ポートフォリオへの影響大<br/>
+      <strong>Tier 2（翌日分析）：</strong>JFE、出光、三菱マテリアル、住友電工、AGC<br/>
+      <strong>Tier 3（週末にまとめて）：</strong>その他のカバレッジ銘柄<br/><br/>
+      ファンドマネージャーが最も気にする銘柄を優先。事前にTier分けしておくことで決算シーズンを効率的に乗り切る。
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ==================== CROSS-CUTTING ==================== -->
+<div class="section">
+  <div class="section-title"><div class="icon" style="background:#d3f9d8;">🔗</div>横断テクニック：為替影響の分離</div>
+
+  <div class="card">
+    <p>
+      素材セクターは海外売上比率が高く、為替変動が利益を大きく動かす。
+      ただし為替の影響は「実力」ではない。<strong>為替一定ベース</strong>（恒常為替ベース）で前期比較するのがベストプラクティス。
+    </p>
+  </div>
+
+  <div class="calc-box">
+    <div class="calc-title">📝 為替影響の分離（例：住友鉱山）</div>
+    <div class="calc-row"><span class="calc-label">今期 営業利益</span><span class="calc-value">¥2,400億</span></div>
+    <div class="calc-row"><span class="calc-label">前期 営業利益</span><span class="calc-value">¥2,100億</span></div>
+    <div class="calc-row"><span class="calc-label">増減（報告ベース）</span><span class="calc-value">+¥300億 (+14%)</span></div>
+    <div class="calc-row negative"><span class="calc-label">うち為替影響（USD/JPY +5円分）</span><span class="calc-value">+¥75億</span></div>
+    <div class="calc-row negative"><span class="calc-label">うちLME価格変動（在庫評価含む）</span><span class="calc-value">+¥180億</span></div>
+    <div class="calc-row result"><span class="calc-label">実力ベース増減（為替＋市況除き）</span><span class="calc-value">+¥45億 (+2%)</span></div>
+  </div>
+
+  <div class="card">
+    <p>
+      報告ベースでは+14%の増益に見えるが、為替と市況を除くと<strong>実力は+2%しか改善していない</strong>。
+      この分解ができると、「本当に経営改善しているのか、追い風に乗っているだけなのか」を見抜ける。
+    </p>
+  </div>
+</div>
+
+<!-- Summary -->
+<div class="section">
+  <div class="section-title"><div class="icon" style="background:#e8f4fd;">✅</div>まとめ：5つのテクニックの使い分け</div>
+  <div class="card">
+    <p>
+      <strong>① 在庫影響除去：</strong>石油元売・非鉄金属で必須。報告ベースと実力ベースの乖離を把握。<br/><br/>
+      <strong>② ブリッジチャート：</strong>決算説明会の最重要スライド。変動要因を「持続的か一時的か」で仕分け。<br/><br/>
+      <strong>③ セグメント分解：</strong>複合企業は全社数字で見ない。セグメント別利益率とミックス変化を追跡。<br/><br/>
+      <strong>④ 感応度分析：</strong>「鉄鉱石$10でいくら動く？」を即答できるようにする。利益予想の調整に直結。<br/><br/>
+      <strong>⑤ 決算前チェックリスト：</strong>事前準備が8割。当日は「差分」だけ確認して即座にレポート。<br/><br/>
+      これらは全て相互に連動している。スプレッド分析（#1）で市況を把握し、サイクル判断（#2）で方向感を持ち、
+      決算分析（#3）で実績を検証する。この3つが素材アナリストの基本動作。
+    </p>
+  </div>
+</div>
+
+<div class="footnote">
+  素材セクター中級編 #3 / 7<br/>
+  次回：#4 中国データの読み方
+</div>
+
+<script>
+function switchTab(id){
+  document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('tab-'+id).classList.add('active');
+  event.target.classList.add('active');
+}
+</script>
+</body>
+</html>

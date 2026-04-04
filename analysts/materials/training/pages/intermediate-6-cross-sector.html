@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>素材セクター中級編 #6 — クロスセクター連鎖分析</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#f5f5f7;--card:#fff;--text:#1d1d1f;--sub:#6e6e73;--radius:16px;--shadow:0 1px 3px rgba(0,0,0,0.04);--gradient:linear-gradient(135deg,#1e3a5f 0%,#7c3aed 50%,#ec4899 100%);--red:#dc2626;--orange:#e8590c;--green:#059669;--blue:#3b82f6;--purple:#7c3aed;--pink:#ec4899;--gold:#f59e0b;}
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{font-family:'DM Sans','Noto Sans JP',sans-serif;background:var(--bg);color:var(--text);line-height:1.7;padding:24px 16px 60px;max-width:800px;margin:0 auto;}
+  .header{text-align:center;margin-bottom:40px;padding:32px 20px;background:var(--gradient);border-radius:var(--radius);color:#fff;position:relative;overflow:hidden;}
+  .header::before{content:'🔗';position:absolute;font-size:120px;opacity:0.06;top:-10px;right:-10px;}
+  .header .series-tag{display:inline-block;background:rgba(255,255,255,0.15);padding:4px 14px;border-radius:20px;font-size:12px;letter-spacing:1px;text-transform:uppercase;margin-bottom:12px;}
+  .header h1{font-size:26px;font-weight:700;margin-bottom:8px;}
+  .header p{font-size:14px;opacity:0.7;}
+  .section{margin-bottom:36px;}
+  .section-title{font-size:18px;font-weight:700;margin-bottom:16px;display:flex;align-items:center;gap:8px;}
+  .section-title .icon{width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;}
+  .card{background:var(--card);border-radius:var(--radius);padding:20px;box-shadow:var(--shadow);margin-bottom:12px;}
+  .card p{font-size:14px;color:var(--sub);}
+  .card p strong{color:var(--text);}
+
+  .tab-bar{display:flex;gap:4px;margin-bottom:16px;background:#e9ecef;border-radius:10px;padding:3px;overflow-x:auto;}
+  .tab-btn{flex:1;padding:8px 4px;border:none;background:transparent;border-radius:8px;font-family:inherit;font-size:11px;font-weight:600;color:var(--sub);cursor:pointer;transition:all 0.2s;white-space:nowrap;min-width:50px;}
+  .tab-btn.active{background:var(--card);color:var(--text);box-shadow:0 1px 3px rgba(0,0,0,0.08);}
+  .tab-content{display:none;}
+  .tab-content.active{display:block;}
+
+  /* Chain visualization */
+  .chain-flow{background:var(--card);border-radius:var(--radius);padding:20px;box-shadow:var(--shadow);margin-bottom:12px;overflow-x:auto;}
+  .chain-flow-title{font-weight:700;font-size:15px;margin-bottom:16px;}
+  .chain-row{display:flex;align-items:center;gap:0;min-width:500px;margin-bottom:8px;}
+  .chain-node{padding:10px 14px;border-radius:10px;font-size:12px;font-weight:600;text-align:center;white-space:nowrap;color:#fff;min-width:80px;}
+  .chain-arrow-r{padding:0 6px;color:var(--sub);font-size:14px;flex-shrink:0;}
+  .chain-impact{padding:4px 10px;border-radius:8px;font-size:11px;font-weight:600;margin-left:8px;}
+  .impact-pos{background:#d1fae5;color:#065f46;}
+  .impact-neg{background:#fee2e2;color:#991b1b;}
+  .impact-neutral{background:#fef3c7;color:#92400e;}
+
+  /* Pair trade */
+  .pair-card{background:var(--card);border-radius:var(--radius);padding:20px;box-shadow:var(--shadow);margin-bottom:12px;border-left:4px solid;}
+  .pair-header{display:flex;align-items:center;gap:8px;margin-bottom:10px;}
+  .pair-vs{font-size:20px;font-weight:800;color:var(--sub);}
+  .pair-card h3{font-size:15px;font-weight:700;}
+  .pair-card .pair-desc{font-size:13px;color:var(--sub);line-height:1.8;margin-bottom:10px;}
+  .pair-logic{background:#f8f9fa;border-radius:10px;padding:12px;font-size:12px;line-height:1.8;color:var(--sub);}
+  .pair-logic strong{color:var(--text);}
+  .pair-long{color:var(--green);font-weight:700;}
+  .pair-short{color:var(--red);font-weight:700;}
+
+  /* Matrix */
+  .matrix-table{width:100%;border-collapse:collapse;font-size:10px;background:var(--card);border-radius:12px;overflow:hidden;box-shadow:var(--shadow);}
+  .matrix-table th{padding:8px 6px;background:#f1f3f5;font-weight:600;font-size:9px;text-align:center;}
+  .matrix-table th:first-child{text-align:left;min-width:90px;}
+  .matrix-table td{padding:6px;border-bottom:1px solid #f1f3f5;text-align:center;font-size:10px;}
+  .matrix-table td:first-child{text-align:left;font-weight:600;font-size:10px;}
+  .matrix-table tr:last-child td{border-bottom:none;}
+  .m-pos{color:var(--green);font-weight:700;}
+  .m-neg{color:var(--red);font-weight:700;}
+  .m-flat{color:var(--sub);}
+
+  .tip-box{background:#fffbeb;border:1px solid #fcd34d;border-radius:12px;padding:16px;margin-bottom:12px;}
+  .tip-box .tip-title{font-weight:700;font-size:13px;color:#92400e;margin-bottom:6px;}
+  .tip-box .tip-body{font-size:12px;color:#78350f;line-height:1.7;}
+  .warn-box{background:#fef2f2;border:1px solid #fca5a5;border-radius:12px;padding:16px;margin-bottom:12px;}
+  .warn-box .warn-title{font-weight:700;font-size:13px;color:#991b1b;margin-bottom:6px;}
+  .warn-box .warn-body{font-size:12px;color:#7f1d1d;line-height:1.7;}
+
+  .calc-box{background:#1e293b;border-radius:var(--radius);padding:20px;color:#e2e8f0;margin-bottom:12px;font-size:13px;line-height:2;}
+  .calc-box .calc-title{font-weight:700;font-size:14px;color:#c4b5fd;margin-bottom:10px;}
+  .calc-row{display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:1px solid rgba(255,255,255,0.06);}
+  .calc-row:last-child{border-bottom:none;}
+  .calc-row .calc-label{color:#94a3b8;flex:1;}
+  .calc-row .calc-value{font-weight:700;text-align:right;min-width:100px;}
+  .cv-pos{color:#4ade80;}
+  .cv-neg{color:#f87171;}
+
+  details{background:var(--card);border-radius:12px;padding:16px;box-shadow:var(--shadow);margin-bottom:10px;}
+  details summary{font-weight:700;font-size:14px;cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center;}
+  details summary::after{content:'▸';transition:transform 0.2s;}
+  details[open] summary::after{transform:rotate(90deg);}
+  details .detail-body{margin-top:12px;font-size:13px;color:var(--sub);line-height:1.8;}
+  .footnote{margin-top:40px;text-align:center;font-size:12px;color:var(--sub);}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="series-tag">素材セクター中級編 #6</div>
+  <h1>クロスセクター連鎖分析</h1>
+  <p>コモディティ価格変動がバリューチェーンをどう波及するか</p>
+</div>
+
+<!-- 1. Concept -->
+<div class="section">
+  <div class="section-title"><div class="icon" style="background:#ede9fe;">📖</div>なぜクロスセクター分析が武器になるか</div>
+  <div class="card">
+    <p>
+      素材セクターの45銘柄は<strong>原料・エネルギー・輸送</strong>で全てつながっている。
+      鉄鉱石の価格変動は鉄鋼の利益を動かし、鉄鋼の値上げは自動車のコストを動かす。
+      原油の変動はナフサ→石化→プラスチック→包装と連鎖する。<br/><br/>
+      <strong>1つのコモディティの変動から、複数の銘柄への影響を同時に推定できるのが素材アナリストの最大の強み。</strong>
+      これは他セクター（テック、金融等）のアナリストには真似できない独自の分析価値。
+    </p>
+  </div>
+</div>
+
+<!-- 2. Chain analysis -->
+<div class="section">
+  <div class="section-title"><div class="icon" style="background:#fef3c7;">⛓</div>主要な連鎖パターン</div>
+
+  <div class="tab-bar">
+    <button class="tab-btn active" onclick="switchTab('chain_io')">鉄鉱石連鎖</button>
+    <button class="tab-btn" onclick="switchTab('chain_oil')">原油連鎖</button>
+    <button class="tab-btn" onclick="switchTab('chain_cu')">銅連鎖</button>
+    <button class="tab-btn" onclick="switchTab('chain_china')">中国需要連鎖</button>
+    <button class="tab-btn" onclick="switchTab('chain_ev')">EV連鎖</button>
+  </div>
+
+  <!-- Iron Ore Chain -->
+  <div class="tab-content active" id="tab-chain_io">
+    <div class="chain-flow">
+      <div class="chain-flow-title">鉄鉱石 +$20/t が波及するパス</div>
+      <div class="chain-row">
+        <div class="chain-node" style="background:var(--orange);">鉄鉱石+$20</div>
+        <div class="chain-arrow-r">→</div>
+        <div class="chain-node" style="background:var(--green);">鉱業（BHP/Rio）<br/>増益</div>
+        <div class="chain-impact impact-pos">利益+数十億$</div>
+      </div>
+      <div class="chain-row">
+        <div class="chain-node" style="background:var(--orange);">鉄鉱石+$20</div>
+        <div class="chain-arrow-r">→</div>
+        <div class="chain-node" style="background:var(--red);">日本製鉄/JFE<br/>コスト増</div>
+        <div class="chain-impact impact-neg">利益▲700億円</div>
+      </div>
+      <div class="chain-row">
+        <div class="chain-node" style="background:var(--blue);">鉄鋼値上げ</div>
+        <div class="chain-arrow-r">→</div>
+        <div class="chain-node" style="background:var(--purple);">自動車OEM<br/>コスト増</div>
+        <div class="chain-impact impact-neg">鋼板+¥5,000/t</div>
+      </div>
+      <div class="chain-row">
+        <div class="chain-node" style="background:var(--blue);">鉄鋼値上げ</div>
+        <div class="chain-arrow-r">→</div>
+        <div class="chain-node" style="background:var(--purple);">ゼネコン<br/>資材コスト増</div>
+        <div class="chain-impact impact-neg">H形鋼/鉄筋UP</div>
+      </div>
+      <div class="chain-row">
+        <div class="chain-node" style="background:var(--orange);">鉄鉱石+$20</div>
+        <div class="chain-arrow-r">→</div>
+        <div class="chain-node" style="background:var(--blue);">ドライバルク<br/>荷動き</div>
+        <div class="chain-impact impact-neutral">BDIへの影響は限定的（量は変わらず）</div>
+      </div>
+    </div>
+
+    <div class="calc-box">
+      <div class="calc-title">📝 鉄鉱石+$20/tの利益インパクト試算</div>
+      <div class="calc-row"><span class="calc-label">BHP：鉄鉱石EBITDA</span><span class="calc-value cv-pos">+$3.2B（生産1.6億t×$20）</span></div>
+      <div class="calc-row"><span class="calc-label">日本製鉄：原料コスト</span><span class="calc-value cv-neg">▲¥700億（4,000万t×1.6×$20×¥150）</span></div>
+      <div class="calc-row"><span class="calc-label">JFE HD：原料コスト</span><span class="calc-value cv-neg">▲¥350億（粗鋼約半分）</span></div>
+      <div class="calc-row"><span class="calc-label">鉄鋼が値上げ成功した場合</span><span class="calc-value cv-pos">スプレッド維持→中立</span></div>
+      <div class="calc-row"><span class="calc-label">鉄鋼が値上げ失敗した場合</span><span class="calc-value cv-neg">スプレッド縮小→大幅減益</span></div>
+    </div>
+
+    <div class="tip-box">
+      <div class="tip-title">💡 連鎖のカギは「値上げの転嫁力」</div>
+      <div class="tip-body">
+        鉄鉱石が上がっても、鉄鋼メーカーが鋼材値上げを顧客に転嫁できれば<strong>スプレッドは維持</strong>される。
+        日本製鉄の橋本社長の「適正マージン確保」方針は、この転嫁力の強さを示す。
+        転嫁できるか否かは、①需要の強さ（景気）、②競合の状況（中国の輸出圧力）、③契約形態（紐付き vs 店売り）で決まる。
+      </div>
+    </div>
+  </div>
+
+  <!-- Oil Chain -->
+  <div class="tab-content" id="tab-chain_oil">
+    <div class="chain-flow">
+      <div class="chain-flow-title">原油 +$20/bbl が波及するパス</div>
+      <div class="chain-row">
+        <div class="chain-node" style="background:var(--green);">INPEX<br/>増益</div>
+        <div class="chain-impact impact-pos">+¥1,000億（$20×50億円/ドル）</div>
+      </div>
+      <div class="chain-row">
+        <div class="chain-node" style="background:var(--orange);">原油+$20</div>
+        <div class="chain-arrow-r">→</div>
+        <div class="chain-node" style="background:#94a3b8;">ENEOS<br/>在庫評価益</div>
+        <div class="chain-arrow-r">→</div>
+        <div class="chain-node" style="background:#94a3b8;">精製マージン<br/>変動なし?</div>
+        <div class="chain-impact impact-neutral">実力は中立。在庫益は一時的</div>
+      </div>
+      <div class="chain-row">
+        <div class="chain-node" style="background:var(--orange);">ナフサ+$130/t</div>
+        <div class="chain-arrow-r">→</div>
+        <div class="chain-node" style="background:var(--red);">石化メーカー<br/>コスト増</div>
+        <div class="chain-impact impact-neg">スプレッド縮小リスク</div>
+      </div>
+      <div class="chain-row">
+        <div class="chain-node" style="background:var(--orange);">燃料費UP</div>
+        <div class="chain-arrow-r">→</div>
+        <div class="chain-node" style="background:var(--red);">海運<br/>航海費増</div>
+        <div class="chain-impact impact-neg">バンカー費+30-40%</div>
+      </div>
+      <div class="chain-row">
+        <div class="chain-node" style="background:var(--orange);">エネルギー費UP</div>
+        <div class="chain-arrow-r">→</div>
+        <div class="chain-node" style="background:var(--red);">ガラス/セメント/製紙<br/>コスト増</div>
+        <div class="chain-impact impact-neg">原価の30-40%がエネルギー</div>
+      </div>
+      <div class="chain-row">
+        <div class="chain-node" style="background:var(--green);">高油価</div>
+        <div class="chain-arrow-r">→</div>
+        <div class="chain-node" style="background:var(--green);">OCTG需要<br/>（鋼管）</div>
+        <div class="chain-impact impact-pos">掘削リグ増→日本製鉄パイプ好調</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <p>
+        原油+$20は<strong>「勝者」と「敗者」を同時に生む</strong>。
+        INPEX（上流）は大幅増益。ENEOS（下流）は実力中立だが在庫益で見かけ好決算。
+        石化・ガラス・セメント・製紙は「エネルギーコストの被害者」として減益圧力。
+        海運は燃料費増だがOPEC増産→荷動き増なら運賃上昇でオフセット可能。<br/><br/>
+        <strong>→ 原油$20上昇のシナリオで、カバレッジ全体への影響を一覧化できるのがクロスセクター分析の価値。</strong>
+      </p>
+    </div>
+  </div>
+
+  <!-- Copper Chain -->
+  <div class="tab-content" id="tab-chain_cu">
+    <div class="chain-flow">
+      <div class="chain-flow-title">LME銅 +$1,000/t が波及するパス</div>
+      <div class="chain-row">
+        <div class="chain-node" style="background:var(--green);">住友鉱山<br/>鉱山利益+</div>
+        <div class="chain-impact impact-pos">+¥250億（鉱山15万t×$1,000+在庫影響）</div>
+      </div>
+      <div class="chain-row">
+        <div class="chain-node" style="background:#94a3b8;">三菱マテリアル<br/>製錬</div>
+        <div class="chain-impact impact-neutral">TC/RCに変化なければ中立。在庫評価益のみ</div>
+      </div>
+      <div class="chain-row">
+        <div class="chain-node" style="background:var(--blue);">銅地金+$1,000</div>
+        <div class="chain-arrow-r">→</div>
+        <div class="chain-node" style="background:#94a3b8;">住友電工/古河電工<br/>銅パススルー</div>
+        <div class="chain-impact impact-neutral">売上増だが利益中立（口銭モデル）</div>
+      </div>
+      <div class="chain-row">
+        <div class="chain-node" style="background:var(--blue);">銅高</div>
+        <div class="chain-arrow-r">→</div>
+        <div class="chain-node" style="background:var(--red);">電線需要家<br/>コスト増</div>
+        <div class="chain-impact impact-neg">電力会社の設備投資判断に影響</div>
+      </div>
+      <div class="chain-row">
+        <div class="chain-node" style="background:var(--blue);">銅高（長期）</div>
+        <div class="chain-arrow-r">→</div>
+        <div class="chain-node" style="background:var(--green);">アルミ代替<br/>加速</div>
+        <div class="chain-impact impact-pos">UACJ等アルミ加工に追い風</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- China Demand Chain -->
+  <div class="tab-content" id="tab-chain_china">
+    <div class="chain-flow">
+      <div class="chain-flow-title">🇨🇳 中国景気回復シナリオの波及</div>
+      <div class="chain-row">
+        <div class="chain-node" style="background:var(--red);">中国PMI改善<br/>不動産回復</div>
+        <div class="chain-arrow-r">→</div>
+        <div class="chain-node" style="background:var(--green);">鉄鉱石↑<br/>原料炭↑</div>
+        <div class="chain-impact impact-pos">鉱業（BHP/Rio）↑</div>
+      </div>
+      <div class="chain-row">
+        <div style="min-width:80px;"></div>
+        <div class="chain-arrow-r">→</div>
+        <div class="chain-node" style="background:var(--green);">中国HRC↑<br/>鉄鋼市況改善</div>
+        <div class="chain-impact impact-pos">日本製鉄↑（輸出+スプレッド）</div>
+      </div>
+      <div class="chain-row">
+        <div style="min-width:80px;"></div>
+        <div class="chain-arrow-r">→</div>
+        <div class="chain-node" style="background:var(--green);">LME銅/ニッケル↑</div>
+        <div class="chain-impact impact-pos">住友鉱山↑</div>
+      </div>
+      <div class="chain-row">
+        <div style="min-width:80px;"></div>
+        <div class="chain-arrow-r">→</div>
+        <div class="chain-node" style="background:var(--green);">ドライバルク<br/>荷動き↑</div>
+        <div class="chain-impact impact-pos">BDI↑→海運↑</div>
+      </div>
+      <div class="chain-row">
+        <div style="min-width:80px;"></div>
+        <div class="chain-arrow-r">→</div>
+        <div class="chain-node" style="background:var(--green);">原油需要↑</div>
+        <div class="chain-impact impact-pos">INPEX↑、タンカー↑</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <p>
+        <strong>中国景気回復は素材セクター「全面高」のカタリスト。</strong>
+        逆に中国景気悪化は全面安。これが素材セクターが「中国テーマ」と呼ばれる理由。
+        ただし個別にはタイムラグと強度が異なる。鉄鋼/鉄鉱石が最初に動き、石化/製紙は遅行する。
+      </p>
+    </div>
+  </div>
+
+  <!-- EV Chain -->
+  <div class="tab-content" id="tab-chain_ev">
+    <div class="chain-flow">
+      <div class="chain-flow-title">🔋 EV普及加速シナリオの波及</div>
+      <div class="chain-row">
+        <div class="chain-node" style="background:var(--green);">銅 +80kg/台</div>
+        <div class="chain-impact impact-pos">銅需要構造増→住友鉱山/フジクラ↑</div>
+      </div>
+      <div class="chain-row">
+        <div class="chain-node" style="background:var(--green);">ニッケル +40kg/台</div>
+        <div class="chain-impact impact-pos">NMC電池需要→住友鉱山正極材↑</div>
+      </div>
+      <div class="chain-row">
+        <div class="chain-node" style="background:var(--green);">アルミ +100kg/台</div>
+        <div class="chain-impact impact-pos">車体軽量化→UACJ/神戸製鋼Al部門↑</div>
+      </div>
+      <div class="chain-row">
+        <div class="chain-node" style="background:var(--green);">電磁鋼板 需要増</div>
+        <div class="chain-impact impact-pos">駆動モーター用→日本製鉄↑（戦略製品）</div>
+      </div>
+      <div class="chain-row">
+        <div class="chain-node" style="background:var(--green);">高圧ハーネス</div>
+        <div class="chain-impact impact-pos">400-800V→住友電工↑（単価数倍）</div>
+      </div>
+      <div class="chain-row">
+        <div class="chain-node" style="background:var(--red);">ガソリン需要↓</div>
+        <div class="chain-impact impact-neg">ENEOS/出光→精製マージン長期圧力</div>
+      </div>
+      <div class="chain-row">
+        <div class="chain-node" style="background:var(--red);">鋼材使用量↓</div>
+        <div class="chain-impact impact-neg">ICE比▲200kg→鉄鋼の自動車向け数量減</div>
+      </div>
+    </div>
+
+    <div class="tip-box">
+      <div class="tip-title">💡 EV化は「勝者と敗者を同時に生む」テーマ</div>
+      <div class="tip-body">
+        同じ素材セクター内で銅/ニッケル/アルミ/電磁鋼板は<strong>EV勝者</strong>、
+        ガソリン/通常鋼材はEV敗者。FMへのプレゼンでは「EV化で何が増えて何が減るか」を
+        定量的に示すことで、セクター内のロング/ショートのアイデアを提供できる。
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 3. Impact Matrix -->
+<div class="section">
+  <div class="section-title"><div class="icon" style="background:#dbeafe;">📊</div>コモディティ変動 × 銘柄 影響マトリクス</div>
+
+  <div class="card" style="padding:0;overflow-x:auto;">
+    <table class="matrix-table">
+      <thead>
+        <tr>
+          <th>変動シナリオ</th><th>日本<br/>製鉄</th><th>INPEX</th><th>住友<br/>鉱山</th><th>ENEOS</th><th>フジクラ</th><th>AGC</th><th>レンゴー</th><th>商船<br/>三井</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>鉄鉱石 +$20</td><td class="m-neg">▼▼</td><td class="m-flat">—</td><td class="m-flat">—</td><td class="m-flat">—</td><td class="m-flat">—</td><td class="m-flat">—</td><td class="m-flat">—</td><td class="m-flat">△</td></tr>
+        <tr><td>原油 +$20</td><td class="m-neg">▼</td><td class="m-pos">▲▲</td><td class="m-flat">—</td><td class="m-flat">→</td><td class="m-flat">—</td><td class="m-neg">▼</td><td class="m-neg">▼</td><td class="m-neg">▼</td></tr>
+        <tr><td>LME銅 +$1,000</td><td class="m-flat">—</td><td class="m-flat">—</td><td class="m-pos">▲▲</td><td class="m-flat">—</td><td class="m-flat">→</td><td class="m-flat">—</td><td class="m-flat">—</td><td class="m-flat">—</td></tr>
+        <tr><td>USD/JPY +10円</td><td class="m-pos">▲</td><td class="m-pos">▲▲</td><td class="m-pos">▲</td><td class="m-flat">→</td><td class="m-pos">▲</td><td class="m-pos">▲</td><td class="m-neg">▼</td><td class="m-pos">▲</td></tr>
+        <tr><td>中国PMI改善</td><td class="m-pos">▲▲</td><td class="m-pos">▲</td><td class="m-pos">▲▲</td><td class="m-pos">▲</td><td class="m-flat">—</td><td class="m-pos">▲</td><td class="m-flat">△</td><td class="m-pos">▲▲</td></tr>
+        <tr><td>DC投資加速</td><td class="m-flat">—</td><td class="m-flat">—</td><td class="m-flat">△</td><td class="m-flat">—</td><td class="m-pos">▲▲▲</td><td class="m-flat">△</td><td class="m-flat">—</td><td class="m-flat">—</td></tr>
+        <tr><td>EV普及加速</td><td class="m-flat">→</td><td class="m-neg">▼</td><td class="m-pos">▲▲</td><td class="m-neg">▼</td><td class="m-pos">▲</td><td class="m-pos">▲</td><td class="m-flat">—</td><td class="m-pos">▲</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="card" style="font-size:11px;color:var(--sub);">
+    <p>▲▲＝強いプラス ▲＝プラス →＝中立 ▼＝マイナス ▼▼＝強いマイナス △＝間接的に軽微 —＝無関係<br/>
+    ※ このマトリクスをExcelで管理し、主要シナリオごとにポートフォリオへの影響を即時試算できるようにする</p>
+  </div>
+</div>
+
+<!-- 4. Pair Trade Ideas -->
+<div class="section">
+  <div class="section-title"><div class="icon" style="background:#fce7f3;">💡</div>ペアトレード・アイデアの発想法</div>
+  <div class="card">
+    <p>
+      クロスセクター分析の最大の実践的価値は<strong>ペアトレード（ロング/ショートの組み合わせ）</strong>のアイデア創出。
+      同じシナリオの「勝者をロング、敗者をショート」すれば、市場全体のリスクを中和しつつ利益を追える。
+      <strong>マーケットニュートラル戦略</strong>のファンドマネージャーが最も欲しい分析。
+    </p>
+  </div>
+
+  <div class="pair-card" style="border-color:var(--blue);">
+    <div class="pair-header">
+      <h3>鉄鉱石上昇シナリオ</h3>
+    </div>
+    <div class="pair-logic">
+      <span class="pair-long">Long：住友鉱山（5713）</span> — 銅/金の鉱山利益＋鉄鉱石は直接連動しないが、コモディティ全般の上昇環境でLME銅/金も上がりやすい<br/>
+      <span class="pair-short">Short：JFE HD（5411）</span> — 原料コスト増の影響が大きい。紐付き比率が日本製鉄より低く、スプレッド感応度が高い<br/><br/>
+      <strong>ロジック：</strong>鉄鉱石上昇は「原料の売り手」に有利、「買い手」に不利。この裏表の関係を利用。
+    </div>
+  </div>
+
+  <div class="pair-card" style="border-color:var(--green);">
+    <div class="pair-header">
+      <h3>DC投資加速 × 中国不動産低迷</h3>
+    </div>
+    <div class="pair-logic">
+      <span class="pair-long">Long：フジクラ（5803）</span> — DC向け光接続製品の需要爆発。中国不動産とは無関係<br/>
+      <span class="pair-short">Short：太平洋セメント（5233）</span> — 国内建設投資依存。中国セメント過剰が間接的な圧力<br/><br/>
+      <strong>ロジック：</strong>テーマ性（DC/AI）の勝者 vs 構造的逆風（内需型建設）の敗者。異なるドライバーの組合せ。
+    </div>
+  </div>
+
+  <div class="pair-card" style="border-color:var(--purple);">
+    <div class="pair-header">
+      <h3>原油高シナリオ</h3>
+    </div>
+    <div class="pair-logic">
+      <span class="pair-long">Long：INPEX（1605）</span> — 油価直結の純粋E&P。$10で+¥500億の感応度<br/>
+      <span class="pair-short">Short：AGC（5201）</span> — ガラス溶融のLNG/重油コスト増。板ガラスは値上げ転嫁に時間がかかる<br/><br/>
+      <strong>ロジック：</strong>原油の「生産者」vs「消費者」。同じ原油変動で逆方向に動く。
+    </div>
+  </div>
+
+  <div class="warn-box">
+    <div class="warn-title">⚠ ペアトレードの注意点</div>
+    <div class="warn-body">
+      <strong>① 流動性：</strong>ショートサイドは貸株が必要。小型株は貸株コストが高い/借りられないことがある。<br/>
+      <strong>② 相関の崩壊：</strong>「理論上は逆に動くはず」が、個別要因（M&A/決算サプライズ/需給要因）で相関が崩れることがある。<br/>
+      <strong>③ バイサイドの自分はペアトレードの「実行」ではなく「アイデア提供」が役割。</strong>FMが実行判断する。
+    </div>
+  </div>
+</div>
+
+<!-- 5. Practical workflow -->
+<div class="section">
+  <div class="section-title"><div class="icon" style="background:#d1fae5;">🔄</div>実践ワークフロー</div>
+
+  <div class="card">
+    <p><strong>Step 1：トリガーの特定</strong><br/>
+    「何が動いたか？」→ 鉄鉱石が$10急落、中国PMIが50割れ、OPEC増産決定、等。Morning Briefのニュースから。</p>
+  </div>
+  <div class="card">
+    <p><strong>Step 2：影響マトリクスで波及先を特定</strong><br/>
+    上のマトリクスで「この変動が45銘柄のどこに効くか」を即座に確認。</p>
+  </div>
+  <div class="card">
+    <p><strong>Step 3：感応度で定量化</strong><br/>
+    #3の感応度テーブルを使って「何億円のインパクトか」を計算。</p>
+  </div>
+  <div class="card">
+    <p><strong>Step 4：タイムラグを考慮</strong><br/>
+    原料変動→利益影響は1-3ヶ月のラグ。紐付き契約は四半期/半期で価格改定。即座に全額は効かない。</p>
+  </div>
+  <div class="card">
+    <p><strong>Step 5：FMへのコミュニケーション</strong><br/>
+    「鉄鉱石+$10で日本製鉄▲350億、JFE▲180億、ただし来期値上げ浸透で回復見込み。住友鉱山は銅連動で別テーマ」のように、連鎖と差別化を1分で説明。</p>
+  </div>
+</div>
+
+<!-- Summary -->
+<div class="section">
+  <div class="section-title"><div class="icon" style="background:#e8f4fd;">✅</div>まとめ</div>
+  <div class="card">
+    <p>
+      <strong>① 1つのコモディティ変動→複数銘柄への波及を同時に推定する。</strong>これが素材アナリストの独自価値。<br/><br/>
+      <strong>② 影響マトリクスをExcelで常に更新しておく。</strong>主要シナリオ7-8個 × カバレッジ銘柄のインパクト表。<br/><br/>
+      <strong>③ 「勝者と敗者」を組み合わせてペアトレード・アイデアを創出する。</strong>マーケットニュートラルFMへの最大の貢献。<br/><br/>
+      <strong>④ タイムラグを常に意識する。</strong>原料→コスト→値上げ→利益反映まで1-6ヶ月のラグ。<br/><br/>
+      <strong>→ 入門編（セクター構造）→ 中級編#1-5（分析手法）→ #6（連鎖）で全てが繋がる。</strong>
+      クロスセクター分析は中級編の総仕上げ。
+    </p>
+  </div>
+</div>
+
+<div class="footnote">
+  素材セクター中級編 #6 / 7<br/>
+  次回：#7 セルサイドレポートの読み方・使い方（最終回）
+</div>
+
+<script>
+function switchTab(id){
+  document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('tab-'+id).classList.add('active');
+  event.target.classList.add('active');
+}
+</script>
+</body>
+</html>

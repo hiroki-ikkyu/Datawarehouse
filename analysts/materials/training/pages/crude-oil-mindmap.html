@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>原油精製マインドマップ</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0f1117;
+    --card-bg: rgba(255,255,255,0.06);
+    --card-border: rgba(255,255,255,0.08);
+    --text: #e8e8ed;
+    --sub: #8e8e93;
+    --radius: 14px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'DM Sans', 'Noto Sans JP', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  .header {
+    text-align: center;
+    padding: 32px 20px 20px;
+  }
+
+  .header .tag {
+    display: inline-block;
+    background: rgba(255,255,255,0.08);
+    padding: 4px 14px;
+    border-radius: 20px;
+    font-size: 11px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--sub);
+    margin-bottom: 10px;
+  }
+
+  .header h1 {
+    font-size: 24px;
+    font-weight: 700;
+    background: linear-gradient(135deg, #ffd43b, #ff922b, #f06595);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .header p {
+    font-size: 13px;
+    color: var(--sub);
+    margin-top: 6px;
+  }
+
+  /* Controls */
+  .controls {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px 16px 20px;
+    flex-wrap: wrap;
+  }
+
+  .ctrl-btn {
+    padding: 8px 16px;
+    border-radius: 20px;
+    border: 1px solid var(--card-border);
+    background: var(--card-bg);
+    color: var(--sub);
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .ctrl-btn:hover, .ctrl-btn.active {
+    background: rgba(255,255,255,0.12);
+    color: var(--text);
+    border-color: rgba(255,255,255,0.2);
+  }
+
+  /* SVG Canvas */
+  .map-container {
+    width: 100%;
+    overflow: auto;
+    -webkit-overflow-scrolling: touch;
+    padding: 0 8px 40px;
+  }
+
+  svg {
+    display: block;
+    margin: 0 auto;
+  }
+
+  /* Tooltip */
+  .tooltip {
+    position: fixed;
+    background: #1c1c1e;
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 12px;
+    padding: 14px 16px;
+    font-size: 12px;
+    color: var(--text);
+    max-width: 260px;
+    line-height: 1.7;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.15s;
+    z-index: 100;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.5);
+  }
+
+  .tooltip.show { opacity: 1; }
+
+  .tooltip .tt-title {
+    font-weight: 700;
+    font-size: 13px;
+    margin-bottom: 6px;
+  }
+
+  .tooltip .tt-body {
+    color: var(--sub);
+  }
+
+  .legend {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    flex-wrap: wrap;
+    padding: 8px 16px 24px;
+    font-size: 11px;
+    color: var(--sub);
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .legend-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+  }
+
+  .footnote {
+    text-align: center;
+    font-size: 11px;
+    color: var(--sub);
+    padding: 0 16px 40px;
+    opacity: 0.6;
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="tag">素材セクター入門 #2</div>
+  <h1>原油 精製マインドマップ</h1>
+  <p>原油 → 留分 → 誘導品 → 最終用途</p>
+</div>
+
+<div class="legend">
+  <div class="legend-item"><div class="legend-dot" style="background:#ff922b"></div>原油</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#ffd43b"></div>留分（蒸留で分離）</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#74c0fc"></div>誘導品（二次加工）</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#69db7c"></div>最終用途</div>
+</div>
+
+<div class="controls">
+  <button class="ctrl-btn active" onclick="showView('all')">全体表示</button>
+  <button class="ctrl-btn" onclick="showView('light')">軽質留分</button>
+  <button class="ctrl-btn" onclick="showView('middle')">中間留分</button>
+  <button class="ctrl-btn" onclick="showView('heavy')">重質留分</button>
+</div>
+
+<div class="map-container" id="mapContainer"></div>
+
+<div class="tooltip" id="tooltip">
+  <div class="tt-title" id="ttTitle"></div>
+  <div class="tt-body" id="ttBody"></div>
+</div>
+
+<div class="footnote">
+  ※ タップで詳細表示 ｜ 蒸留塔の上部ほど軽質（低沸点）、下部ほど重質（高沸点）
+</div>
+
+<script>
+const DATA = {
+  id: 'crude',
+  label: '原油',
+  labelEn: 'Crude Oil',
+  color: '#ff922b',
+  info: 'WTI・ブレント・ドバイが3大指標。API比重で軽質/重質、硫黄分でスイート/サワーに分類。軽質スイートが最も高価。',
+  children: [
+    {
+      id: 'lpg',
+      label: 'LPG',
+      labelEn: 'C3-C4 / ~30℃',
+      color: '#ffd43b',
+      group: 'light',
+      info: '蒸留塔の最上部で回収。プロパン(C3)・ブタン(C4)。沸点が最も低い。',
+      children: [
+        { id: 'lpg_fuel', label: 'プロパンガス', color: '#69db7c', info: '家庭用・タクシー用燃料。ENEOSグローブ等が販売。', group: 'light' },
+        { id: 'lpg_chem', label: '化学原料', color: '#69db7c', info: 'プロピレン原料。PDH（プロパン脱水素）でポリプロピレンへ。', group: 'light' },
+      ]
+    },
+    {
+      id: 'naphtha',
+      label: 'ナフサ',
+      labelEn: 'C5-C10 / 30-180℃',
+      color: '#ffd43b',
+      group: 'light',
+      info: '石油化学の最重要原料。日本はナフサクラッカーが主流（米国はエタンクラッカー）。ナフサ価格は石化製品のコストベース。',
+      children: [
+        { id: 'ethylene', label: 'エチレン', color: '#74c0fc', info: '石化の基礎中の基礎。ナフサを800℃超で熱分解（スチームクラッカー）して生産。', group: 'light',
+          children: [
+            { id: 'pe', label: 'ポリエチレン', color: '#69db7c', info: '世界最大の汎用樹脂。レジ袋・フィルム・容器。HDPE/LDPEに分類。', group: 'light' },
+            { id: 'pvc', label: 'PVC（塩ビ）', color: '#69db7c', info: '建材パイプ・窓枠。信越化学(4063)が世界最大手。', group: 'light' },
+            { id: 'eo', label: 'エチレンオキサイド', color: '#69db7c', info: '不凍液・界面活性剤・PET原料へ。三菱ケミカル等。', group: 'light' },
+          ]
+        },
+        { id: 'propylene', label: 'プロピレン', color: '#74c0fc', info: 'エチレンと並ぶ主要基礎化学品。ナフサ分解の副産物としても得られる。', group: 'light',
+          children: [
+            { id: 'pp', label: 'ポリプロピレン', color: '#69db7c', info: '自動車部品・食品容器・不織布（マスク）。軽量・耐熱。', group: 'light' },
+            { id: 'an', label: 'アクリロニトリル', color: '#69db7c', info: '炭素繊維・ABS樹脂の原料。東レの炭素繊維はここから。', group: 'light' },
+          ]
+        },
+        { id: 'btx', label: 'BTX（芳香族）', color: '#74c0fc', info: 'ベンゼン(B)・トルエン(T)・キシレン(X)。接触改質で生産。', group: 'light',
+          children: [
+            { id: 'benzene_d', label: 'スチレン→PS/ABS', color: '#69db7c', info: '発泡スチロール・家電筐体。デンカ等。', group: 'light' },
+            { id: 'px', label: 'パラキシレン→PET', color: '#69db7c', info: 'PETボトル・ポリエステル繊維の原料。アジア需要大。', group: 'light' },
+          ]
+        },
+        { id: 'gasoline_blend', label: 'ガソリン基材', color: '#69db7c', info: 'ナフサの一部はガソリンにブレンド。オクタン価調整用。', group: 'light' },
+      ]
+    },
+    {
+      id: 'gasoline',
+      label: 'ガソリン',
+      labelEn: 'C5-C12 / 30-210℃',
+      color: '#ffd43b',
+      group: 'light',
+      info: '自動車用燃料。日本ではレギュラー・ハイオクの2種。EV普及で長期需要減トレンド。',
+      children: [
+        { id: 'car_fuel', label: '自動車燃料', color: '#69db7c', info: '日本の石油需要の約3割。ENEOS(5020)が国内シェア5割。', group: 'light' },
+        { id: 'ev_impact', label: 'EV代替リスク', color: '#69db7c', info: 'ガソリン需要ピークアウトは2030年前後の見方。精製能力の過剰問題。', group: 'light' },
+      ]
+    },
+    {
+      id: 'kerosene',
+      label: '灯油',
+      labelEn: 'C10-C16 / 170-250℃',
+      color: '#ffd43b',
+      group: 'middle',
+      info: '蒸留塔の中間部。暖房用・ジェット燃料のベース。季節性が強い（冬場需要増）。',
+      children: [
+        { id: 'heating', label: '暖房用灯油', color: '#69db7c', info: '北日本で需要大。10-3月に需要集中。灯油先物で価格形成。', group: 'middle' },
+        { id: 'jet', label: 'ジェット燃料', color: '#69db7c', info: '灯油ベースのJet A-1。航空需要回復で需要増。SAF（持続可能な航空燃料）が注目。', group: 'middle' },
+      ]
+    },
+    {
+      id: 'diesel',
+      label: '軽油',
+      labelEn: 'C14-C20 / 250-350℃',
+      color: '#ffd43b',
+      group: 'middle',
+      info: '中間留分の主力。トラック・建機・船舶用。経済活動に直結するため景気指標的な意味合いも。',
+      children: [
+        { id: 'truck', label: 'トラック・建機', color: '#69db7c', info: '物流の血液。軽油価格は運送コストに直結。物流2024年問題とも関連。', group: 'middle' },
+        { id: 'marine_diesel', label: '船舶用（MGO）', color: '#69db7c', info: 'IMO2020規制で低硫黄燃料へシフト。海運コストに影響。', group: 'middle' },
+      ]
+    },
+    {
+      id: 'heavy_oil',
+      label: '重油',
+      labelEn: 'C20-C50 / 350-500℃',
+      color: '#ffd43b',
+      group: 'heavy',
+      info: '蒸留塔の下部。A重油（発電・工場）とC重油（船舶・発電）に分類。需要は減少トレンド。',
+      children: [
+        { id: 'power', label: '発電用', color: '#69db7c', info: '石油火力は日本で縮小中。LNG・再エネに置換。ピーク電源として残存。', group: 'heavy' },
+        { id: 'bunker', label: '船舶燃料（HSFO/VLSFO）', color: '#69db7c', info: 'IMO規制で高硫黄C重油→VLSFO/スクラバー対応へ。コスト増。', group: 'heavy' },
+        { id: 'industrial', label: '工場ボイラー', color: '#69db7c', info: '製紙・セメント等の熱源。石炭・LNGとの代替関係。', group: 'heavy' },
+      ]
+    },
+    {
+      id: 'residue',
+      label: '残渣（アスファルト等）',
+      labelEn: 'C50+ / 500℃超',
+      color: '#ffd43b',
+      group: 'heavy',
+      info: '蒸留塔の最底部。そのままでは価値が低いが、分解装置（FCC/コーカー）で軽質化可能。',
+      children: [
+        { id: 'asphalt', label: 'アスファルト', color: '#69db7c', info: '道路舗装。日本ではENEOS・出光が製造。公共投資に需要連動。', group: 'heavy' },
+        { id: 'petcoke', label: '石油コークス', color: '#69db7c', info: 'アルミ製錬の電極材・セメント燃料。カーボン素材の原料にも。', group: 'heavy' },
+        { id: 'fcc', label: 'FCC分解→ガソリン', color: '#74c0fc', info: '残渣を触媒で分解し軽質化。ガソリン収率を上げる装置。重質原油の処理能力＝精製マージンの鍵。', group: 'heavy' },
+      ]
+    },
+  ]
+};
+
+// Flatten tree
+function flattenTree(node, depth=0, parent=null, list=[]) {
+  list.push({ ...node, depth, parent, childCount: (node.children||[]).length });
+  (node.children||[]).forEach(c => flattenTree(c, depth+1, node.id, list));
+  return list;
+}
+
+const allNodes = flattenTree(DATA);
+
+// Layout: horizontal tree
+function buildLayout(data, filter) {
+  const nodes = [];
+  const links = [];
+
+  function traverse(node, x, yStart, yEnd, depth) {
+    const y = (yStart + yEnd) / 2;
+    const visible = filter === 'all' || !node.group || node.group === filter || depth === 0;
+
+    if (!visible) return null;
+
+    nodes.push({ id: node.id, label: node.label, labelEn: node.labelEn || '', color: node.color, info: node.info, x, y, depth, group: node.group });
+
+    const children = (node.children || []).filter(c => filter === 'all' || !c.group || c.group === filter);
+    if (children.length > 0) {
+      const childHeight = (yEnd - yStart) / children.length;
+      children.forEach((child, i) => {
+        const cy1 = yStart + childHeight * i;
+        const cy2 = cy1 + childHeight;
+        const result = traverse(child, x + 220, cy1, cy2, depth + 1);
+        if (result) {
+          links.push({ x1: x, y1: y, x2: result.x, y2: result.y, color: child.color });
+        }
+      });
+    }
+
+    return { x, y };
+  }
+
+  // Calc total height based on leaf count
+  function countLeaves(node, filter) {
+    const children = (node.children || []).filter(c => filter === 'all' || !c.group || c.group === filter);
+    if (children.length === 0) return 1;
+    return children.reduce((sum, c) => sum + countLeaves(c, filter), 0);
+  }
+
+  const leaves = countLeaves(data, filter);
+  const totalH = Math.max(leaves * 52, 400);
+  const xStart = 100;
+
+  traverse(data, xStart, 20, totalH, 0);
+
+  return { nodes, links, width: 1050, height: totalH + 40 };
+}
+
+let currentView = 'all';
+
+function showView(view) {
+  currentView = view;
+  document.querySelectorAll('.ctrl-btn').forEach(b => b.classList.remove('active'));
+  event.target.classList.add('active');
+  render();
+}
+
+function render() {
+  const { nodes, links, width, height } = buildLayout(DATA, currentView);
+  const container = document.getElementById('mapContainer');
+
+  let svg = `<svg width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" xmlns="http://www.w3.org/2000/svg">`;
+
+  // Defs
+  svg += `<defs>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="3" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>`;
+
+  // Links
+  links.forEach(l => {
+    const mx = (l.x1 + l.x2) / 2;
+    svg += `<path d="M${l.x1+60} ${l.y1} C${mx} ${l.y1}, ${mx} ${l.y2}, ${l.x2-60} ${l.y2}" 
+      fill="none" stroke="${l.color}" stroke-width="1.5" opacity="0.3"/>`;
+  });
+
+  // Nodes
+  nodes.forEach(n => {
+    const w = n.depth === 0 ? 120 : (n.depth === 1 ? 110 : (n.depth === 2 ? 110 : 110));
+    const h = n.labelEn ? 46 : 36;
+    const rx = n.depth === 0 ? 24 : 10;
+
+    svg += `<g class="node" data-id="${n.id}" style="cursor:pointer" 
+      onmouseenter="showTooltip(event,'${n.id}')" onmouseleave="hideTooltip()"
+      ontouchstart="showTooltip(event,'${n.id}')">`;
+
+    // Background
+    svg += `<rect x="${n.x - w/2}" y="${n.y - h/2}" width="${w}" height="${h}" rx="${rx}" 
+      fill="${n.depth === 0 ? n.color : 'rgba(255,255,255,0.06)'}" 
+      stroke="${n.color}" stroke-width="${n.depth === 0 ? 0 : 1.5}" opacity="0.9"/>`;
+
+    // Glow for root
+    if (n.depth === 0) {
+      svg += `<rect x="${n.x - w/2}" y="${n.y - h/2}" width="${w}" height="${h}" rx="${rx}" 
+        fill="${n.color}" filter="url(#glow)" opacity="0.3"/>`;
+    }
+
+    // Label
+    const textColor = n.depth === 0 ? '#1a1a2e' : '#e8e8ed';
+    const fontSize = n.depth === 0 ? 15 : (n.depth === 1 ? 13 : 12);
+    const labelY = n.labelEn ? n.y - 5 : n.y + 4;
+
+    svg += `<text x="${n.x}" y="${labelY}" text-anchor="middle" 
+      fill="${textColor}" font-family="'DM Sans','Noto Sans JP',sans-serif" 
+      font-size="${fontSize}" font-weight="700">${n.label}</text>`;
+
+    if (n.labelEn) {
+      svg += `<text x="${n.x}" y="${n.y + 12}" text-anchor="middle" 
+        fill="${n.depth === 0 ? 'rgba(26,26,46,0.6)' : 'rgba(255,255,255,0.4)'}" 
+        font-family="'DM Sans',sans-serif" font-size="9">${n.labelEn}</text>`;
+    }
+
+    svg += `</g>`;
+  });
+
+  svg += `</svg>`;
+  container.innerHTML = svg;
+
+  // Store node info for tooltip
+  window._nodeMap = {};
+  nodes.forEach(n => window._nodeMap[n.id] = n);
+}
+
+// Tooltip info map
+const infoMap = {};
+allNodes.forEach(n => { infoMap[n.id] = { title: n.label + (n.labelEn ? ` (${n.labelEn})` : ''), body: n.info || '' }; });
+
+function showTooltip(e, id) {
+  const tt = document.getElementById('tooltip');
+  const info = infoMap[id];
+  if (!info) return;
+
+  document.getElementById('ttTitle').textContent = info.title;
+  document.getElementById('ttBody').textContent = info.body;
+
+  // Position
+  const touch = e.touches ? e.touches[0] : e;
+  let left = touch.clientX + 12;
+  let top = touch.clientY - 60;
+
+  if (left + 270 > window.innerWidth) left = touch.clientX - 270;
+  if (top < 10) top = touch.clientY + 20;
+
+  tt.style.left = left + 'px';
+  tt.style.top = top + 'px';
+  tt.classList.add('show');
+}
+
+function hideTooltip() {
+  document.getElementById('tooltip').classList.remove('show');
+}
+
+document.addEventListener('touchstart', (e) => {
+  if (!e.target.closest('.node')) hideTooltip();
+});
+
+render();
+</script>
+</body>
+</html>

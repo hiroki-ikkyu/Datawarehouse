@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>素材セクター入門 #5 — 線材・ケーブル（Wire & Cable）</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:#f5f5f7; --card:#ffffff; --text:#1d1d1f; --sub:#6e6e73;
+    --accent:#2c2c2e; --radius:16px;
+    --shadow:0 1px 3px rgba(0,0,0,0.04);
+    --shadow-lg:0 4px 20px rgba(0,0,0,0.08);
+    --wc-gradient:linear-gradient(135deg,#0b7285 0%,#1098ad 50%,#15aabf 100%);
+    --power:#e8590c; --optical:#5c7cfa; --auto:#2b8a3e;
+    --electron:#ae3ec9; --dc:#0c8599;
+    --red:#c92a2a; --orange:#e8590c; --green:#2b8a3e;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{font-family:'DM Sans','Noto Sans JP',sans-serif;background:var(--bg);color:var(--text);line-height:1.7;padding:24px 16px 60px;max-width:800px;margin:0 auto;}
+
+  .header{text-align:center;margin-bottom:40px;padding:32px 20px;background:var(--wc-gradient);border-radius:var(--radius);color:#fff;position:relative;overflow:hidden;}
+  .header::before{content:'🔌';position:absolute;font-size:120px;opacity:0.06;top:-10px;right:-10px;}
+  .header .series-tag{display:inline-block;background:rgba(255,255,255,0.15);padding:4px 14px;border-radius:20px;font-size:12px;letter-spacing:1px;text-transform:uppercase;margin-bottom:12px;}
+  .header h1{font-size:26px;font-weight:700;margin-bottom:8px;}
+  .header p{font-size:14px;opacity:0.7;}
+
+  .section{margin-bottom:32px;}
+  .section-title{font-size:18px;font-weight:700;margin-bottom:16px;display:flex;align-items:center;gap:8px;}
+  .section-title .icon{width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;}
+
+  .card{background:var(--card);border-radius:var(--radius);padding:20px;box-shadow:var(--shadow);margin-bottom:12px;}
+  .card p{font-size:14px;color:var(--sub);}
+  .card p strong{color:var(--text);}
+
+  /* Value chain */
+  .chain-container{overflow-x:auto;padding:8px 0;}
+  .chain{display:flex;align-items:stretch;gap:0;min-width:700px;}
+  .chain-step{flex:1;text-align:center;}
+  .chain-box{border-radius:12px;padding:14px 8px;box-shadow:var(--shadow);min-height:100px;display:flex;flex-direction:column;align-items:center;justify-content:center;border:2px solid transparent;}
+  .chain-box .emoji{font-size:22px;margin-bottom:4px;}
+  .chain-box .label{font-size:11px;font-weight:700;}
+  .chain-box .sub-label{font-size:9px;color:var(--sub);margin-top:2px;}
+  .chain-box.active{border-color:#1098ad;background:#e3fafc;}
+  .chain-box.upstream{border-color:#e8590c;background:#fff4e6;}
+  .chain-arrow{display:flex;align-items:center;justify-content:center;width:24px;flex-shrink:0;color:var(--sub);font-size:14px;}
+
+  /* Tabs */
+  .tab-bar{display:flex;gap:4px;margin-bottom:16px;background:#e9ecef;border-radius:10px;padding:3px;overflow-x:auto;}
+  .tab-btn{flex:1;padding:8px 4px;border:none;background:transparent;border-radius:8px;font-family:inherit;font-size:11px;font-weight:600;color:var(--sub);cursor:pointer;transition:all 0.2s;white-space:nowrap;min-width:55px;}
+  .tab-btn.active{background:var(--card);color:var(--text);box-shadow:0 1px 3px rgba(0,0,0,0.08);}
+  .tab-content{display:none;}
+  .tab-content.active{display:block;}
+
+  /* Product profile */
+  .prod-profile{background:var(--card);border-radius:var(--radius);padding:20px;box-shadow:var(--shadow);border-top:4px solid;margin-bottom:12px;}
+  .prod-header{display:flex;align-items:center;gap:10px;margin-bottom:12px;}
+  .prod-badge{padding:4px 10px;border-radius:8px;font-size:11px;font-weight:700;color:#fff;}
+  .prod-profile h3{font-size:16px;font-weight:700;}
+  .prod-profile .prod-desc{font-size:13px;color:var(--sub);line-height:1.8;margin-bottom:12px;}
+  .prod-stats{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+  .stat-item{background:#f8f9fa;border-radius:8px;padding:10px;}
+  .stat-label{font-size:10px;color:var(--sub);font-weight:600;text-transform:uppercase;letter-spacing:0.5px;}
+  .stat-value{font-size:15px;font-weight:700;margin-top:2px;}
+  .stat-note{font-size:10px;color:var(--sub);margin-top:2px;}
+
+  /* Formula */
+  .formula-box{background:var(--wc-gradient);border-radius:var(--radius);padding:24px;color:#fff;text-align:center;margin-bottom:12px;}
+  .formula-box .formula{font-size:15px;font-weight:700;margin-bottom:8px;}
+  .formula-box .formula .var{color:#c3fae8;}
+  .formula-box .formula .op{color:#ffd43b;margin:0 4px;}
+  .formula-box .note{font-size:12px;opacity:0.6;}
+
+  /* DC callout */
+  .dc-box{background:linear-gradient(135deg,#1864ab 0%,#228be6 100%);border-radius:var(--radius);padding:24px;color:#fff;margin-bottom:12px;}
+  .dc-box h3{font-size:17px;font-weight:700;margin-bottom:10px;}
+  .dc-box p{font-size:13px;opacity:0.9;line-height:1.8;}
+
+  /* Spread visual */
+  .spread-visual{background:var(--card);border-radius:var(--radius);padding:24px;box-shadow:var(--shadow);margin-bottom:12px;}
+  .spread-bar-container{margin:16px 0;}
+  .spread-bar{display:flex;height:44px;border-radius:10px;overflow:hidden;font-size:11px;font-weight:600;color:#fff;}
+  .spread-seg{display:flex;align-items:center;justify-content:center;padding:0 6px;white-space:nowrap;}
+  .spread-label{display:flex;justify-content:space-between;font-size:12px;color:var(--sub);margin-top:8px;}
+  .spread-annotation{font-size:13px;color:var(--sub);text-align:center;margin-top:16px;padding-top:16px;border-top:1px solid #f1f3f5;line-height:1.8;}
+
+  /* KPI table */
+  .kpi-table{width:100%;border-collapse:collapse;font-size:13px;}
+  .kpi-table th{text-align:left;padding:10px 12px;background:#f1f3f5;font-weight:600;}
+  .kpi-table td{padding:10px 12px;border-bottom:1px solid #f1f3f5;}
+  .kpi-table tr:last-child td{border-bottom:none;}
+  .kpi-table .kpi-name{font-weight:600;}
+  .kpi-table .kpi-why{color:var(--sub);font-size:12px;}
+
+  /* Risk */
+  .risk-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+  .risk-item{background:var(--card);border-radius:12px;padding:14px;box-shadow:var(--shadow);border-left:4px solid;}
+  .risk-item.high{border-color:var(--red);}
+  .risk-item.mid{border-color:var(--orange);}
+  .risk-item.low{border-color:var(--green);}
+  .risk-item .risk-name{font-weight:700;font-size:13px;margin-bottom:4px;}
+  .risk-item .risk-desc{font-size:11px;color:var(--sub);}
+
+  /* Coverage table */
+  .cov-table{width:100%;border-collapse:collapse;font-size:12px;background:var(--card);border-radius:12px;overflow:hidden;box-shadow:var(--shadow);}
+  .cov-table th{text-align:left;padding:10px 12px;background:#f1f3f5;font-weight:600;font-size:11px;}
+  .cov-table td{padding:10px 12px;border-bottom:1px solid #f1f3f5;}
+  .cov-table tr:last-child td{border-bottom:none;}
+
+  /* Expandable */
+  details{background:var(--card);border-radius:12px;padding:16px;box-shadow:var(--shadow);margin-bottom:10px;}
+  details summary{font-weight:700;font-size:14px;cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center;}
+  details summary::after{content:'▸';transition:transform 0.2s;}
+  details[open] summary::after{transform:rotate(90deg);}
+  details .detail-body{margin-top:12px;font-size:13px;color:var(--sub);line-height:1.8;}
+
+  .footnote{margin-top:40px;text-align:center;font-size:12px;color:var(--sub);}
+
+  @media(max-width:520px){.prod-stats,.risk-grid{grid-template-columns:1fr;}.chain{min-width:620px;}}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="series-tag">素材セクター入門 #5</div>
+  <h1>線材・ケーブル（Wire & Cable）</h1>
+  <p>電力・通信・自動車のインフラ神経網</p>
+</div>
+
+<!-- 1. Overview -->
+<div class="section">
+  <div class="section-title">
+    <div class="icon" style="background:#e3fafc;">📖</div>
+    線材・ケーブルセクターとは
+  </div>
+  <div class="card">
+    <p>
+      <strong>電力ケーブル、光ファイバー、自動車ワイヤーハーネス、電子ワイヤー</strong>など、
+      あらゆる「つなぐ」製品を製造するセクター。地味だが経済インフラの根幹。<br/><br/>
+      日本の電線3大メーカー＝<strong>住友電気工業（5802）、古河電気工業（5801）、フジクラ（5803）</strong>。
+      いずれも祖業は銅線だが、現在は光ファイバー・自動車部品・電子デバイスまで多角化。<br/><br/>
+      <strong>2つのメガトレンドが追い風：</strong>①データセンター（光ファイバー・高速コネクタ爆発需要）、②再エネ・EV（送電線・車載ハーネス増加）。
+      特にフジクラの光接続製品は2024-25年に需要が供給を大幅に上回り、株価が数倍に急騰した象徴的事例。
+    </p>
+  </div>
+</div>
+
+<!-- 2. Value Chain -->
+<div class="section">
+  <div class="section-title">
+    <div class="icon" style="background:#fff3bf;">🔗</div>
+    バリューチェーン
+  </div>
+  <div class="chain-container">
+    <div class="chain">
+      <div class="chain-step">
+        <div class="chain-box upstream">
+          <div class="emoji">🪨</div>
+          <div class="label">銅鉱山</div>
+          <div class="sub-label">#1 鉱業</div>
+        </div>
+      </div>
+      <div class="chain-arrow">→</div>
+      <div class="chain-step">
+        <div class="chain-box upstream">
+          <div class="emoji">🔥</div>
+          <div class="label">製錬→銅地金</div>
+          <div class="sub-label">#4 非鉄</div>
+        </div>
+      </div>
+      <div class="chain-arrow">→</div>
+      <div class="chain-step">
+        <div class="chain-box active">
+          <div class="emoji">〰️</div>
+          <div class="label">荒引線/光母材</div>
+          <div class="sub-label">Wire Rod / Preform</div>
+        </div>
+      </div>
+      <div class="chain-arrow">→</div>
+      <div class="chain-step">
+        <div class="chain-box active">
+          <div class="emoji">🔧</div>
+          <div class="label">伸線・撚線・被覆</div>
+          <div class="sub-label">Drawing & Coating</div>
+        </div>
+      </div>
+      <div class="chain-arrow">→</div>
+      <div class="chain-step">
+        <div class="chain-box active">
+          <div class="emoji">📦</div>
+          <div class="label">ケーブル製品</div>
+          <div class="sub-label">Cable Products</div>
+        </div>
+      </div>
+      <div class="chain-arrow">→</div>
+      <div class="chain-step">
+        <div class="chain-box">
+          <div class="emoji">🏗</div>
+          <div class="label">需要家</div>
+          <div class="sub-label">電力/通信/自動車</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="card" style="margin-top:8px;">
+    <p>
+      <strong>水色枠＝線材・ケーブルメーカーの守備範囲。</strong>
+      原料の銅地金は#4非鉄から調達。光ファイバーの母材（プリフォーム）は石英ガラスベースで自社製造。
+      銅線系は「銅価格＋加工賃（口銭）」のパススルーモデル、光ファイバー系は技術で差別化する付加価値モデル。
+    </p>
+  </div>
+</div>
+
+<!-- 3. Profit structure -->
+<div class="section">
+  <div class="section-title">
+    <div class="icon" style="background:#ffe3e3;">💰</div>
+    利益構造 — 2つの全く異なるモデル
+  </div>
+
+  <div class="formula-box">
+    <div class="formula">
+      <span class="var">【銅線系】売上</span>
+      <span class="op">=</span>
+      <span class="var">銅価格（パススルー）</span>
+      <span class="op">+</span>
+      <span class="var">加工賃（口銭）</span>
+    </div>
+    <div class="note">銅価格は顧客に転嫁。真の利益は加工賃部分のみ</div>
+  </div>
+
+  <div class="formula-box">
+    <div class="formula">
+      <span class="var">【光/電子系】売上</span>
+      <span class="op">=</span>
+      <span class="var">技術付加価値</span>
+      <span class="op">×</span>
+      <span class="var">数量</span>
+    </div>
+    <div class="note">原材料比率が低く、技術・ブランドで価格支配力。高マージン</div>
+  </div>
+
+  <div class="spread-visual">
+    <div style="font-weight:700;font-size:14px;margin-bottom:4px;">セグメント別の利益率イメージ</div>
+    <div style="font-size:12px;color:var(--sub);margin-bottom:16px;">同じ「線材メーカー」でも事業により利益率が全く異なる</div>
+
+    <div class="spread-bar-container">
+      <div style="font-size:12px;font-weight:600;margin-bottom:6px;color:var(--power);">電力ケーブル（銅線系）</div>
+      <div class="spread-bar">
+        <div class="spread-seg" style="width:65%;background:#e8590c;">銅パススルー</div>
+        <div class="spread-seg" style="width:20%;background:#868e96;">加工費</div>
+        <div class="spread-seg" style="width:10%;background:#495057;">固定費</div>
+        <div class="spread-seg" style="width:5%;background:#2b8a3e;">利益</div>
+      </div>
+      <div style="font-size:10px;color:var(--sub);margin-top:4px;margin-bottom:16px;">営業利益率 3-5% 程度</div>
+
+      <div style="font-size:12px;font-weight:600;margin-bottom:6px;color:var(--optical);">光接続製品・電子デバイス</div>
+      <div class="spread-bar">
+        <div class="spread-seg" style="width:25%;background:#5c7cfa;">原材料</div>
+        <div class="spread-seg" style="width:30%;background:#868e96;">加工・R&D</div>
+        <div class="spread-seg" style="width:20%;background:#495057;">固定費</div>
+        <div class="spread-seg" style="width:25%;background:#2b8a3e;">利益</div>
+      </div>
+      <div style="font-size:10px;color:var(--sub);margin-top:4px;">営業利益率 15-25%+</div>
+    </div>
+
+    <div class="spread-annotation">
+      <strong>→ アナリストが見るべきは「製品ミックス」。</strong><br/>
+      銅線系比率が高い会社（古河電工）vs 光/電子比率が高い会社（フジクラ）でバリュエーションの議論が全く異なる。
+      「銅パススルー」を除いた実質売上・利益で比較するのが正しい分析。
+    </div>
+  </div>
+</div>
+
+<!-- 4. Product segments -->
+<div class="section">
+  <div class="section-title">
+    <div class="icon" style="background:#d3f9d8;">📦</div>
+    製品セグメント別プロファイル
+  </div>
+
+  <div class="tab-bar">
+    <button class="tab-btn active" onclick="switchTab('power')">電力ケーブル</button>
+    <button class="tab-btn" onclick="switchTab('optical')">光ファイバー</button>
+    <button class="tab-btn" onclick="switchTab('autowr')">自動車</button>
+    <button class="tab-btn" onclick="switchTab('electron')">電子デバイス</button>
+    <button class="tab-btn" onclick="switchTab('dctheme')">DC需要</button>
+  </div>
+
+  <!-- Power Cable -->
+  <div class="tab-content active" id="tab-power">
+    <div class="prod-profile" style="border-color:var(--power);">
+      <div class="prod-header">
+        <span class="prod-badge" style="background:var(--power);">⚡</span>
+        <h3>電力ケーブル — インフラの血管</h3>
+      </div>
+      <div class="prod-desc">
+        発電所から家庭・工場まで電力を届ける。<strong>低圧（~1kV）、高圧（~77kV）、超高圧（77kV~500kV）、海底ケーブル</strong>に分類。
+        再エネ（洋上風力→陸上変電所の海底送電）とグリッド増強で世界的に需要爆発中。
+        超高圧・海底ケーブルは技術障壁が高く、世界で<strong>Prysmian（伊）、Nexans（仏）、住友電工</strong>の3強寡占。
+      </div>
+      <div class="prod-stats">
+        <div class="stat-item">
+          <div class="stat-label">原材料</div>
+          <div class="stat-value">銅（導体）+ XLPE（絶縁）</div>
+          <div class="stat-note">銅価格パススルー。アルミ導体も増加中</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-label">主要プレーヤー</div>
+          <div class="stat-value">住友電工、Prysmian</div>
+          <div class="stat-note">海底ケーブルは受注残で2-3年先まで埋まる</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-label">成長ドライバー</div>
+          <div class="stat-value">洋上風力＋グリッド更新</div>
+          <div class="stat-note">欧州・アジアの再エネ接続。国際連系線</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-label">利益率</div>
+          <div class="stat-value">OPM 3-7%</div>
+          <div class="stat-note">銅除き。海底ケーブルは10%超可能</div>
+        </div>
+      </div>
+    </div>
+
+    <details>
+      <summary>海底ケーブル — 再エネ時代の花形</summary>
+      <div class="detail-body">
+        洋上風力発電所→陸上変電所を結ぶ海底送電ケーブルは、1プロジェクトで数百〜数千億円規模。
+        技術障壁が極めて高い（水深数百m、数百km敷設、超高圧絶縁）。<br/><br/>
+        <strong>世界3強：</strong>Prysmian（伊）、Nexans（仏）、住友電工。この3社でシェア約7割。<br/>
+        <strong>受注残：</strong>各社とも受注残が3年分超に膨張。需要＞供給の超タイト状態。<br/>
+        <strong>敷設船：</strong>専用の大型ケーブル敷設船が必要で、これ自体がボトルネック。<br/><br/>
+        → 住友電工の海底ケーブル事業は中長期の利益成長ストーリーの中核。
+      </div>
+    </details>
+  </div>
+
+  <!-- Optical Fiber -->
+  <div class="tab-content" id="tab-optical">
+    <div class="prod-profile" style="border-color:var(--optical);">
+      <div class="prod-header">
+        <span class="prod-badge" style="background:var(--optical);">🔵</span>
+        <h3>光ファイバー・光接続製品 — データの高速道路</h3>
+      </div>
+      <div class="prod-desc">
+        ガラス繊維（石英ガラス）の中を光で信号を伝送。<strong>光ファイバー、光ケーブル、光コネクタ、光トランシーバー</strong>に分類。
+        データセンター内の高速接続で需要が爆発的に拡大中。AIの演算能力増大→GPU間接続の帯域需要→光接続製品の需要が指数関数的に成長。
+        <strong>フジクラの光コネクタ・光トランシーバー</strong>がこの分野のど真ん中。
+      </div>
+      <div class="prod-stats">
+        <div class="stat-item">
+          <div class="stat-label">原材料</div>
+          <div class="stat-value">石英ガラス（プリフォーム）</div>
+          <div class="stat-note">銅ではない。原材料費比率が低い→高マージン</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-label">世界大手</div>
+          <div class="stat-value">Corning、フジクラ、住友電工</div>
+          <div class="stat-note">プリフォーム製造技術が参入障壁</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-label">成長ドライバー</div>
+          <div class="stat-value">DC/AI + FTTH + 5G</div>
+          <div class="stat-note">DC内光配線が最大の成長市場</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-label">利益率</div>
+          <div class="stat-value">OPM 15-25%+</div>
+          <div class="stat-note">特にDC向け光接続はフジクラで20%超</div>
+        </div>
+      </div>
+    </div>
+
+    <details>
+      <summary>フジクラの光接続 — 2024-25年の象徴的成功例</summary>
+      <div class="detail-body">
+        フジクラの光接続製品（光コネクタ・融着接続機・光ケーブル）がAI/データセンター需要で爆発。
+        主力製品：<br/><br/>
+        <strong>・MPOコネクタ：</strong>多心一括接続。DC内のサーバー間を高密度に接続。<br/>
+        <strong>・融着接続機：</strong>光ファイバーを精密に融着する装置。世界シェアトップクラス。<br/>
+        <strong>・スパイダーウェブリボン（SWR）：</strong>高密度光ケーブル。DCの限られたスペースに大容量配線。<br/><br/>
+        2024年に営業利益が前年比数倍に拡大。株価も大幅上昇。
+        需要＞供給で値上げも浸透。設備増強が追いつかない状況。
+      </div>
+    </details>
+
+    <details>
+      <summary>光ファイバーの種類と用途</summary>
+      <div class="detail-body">
+        <strong>シングルモード（SMF）：</strong>長距離伝送用。通信キャリアの幹線、海底ケーブル。光が1つの経路のみ→減衰少ない。<br/>
+        <strong>マルチモード（MMF）：</strong>短距離用。DC内のサーバー間接続。OM3/OM4/OM5の規格。コストが安い。<br/><br/>
+        DC内では距離が短いためMMFが主流だったが、帯域要求の増大でSMFへの移行が進行中。
+        800G/1.6Tの次世代光トランシーバーでは SMF＋コヒーレント技術が標準に。
+      </div>
+    </details>
+  </div>
+
+  <!-- Automotive -->
+  <div class="tab-content" id="tab-autowr">
+    <div class="prod-profile" style="border-color:var(--auto);">
+      <div class="prod-header">
+        <span class="prod-badge" style="background:var(--auto);">🚗</span>
+        <h3>自動車ワイヤーハーネス — 車の神経系</h3>
+      </div>
+      <div class="prod-desc">
+        車内の電装品をつなぐ電線の束。1台のICE車に約1,500〜2,000本、EV車では3,000本超のワイヤーが走る。
+        ADAS（先進運転支援）・EV化で車1台あたりのハーネス使用量が急増。
+        <strong>住友電工</strong>が世界シェアトップクラス（Yazaki、Aptivと3強）。
+        労働集約的で、東南アジア・北アフリカに製造拠点を分散。
+      </div>
+      <div class="prod-stats">
+        <div class="stat-item">
+          <div class="stat-label">原材料</div>
+          <div class="stat-value">銅線＋被覆材（PVC等）</div>
+          <div class="stat-note">銅パススルー＋加工賃モデル</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-label">世界3強</div>
+          <div class="stat-value">住友電工、Yazaki、Aptiv</div>
+          <div class="stat-note">3社で世界シェア約6割</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-label">成長ドライバー</div>
+          <div class="stat-value">EV化→搭載量増</div>
+          <div class="stat-note">ADAS・車内LAN・高電圧ハーネス</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-label">リスク</div>
+          <div class="stat-value">自動車生産台数に直結</div>
+          <div class="stat-note">OEMの減産で即座に受注減</div>
+        </div>
+      </div>
+    </div>
+
+    <details>
+      <summary>EV化によるハーネス構造の変化</summary>
+      <div class="detail-body">
+        <strong>高電圧ハーネス：</strong>EV駆動用に400V-800Vの高電圧ハーネスが必要。太い銅線＋高性能絶縁。単価が従来の数倍。<br/>
+        <strong>車載LAN：</strong>ADAS/自動運転で車内通信量が激増。Ethernet（車載イーサネット）への移行。<br/>
+        <strong>軽量化：</strong>ハーネスは車重の3-5%を占める。アルミ導体への置換、ワイヤレス化も検討。<br/><br/>
+        → EV化はハーネスの「量」と「単価」の両方を押し上げる。住友電工にとってはポジティブ。
+      </div>
+    </details>
+  </div>
+
+  <!-- Electronic Devices -->
+  <div class="tab-content" id="tab-electron">
+    <div class="prod-profile" style="border-color:var(--electron);">
+      <div class="prod-header">
+        <span class="prod-badge" style="background:var(--electron);">🔬</span>
+        <h3>電子デバイス・FPC — 精密接続の世界</h3>
+      </div>
+      <div class="prod-desc">
+        <strong>FPC（フレキシブルプリント基板）：</strong>スマートフォン・タブレット内部の薄型配線。折り曲げ可能。
+        フジクラが世界トップクラス。iPhoneのヒンジ部分にも使用。<br/><br/>
+        <strong>電子ワイヤー：</strong>極細銅線、ボンディングワイヤー（半導体の金・銅線接続）。
+        <strong>化合物半導体材料：</strong>GaN/SiC基板。パワー半導体向け。住友電工が技術先行。
+      </div>
+      <div class="prod-stats">
+        <div class="stat-item">
+          <div class="stat-label">FPC市場</div>
+          <div class="stat-value">スマホ＋車載＋医療</div>
+          <div class="stat-note">フジクラ、NOK、日本メクトロン</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-label">化合物半導体</div>
+          <div class="stat-value">GaN/SiC基板</div>
+          <div class="stat-note">住友電工。EV用インバーター向けSiCが成長</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-label">利益率</div>
+          <div class="stat-value">OPM 10-20%</div>
+          <div class="stat-note">技術差別化が効くハイマージン事業</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-label">需要サイクル</div>
+          <div class="stat-value">スマホ出荷台数に連動</div>
+          <div class="stat-note">Appleの新機種サイクルが直接影響</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Data Center demand theme -->
+  <div class="tab-content" id="tab-dctheme">
+    <div class="dc-box">
+      <h3>🏢 データセンター需要 — 線材セクター最大のテーマ</h3>
+      <p>
+        AI/クラウドの爆発的成長でデータセンター投資が年率20-30%で拡大。
+        DC建設→電力ケーブル（住友電工）、DC内光配線→光コネクタ/光ケーブル（フジクラ）、
+        DC向け電力供給→送電線（住友電工）。線材セクター全体に恩恵。<br/><br/>
+        <strong>ハイパースケーラー</strong>（Google、Amazon、Microsoft、Meta）の設備投資額が先行指標。
+        各社の四半期決算でCapexガイダンスを確認→線材メーカーの受注見通しに直結。
+      </p>
+    </div>
+
+    <details>
+      <summary>DC内の配線構造（どこに何が使われるか）</summary>
+      <div class="detail-body">
+        <strong>① 外部電力引き込み：</strong>高圧電力ケーブル（住友電工、Prysmian）→変電設備→UPS。<br/>
+        <strong>② サーバー間接続：</strong>光ファイバー・光コネクタ（フジクラ、Corning）。Spine-Leaf構造。<br/>
+        <strong>③ ラック内接続：</strong>DAC（ダイレクトアタッチ銅線）or AOC（アクティブ光ケーブル）。短距離は銅、長距離は光。<br/>
+        <strong>④ GPU間接続：</strong>NVIDIAのNVLinkはAOCを使用。AI学習で最も帯域要求が高い部分。<br/><br/>
+        → GPU間の帯域要求が800G→1.6T→3.2Tへと急拡大。これに伴い光接続製品の需要は指数関数的に増加。
+      </div>
+    </details>
+
+    <details>
+      <summary>ハイパースケーラーのCapexをウォッチする方法</summary>
+      <div class="detail-body">
+        <strong>四半期決算：</strong>Google（Alphabet）、Amazon（AWS）、Microsoft（Azure）、MetaのCapexを確認。<br/>
+        <strong>通信キャリア：</strong>NTT（IOWN構想）、AT&T、Verizonの設備投資も光ファイバー需要の先行指標。<br/><br/>
+        2024-25年のハイパースケーラー合計Capexは年間$200B超に達する見通し。
+        この投資の10-15%が「ネットワーク/配線」に向かうとすれば、線材セクターへの波及は$20-30B規模。
+      </div>
+    </details>
+  </div>
+</div>
+
+<!-- 5. KPIs -->
+<div class="section">
+  <div class="section-title">
+    <div class="icon" style="background:#e8f4fd;">📊</div>
+    アナリストが見るべきKPI
+  </div>
+  <div class="card" style="padding:0;overflow:hidden;">
+    <table class="kpi-table">
+      <thead><tr><th>KPI</th><th>対象</th><th>なぜ重要か</th></tr></thead>
+      <tbody>
+        <tr>
+          <td class="kpi-name">銅除き売上・利益</td>
+          <td>電力ケーブル</td>
+          <td class="kpi-why">銅パススルーを除いた実質的な事業規模と収益性。住友電工はこの数字を開示。</td>
+        </tr>
+        <tr>
+          <td class="kpi-name">受注残（Backlog）</td>
+          <td>海底ケーブル</td>
+          <td class="kpi-why">海底ケーブルは長期プロジェクト。受注残の水準＝今後2-3年の売上の可視性。</td>
+        </tr>
+        <tr>
+          <td class="kpi-name">光関連売上成長率</td>
+          <td>光ファイバー</td>
+          <td class="kpi-why">フジクラ・住友電工の光接続事業の前年比成長率。DC需要の代理変数。</td>
+        </tr>
+        <tr>
+          <td class="kpi-name">設備投資額/増産計画</td>
+          <td>光コネクタ</td>
+          <td class="kpi-why">フジクラの増産投資がDC需要の強さを示す。供給キャパが売上の天井を決める。</td>
+        </tr>
+        <tr>
+          <td class="kpi-name">自動車生産台数</td>
+          <td>ハーネス</td>
+          <td class="kpi-why">ワイヤーハーネスの出荷量は自動車生産に直結。地域別（北米/欧州/アジア）で分解。</td>
+        </tr>
+        <tr>
+          <td class="kpi-name">LME銅価格</td>
+          <td>全体</td>
+          <td class="kpi-why">在庫評価影響。パススルーなので利益への直接影響は限定的だが、売上の上下に影響。</td>
+        </tr>
+        <tr>
+          <td class="kpi-name">セグメント利益率推移</td>
+          <td>全体</td>
+          <td class="kpi-why">各社ともセグメントが多い。光/電力/自動車/電子の利益率変化でミックス改善を測定。</td>
+        </tr>
+        <tr>
+          <td class="kpi-name">ハイパースケーラーCapex</td>
+          <td>光ファイバー</td>
+          <td class="kpi-why">Google/Amazon/Microsoft/MetaのCapex＝DC投資＝光接続需要の最大の先行指標。</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- 6. Risks -->
+<div class="section">
+  <div class="section-title">
+    <div class="icon" style="background:#ffe3e3;">⚠️</div>
+    主なリスク要因
+  </div>
+  <div class="risk-grid">
+    <div class="risk-item high">
+      <div class="risk-name">DC投資の減速</div>
+      <div class="risk-desc">ハイパースケーラーの投資サイクルに大きく依存。テック企業の業績悪化でCapex削減→受注急減リスク。</div>
+    </div>
+    <div class="risk-item high">
+      <div class="risk-name">自動車減産</div>
+      <div class="risk-desc">住友電工の売上の約4割が自動車関連。半導体不足・景気後退での減産が直撃。</div>
+    </div>
+    <div class="risk-item mid">
+      <div class="risk-name">中国メーカーの台頭</div>
+      <div class="risk-desc">光ファイバーは中国の長飛光纖（YOFC）が世界最大の生産量。価格競争圧力。ただし高付加価値品は日本勢優位。</div>
+    </div>
+    <div class="risk-item mid">
+      <div class="risk-name">銅価格急変動</div>
+      <div class="risk-desc">パススルーでも在庫評価影響あり。急落時は運転資本の圧縮で一時的にCFが悪化。</div>
+    </div>
+    <div class="risk-item mid">
+      <div class="risk-name">再エネ政策変更</div>
+      <div class="risk-desc">洋上風力の入札延期・中止。送電線計画の遅延。規制変更で海底ケーブル受注が先延ばしリスク。</div>
+    </div>
+    <div class="risk-item low">
+      <div class="risk-name">技術代替</div>
+      <div class="risk-desc">ワイヤレス給電、無線通信の進化でケーブル需要減。ただし大容量・高信頼性は当面有線が優位。</div>
+    </div>
+  </div>
+</div>
+
+<!-- 7. Coverage -->
+<div class="section">
+  <div class="section-title">
+    <div class="icon" style="background:#f3e8ff;">🇯🇵</div>
+    日本株カバレッジ対応表
+  </div>
+  <div class="card" style="padding:0;overflow:hidden;">
+    <table class="cov-table">
+      <thead><tr><th>銘柄</th><th>ポジション</th><th>注目ポイント</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><strong>住友電気工業（5802）</strong></td>
+          <td>電線最大手。総合型</td>
+          <td>自動車ハーネス世界トップ。海底ケーブル3強。超硬工具（イゲタロイ）。GaN基板。光ファイバー。多角化の典型。</td>
+        </tr>
+        <tr>
+          <td><strong>フジクラ（5803）</strong></td>
+          <td>光接続＋FPC特化</td>
+          <td>DC向け光コネクタ・SWR・融着接続機で世界的ポジション。2024-25年の最注目銘柄。利益率急改善中。電子（FPC）。</td>
+        </tr>
+        <tr>
+          <td><strong>古河電気工業（5801）</strong></td>
+          <td>電線＋光＋銅加工</td>
+          <td>光ファイバー・FITEL融着接続機。自動車部品（アルミ）。機能樹脂。銅加工（荒引線→伸銅品）。#4非鉄とも重複。</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <details>
+    <summary>3社の戦略的ポジショニングの違い</summary>
+    <div class="detail-body">
+      <strong>住友電工：</strong>「広く深い」超多角化。自動車ハーネスが売上の最大比率。海底ケーブルで差別化。安定型だが成長の軸が見えにくい時もある。<br/><br/>
+      <strong>フジクラ：</strong>「光に集中」。DC向け光接続製品に経営資源を集中。成長ストーリーが明確で市場評価が高い。ただしDC投資サイクルへの依存度大。<br/><br/>
+      <strong>古河電工：</strong>「素材寄り」。銅荒引線→電線の川上統合。光ファイバーも持つが規模でフジクラに劣る。機能製品（放熱材料等）の成長余地がカギ。<br/><br/>
+      → 同じ「電線セクター」でも株価の動きは全く異なる。製品ミックスとテーマ適合度で評価が分かれる。
+    </div>
+  </details>
+</div>
+
+<!-- 8. Cross sector -->
+<div class="section">
+  <div class="section-title">
+    <div class="icon" style="background:#d3f9d8;">🔄</div>
+    他セクターとのつながり
+  </div>
+  <details>
+    <summary>非鉄金属（#4）→ 線材 — 銅の最大需要先</summary>
+    <div class="detail-body">
+      世界の銅需要の約30%が電線・ケーブル用。LME銅価格は線材メーカーの原料コストだが、パススルーモデルのため利益影響は限定的。ただし在庫評価と運転資本に影響。住友鉱山の銅生産→住友電工の銅線という住友グループ内の垂直連携。
+    </div>
+  </details>
+  <details>
+    <summary>石油・エネルギー（#2）→ 線材 — 再エネ接続</summary>
+    <div class="detail-body">
+      洋上風力→海底ケーブル→変電所→送電線。再エネの拡大は電力ケーブル需要の構造的成長ドライバー。GX（グリーントランスフォーメーション）政策で日本の送電網更新も加速。
+    </div>
+  </details>
+  <details>
+    <summary>鉄鋼（#3）→ 線材 — 自動車を共有需要先として</summary>
+    <div class="detail-body">
+      鉄鋼のハイテン鋼板も、線材のワイヤーハーネスも、最大の顧客は自動車メーカー。自動車生産台数の増減は両セクターに同時に波及。EV化の影響は鉄鋼（鋼材使用量減）とは逆に線材（ハーネス増加）にはプラス。
+    </div>
+  </details>
+  <details>
+    <summary>ガラス（#6予定）→ 線材 — 光ファイバーの原料</summary>
+    <div class="detail-body">
+      光ファイバーの原料は超高純度石英ガラス。プリフォーム（母材）を線引きして光ファイバーにする。ガラスセクター（#6）と技術的に接点がある。信越化学グループのShin-Etsu Quartz等が石英原料を供給。
+    </div>
+  </details>
+</div>
+
+<!-- 9. Global -->
+<div class="section">
+  <div class="section-title">
+    <div class="icon" style="background:#e8f4fd;">🌍</div>
+    グローバルの参考プレーヤー
+  </div>
+  <div class="card">
+    <p>
+      <strong>Prysmian</strong>（伊）— 電力ケーブル世界最大手。海底ケーブルのリーダー。Nexans買収でさらに巨大化。<br/>
+      <strong>Nexans</strong>（仏）— 欧州2位。海底ケーブル＋建設用電線。<br/>
+      <strong>Corning</strong>（米）— 光ファイバーの世界最大手。ゴリラガラス（スマホ）でも有名。<br/>
+      <strong>YOFC（長飛光纖）</strong>（中国）— 光ファイバー生産量世界最大。価格攻勢。ただし品質差あり。<br/>
+      <strong>Aptiv</strong>（アイルランド）— 自動車ハーネス世界大手。元Delphi。自動運転技術も。<br/>
+      <strong>Yazaki</strong>（日本・非上場）— 自動車ハーネス世界最大級。住友電工と並ぶ。<br/><br/>
+      → Prysmianの決算・受注動向は海底ケーブル市場の温度計。Corningは光ファイバー需給の先行指標。
+    </p>
+  </div>
+</div>
+
+<div class="footnote">
+  素材セクター入門シリーズ #5 / 8<br/>
+  次回：#6 ガラス・セメント（Glass & Cement）
+</div>
+
+<script>
+function switchTab(id){
+  document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('tab-'+id).classList.add('active');
+  event.target.classList.add('active');
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>素材セクター上級編 #3 — 投資メモの書き方</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#f5f5f7;--card:#fff;--text:#1d1d1f;--sub:#6e6e73;--radius:16px;--shadow:0 1px 3px rgba(0,0,0,0.04);--gradient:linear-gradient(135deg,#1a1a2e 0%,#7c3aed 50%,#c026d3 100%);--red:#dc2626;--green:#059669;--blue:#3b82f6;--purple:#7c3aed;}
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{font-family:'DM Sans','Noto Sans JP',sans-serif;background:var(--bg);color:var(--text);line-height:1.7;padding:24px 16px 60px;max-width:800px;margin:0 auto;}
+  .header{text-align:center;margin-bottom:40px;padding:32px 20px;background:var(--gradient);border-radius:var(--radius);color:#fff;position:relative;overflow:hidden;}
+  .header::before{content:'📝';position:absolute;font-size:120px;opacity:0.06;top:-10px;right:-10px;}
+  .header .series-tag{display:inline-block;background:rgba(255,255,255,0.15);padding:4px 14px;border-radius:20px;font-size:12px;letter-spacing:1px;text-transform:uppercase;margin-bottom:12px;}
+  .header h1{font-size:24px;font-weight:700;margin-bottom:8px;}
+  .header p{font-size:14px;opacity:0.7;}
+  .section{margin-bottom:32px;}
+  .section-title{font-size:18px;font-weight:700;margin-bottom:16px;display:flex;align-items:center;gap:8px;}
+  .section-title .icon{width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;}
+  .card{background:var(--card);border-radius:var(--radius);padding:20px;box-shadow:var(--shadow);margin-bottom:12px;}
+  .card p{font-size:14px;color:var(--sub);}
+  .card p strong{color:var(--text);}
+
+  /* Memo template */
+  .memo{background:#1e293b;border-radius:var(--radius);padding:24px;color:#e2e8f0;margin-bottom:16px;font-size:12px;line-height:2;}
+  .memo .memo-header{color:#c084fc;font-weight:700;font-size:16px;margin-bottom:4px;}
+  .memo .memo-sub{color:#94a3b8;font-size:11px;margin-bottom:16px;}
+  .memo .memo-section{color:#fbbf24;font-weight:700;font-size:13px;margin-top:16px;margin-bottom:6px;padding-top:12px;border-top:1px solid rgba(255,255,255,0.06);}
+  .memo .memo-section:first-of-type{border-top:none;padding-top:0;}
+  .memo .m-action{color:#c084fc;font-weight:600;}
+  .memo .m-up{color:#4ade80;}
+  .memo .m-down{color:#f87171;}
+  .memo .m-data{color:#94a3b8;}
+
+  .tip-box{background:#fffbeb;border:1px solid #fcd34d;border-radius:12px;padding:16px;margin-bottom:12px;}
+  .tip-box .tip-title{font-weight:700;font-size:13px;color:#92400e;margin-bottom:6px;}
+  .tip-box .tip-body{font-size:12px;color:#78350f;line-height:1.7;}
+  .warn-box{background:#fef2f2;border:1px solid #fca5a5;border-radius:12px;padding:16px;margin-bottom:12px;}
+  .warn-box .warn-title{font-weight:700;font-size:13px;color:#991b1b;margin-bottom:6px;}
+  .warn-box .warn-body{font-size:12px;color:#7f1d1d;line-height:1.7;}
+
+  details{background:var(--card);border-radius:12px;padding:16px;box-shadow:var(--shadow);margin-bottom:10px;}
+  details summary{font-weight:700;font-size:14px;cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center;}
+  details summary::after{content:'▸';transition:transform 0.2s;}
+  details[open] summary::after{transform:rotate(90deg);}
+  details .detail-body{margin-top:12px;font-size:13px;color:var(--sub);line-height:1.8;}
+  .footnote{margin-top:40px;text-align:center;font-size:12px;color:var(--sub);}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="series-tag">素材セクター上級編 #3</div>
+  <h1>投資メモの書き方</h1>
+  <p>FMを動かす1ページレポート — BLUF原則とConvictionフレームワーク</p>
+</div>
+
+<!-- 1. BLUF -->
+<div class="section">
+  <div class="section-title"><div class="icon" style="background:#ede9fe;">📖</div>BLUF原則 — Bottom Line Up Front</div>
+  <div class="card">
+    <p>
+      投資メモの第一文は<strong>「結論」</strong>。理由は後。
+      FMは1日に数十本のメモを読む。最初の3行で「何を言いたいか」が伝わらなければ読まれない。<br/><br/>
+      <strong>❌ 悪い例：</strong>「中国のPMIが50.3に回復し、鉄鉱石在庫が減少傾向にある中で…（10行続く）…したがって日本製鉄はBuy」<br/>
+      <strong>✅ 良い例：</strong>「日本製鉄をBuy。TP ¥3,800（現在¥3,200、upside 19%）。スプレッド改善が来期以降3四半期続く見通し。コンセンサスEPSは15%過小評価」
+    </p>
+  </div>
+</div>
+
+<!-- 2. Template -->
+<div class="section">
+  <div class="section-title"><div class="icon" style="background:#d1fae5;">📝</div>投資メモ・テンプレート</div>
+
+  <div class="memo">
+    <div class="memo-header">日本製鉄（5401）— BUY initiate</div>
+    <div class="memo-sub">2025/XX/XX ｜ 素材セクター ｜ 投資メモ</div>
+
+    <div class="memo-section">🎯 結論（BLUF）</div>
+    <span class="m-action">Buy。TP ¥3,800（upside 19%）。</span>スプレッド拡大＋値上げ浸透で来期OP ¥6,800億予想（コンセンサス¥5,900億、+15%）。ミッドサイクルPE 8.5x vs 現在7.2x。PBR 0.7xは東証要請の是正余地。
+
+    <div class="memo-section">💡 投資テーゼ（なぜ今買うか — 3つの理由）</div>
+    <strong>① スプレッド改善が3Q続く見通し：</strong>鉄鉱石が$120→$100に下落する一方、鋼材値上げ（+¥5,000/t）が来期1Qから浸透。メタルスプレッドは$200→$260に拡大見込み。<br/><br/>
+    <strong>② 中国鉄鋼輸出がピークアウト：</strong>粗鋼減産令の実効性が確認されつつある。月間輸出が800万t→650万tに減少すれば、アジア市況は底打ち。<br/><br/>
+    <strong>③ PBR是正カタリスト：</strong>配当性向30%→40%への引上げ＋自社株買い（¥1,000億）で総還元利回り5%超。東証PBR1x達成には¥4,200。
+
+    <div class="memo-section">⚠ リスク（何が間違い得るか）</div>
+    <span class="m-down">• 中国不動産が想定以上に悪化→鉄鋼輸出再増→アジア市況崩壊</span><br/>
+    <span class="m-down">• 原料炭がサイクロンで急騰→スプレッド縮小</span><br/>
+    <span class="m-down">• USスチール買収が不成立→成長ストーリーの修正</span>
+
+    <div class="memo-section">📊 バリュエーション</div>
+    <span class="m-data">EV/EBITDA: 4.5x（今期）→ 3.8x（来期予想）vs Peer平均 5.2x</span><br/>
+    <span class="m-data">ミッドサイクルPE: 8.5x vs 過去10年平均 9.2x</span><br/>
+    <span class="m-data">PBR: 0.7x → PBR1.0x達成で ¥4,200（+31%）</span><br/>
+    <span class="m-data">配当利回り: 4.8%（増配見込み）</span>
+
+    <div class="memo-section">📐 感応度</div>
+    <span class="m-data">鉄鉱石 +$10/t → EPS ▲¥35 ｜ 原料炭 +$10/t → EPS ▲¥15</span><br/>
+    <span class="m-data">USD/JPY +1円 → EPS +¥3 ｜ 粗鋼+100万t → EPS +¥25</span>
+  </div>
+
+  <div class="tip-box">
+    <div class="tip-title">💡 投資メモの黄金構造（5セクション・1ページ以内）</div>
+    <div class="tip-body">
+      <strong>① BLUF（3行）：</strong>結論＋TP＋核心の理由1つ<br/>
+      <strong>② テーゼ（3つまで）：</strong>なぜ今買う/売るか。各テーゼに定量的根拠<br/>
+      <strong>③ リスク（2-3つ）：</strong>何が間違い得るか。自分が間違うシナリオを正直に書く<br/>
+      <strong>④ バリュエーション（4行）：</strong>複数手法の結果。コンセンサスとの差<br/>
+      <strong>⑤ 感応度（2行）：</strong>主要変数の±でEPSがどう動くか
+    </div>
+  </div>
+</div>
+
+<!-- 3. Conviction levels -->
+<div class="section">
+  <div class="section-title"><div class="icon" style="background:#fee2e2;">🔥</div>Conviction（確信度）の表現</div>
+  <div class="card">
+    <p>
+      全てのBuyが同じ重みではない。FMは「どのくらい自信があるか」を知りたい。<br/><br/>
+      <strong>High Conviction：</strong>「自分のキャリアを賭けても良い」レベル。ポートフォリオの3-5%以上。年に1-2回しか出さない。<br/>
+      <strong>Medium Conviction：</strong>通常のBuy。1-2%程度のポジション。分析に基づいた合理的な判断。<br/>
+      <strong>Low Conviction / Monitor：</strong>方向性は見えるが確信が持てない。「ウォッチリスト」に入れる。ポジションは小さく。<br/><br/>
+      <strong>→ 全部をHigh Convictionにすると信頼を失う。正直にConvictionレベルを表明する方がFMの信頼を得る。</strong>
+    </p>
+  </div>
+</div>
+
+<!-- 4. Common mistakes -->
+<div class="section">
+  <div class="section-title"><div class="icon" style="background:#dbeafe;">⚠️</div>投資メモのよくあるミス</div>
+  <details>
+    <summary>❌ テーゼが「市況が上がるから」だけ</summary>
+    <div class="detail-body">
+      「鉄鉱石が上がるから住友鉱山はBuy」→ これはマクロベットであって銘柄固有のテーゼではない。「鉄鉱石が上がるならBHPでもRioでもいい」と言われる。<strong>銘柄固有の理由</strong>（コスト改善、製品ミックス改善、還元方針変更等）を少なくとも1つ入れる。
+    </div>
+  </details>
+  <details>
+    <summary>❌ リスクを書かない</summary>
+    <div class="detail-body">
+      リスクを書かないメモはFMに信用されない。「自分が間違うとしたらどのシナリオか」を正直に書く方が、結論への信頼度が上がる。良いアナリストほどリスクの記述が具体的。
+    </div>
+  </details>
+  <details>
+    <summary>❌ タイミングがない</summary>
+    <div class="detail-body">
+      「日本製鉄は中長期的にBuy」→ いつ？「来期決算でスプレッド改善が確認される4月が買い場」のように、カタリストとタイミングを明示。FMは「今買うか3ヶ月待つか」を判断する。
+    </div>
+  </details>
+  <details>
+    <summary>❌ 長すぎる</summary>
+    <div class="detail-body">
+      投資メモはA4で1ページが理想。2ページが上限。それ以上はFMが読まない。詳細はExcelモデルやバックアップノートに分離。メモ本体は「結論＋根拠＋リスク」に絞る。
+    </div>
+  </details>
+</div>
+
+<div class="footnote">
+  素材セクター上級編 #3 / 6<br/>
+  次回：#4 IR面談の準備と質問設計
+</div>
+</body>
+</html>

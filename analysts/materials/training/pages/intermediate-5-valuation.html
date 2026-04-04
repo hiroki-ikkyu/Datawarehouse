@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>素材セクター中級編 #5 — バリュエーション手法</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#f5f5f7;--card:#fff;--text:#1d1d1f;--sub:#6e6e73;--accent:#2c2c2e;--radius:16px;--shadow:0 1px 3px rgba(0,0,0,0.04);--gradient:linear-gradient(135deg,#064e3b 0%,#059669 50%,#34d399 100%);--red:#dc2626;--orange:#e8590c;--green:#059669;--blue:#3b82f6;--purple:#8b5cf6;--gold:#f59e0b;}
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{font-family:'DM Sans','Noto Sans JP',sans-serif;background:var(--bg);color:var(--text);line-height:1.7;padding:24px 16px 60px;max-width:800px;margin:0 auto;}
+  .header{text-align:center;margin-bottom:40px;padding:32px 20px;background:var(--gradient);border-radius:var(--radius);color:#fff;position:relative;overflow:hidden;}
+  .header::before{content:'💎';position:absolute;font-size:120px;opacity:0.06;top:-10px;right:-10px;}
+  .header .series-tag{display:inline-block;background:rgba(255,255,255,0.15);padding:4px 14px;border-radius:20px;font-size:12px;letter-spacing:1px;text-transform:uppercase;margin-bottom:12px;}
+  .header h1{font-size:26px;font-weight:700;margin-bottom:8px;}
+  .header p{font-size:14px;opacity:0.7;}
+  .section{margin-bottom:36px;}
+  .section-title{font-size:18px;font-weight:700;margin-bottom:16px;display:flex;align-items:center;gap:8px;}
+  .section-title .icon{width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;}
+  .card{background:var(--card);border-radius:var(--radius);padding:20px;box-shadow:var(--shadow);margin-bottom:12px;}
+  .card p{font-size:14px;color:var(--sub);}
+  .card p strong{color:var(--text);}
+
+  .tab-bar{display:flex;gap:4px;margin-bottom:16px;background:#e9ecef;border-radius:10px;padding:3px;overflow-x:auto;}
+  .tab-btn{flex:1;padding:8px 4px;border:none;background:transparent;border-radius:8px;font-family:inherit;font-size:10px;font-weight:600;color:var(--sub);cursor:pointer;transition:all 0.2s;white-space:nowrap;min-width:44px;}
+  .tab-btn.active{background:var(--card);color:var(--text);box-shadow:0 1px 3px rgba(0,0,0,0.08);}
+  .tab-content{display:none;}
+  .tab-content.active{display:block;}
+
+  .formula-box{border-radius:var(--radius);padding:24px;color:#fff;text-align:center;margin-bottom:16px;}
+  .formula-box .formula{font-size:15px;font-weight:700;margin-bottom:8px;}
+  .formula-box .formula .var{color:#a7f3d0;}
+  .formula-box .formula .op{color:#fcd34d;margin:0 4px;}
+  .formula-box .note{font-size:12px;opacity:0.6;line-height:1.6;}
+
+  .calc-box{background:#1e293b;border-radius:var(--radius);padding:20px;color:#e2e8f0;margin-bottom:12px;font-size:13px;line-height:2;}
+  .calc-box .calc-title{font-weight:700;font-size:14px;color:#6ee7b7;margin-bottom:10px;}
+  .calc-row{display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:1px solid rgba(255,255,255,0.06);}
+  .calc-row:last-child{border-bottom:none;}
+  .calc-row .calc-label{color:#94a3b8;flex:1;}
+  .calc-row .calc-value{font-weight:700;font-family:'DM Sans',monospace;text-align:right;min-width:110px;}
+  .calc-row.result{background:rgba(16,185,129,0.1);border-radius:8px;padding:8px 12px;margin-top:8px;border:1px solid rgba(16,185,129,0.2);}
+  .calc-row.result .calc-label{color:#6ee7b7;font-weight:600;}
+  .calc-row.result .calc-value{color:#34d399;font-size:16px;}
+
+  /* Method comparison */
+  .method-card{background:var(--card);border-radius:var(--radius);padding:20px;box-shadow:var(--shadow);border-top:4px solid;margin-bottom:12px;}
+  .method-card h3{font-size:15px;font-weight:700;margin-bottom:4px;}
+  .method-card .method-sub{font-size:12px;color:var(--sub);margin-bottom:10px;}
+  .method-card .method-desc{font-size:13px;color:var(--sub);line-height:1.8;margin-bottom:10px;}
+  .method-tags{display:flex;flex-wrap:wrap;gap:4px;}
+  .method-tag{font-size:10px;padding:3px 8px;border-radius:6px;font-weight:600;}
+  .tag-best{background:#d1fae5;color:#065f46;}
+  .tag-ok{background:#fef3c7;color:#92400e;}
+  .tag-bad{background:#fee2e2;color:#991b1b;}
+
+  /* Comparison table */
+  .comp-table{width:100%;border-collapse:collapse;font-size:11px;background:var(--card);border-radius:12px;overflow:hidden;box-shadow:var(--shadow);}
+  .comp-table th{text-align:center;padding:10px 8px;background:#f1f3f5;font-weight:600;font-size:10px;}
+  .comp-table th:first-child{text-align:left;}
+  .comp-table td{padding:10px 8px;border-bottom:1px solid #f1f3f5;text-align:center;vertical-align:top;}
+  .comp-table td:first-child{text-align:left;font-weight:600;}
+  .comp-table tr:last-child td{border-bottom:none;}
+  .comp-best{background:#d1fae5;color:#065f46;font-weight:700;border-radius:4px;padding:2px 4px;}
+  .comp-ok{background:#fef3c7;color:#92400e;border-radius:4px;padding:2px 4px;}
+  .comp-bad{background:#fee2e2;color:#991b1b;border-radius:4px;padding:2px 4px;}
+
+  .tip-box{background:#fffbeb;border:1px solid #fcd34d;border-radius:12px;padding:16px;margin-bottom:12px;}
+  .tip-box .tip-title{font-weight:700;font-size:13px;color:#92400e;margin-bottom:6px;}
+  .tip-box .tip-body{font-size:12px;color:#78350f;line-height:1.7;}
+  .warn-box{background:#fef2f2;border:1px solid #fca5a5;border-radius:12px;padding:16px;margin-bottom:12px;}
+  .warn-box .warn-title{font-weight:700;font-size:13px;color:#991b1b;margin-bottom:6px;}
+  .warn-box .warn-body{font-size:12px;color:#7f1d1d;line-height:1.7;}
+
+  .bbg-box{background:#1a1a2e;border-radius:12px;padding:16px;margin-bottom:12px;font-family:'DM Sans',monospace;color:#ff6600;font-size:12px;line-height:2;}
+  .bbg-box .bbg-title{color:#ff9933;font-weight:700;font-size:13px;margin-bottom:8px;}
+  .bbg-cmd{color:#ffcc00;}
+  .bbg-comment{color:#666;}
+
+  details{background:var(--card);border-radius:12px;padding:16px;box-shadow:var(--shadow);margin-bottom:10px;}
+  details summary{font-weight:700;font-size:14px;cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center;}
+  details summary::after{content:'▸';transition:transform 0.2s;}
+  details[open] summary::after{transform:rotate(90deg);}
+  details .detail-body{margin-top:12px;font-size:13px;color:var(--sub);line-height:1.8;}
+  .footnote{margin-top:40px;text-align:center;font-size:12px;color:var(--sub);}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="series-tag">素材セクター中級編 #5</div>
+  <h1>バリュエーション手法</h1>
+  <p>シクリカル株を正しく評価する — EV/EBITDA・P/NAV・ミッドサイクルPE・SOTP・コスト曲線</p>
+</div>
+
+<!-- Overview -->
+<div class="section">
+  <div class="section-title"><div class="icon" style="background:#d1fae5;">📖</div>素材株バリュエーションの大原則</div>
+  <div class="card">
+    <p>
+      素材セクターのバリュエーションには<strong>「シクリカルの罠」</strong>が常につきまとう。
+      利益が市況で大きく振れるため、単年度の利益に基づくPERは<strong>ほぼ無意味</strong>。
+      かわりに「正常化利益」「資産価値」「サイクル位置」を組み合わせた多面的な評価が必要。<br/><br/>
+      この回では<strong>6つの手法</strong>を、それぞれどの銘柄に最適かを含めて解説する。
+    </p>
+  </div>
+
+  <div class="warn-box">
+    <div class="warn-title">⚠ 再掲：PERの罠（#2から）</div>
+    <div class="warn-body">
+      <strong>シクリカル銘柄はPERが最低の時に売り、最高の時に買うのが正しい。</strong><br/>
+      PER 5x＝利益がピーク→来期から減益でPER上昇。PER 30x＝利益がボトム→来期から回復でPER低下。<br/>
+      この直感に反するパターンを理解しない限り、素材株のバリュエーションは始まらない。
+    </div>
+  </div>
+</div>
+
+<!-- Method selector -->
+<div class="section">
+  <div class="section-title"><div class="icon" style="background:#dbeafe;">🔧</div>6つのバリュエーション手法</div>
+
+  <div class="tab-bar">
+    <button class="tab-btn active" onclick="switchTab('ev_ebitda')">EV/EBITDA</button>
+    <button class="tab-btn" onclick="switchTab('midcycle')">ミッドサイクルPE</button>
+    <button class="tab-btn" onclick="switchTab('pnav')">P/NAV</button>
+    <button class="tab-btn" onclick="switchTab('sotp')">SOTP</button>
+    <button class="tab-btn" onclick="switchTab('costcurve')">コスト曲線</button>
+    <button class="tab-btn" onclick="switchTab('dcf_trap')">DCFの罠</button>
+  </div>
+
+  <!-- ==================== EV/EBITDA ==================== -->
+  <div class="tab-content active" id="tab-ev_ebitda">
+    <div class="method-card" style="border-color:var(--green);">
+      <h3>① EV/EBITDA — 素材セクターの標準手法</h3>
+      <div class="method-sub">最も広く使われる。資本構成の違いを中立化できる</div>
+      <div class="method-desc">
+        PERが純利益ベースで減価償却・金利・税制の差を含んでしまうのに対し、
+        EV/EBITDAは<strong>事業の本源的な稼ぐ力</strong>を、資本構成に中立な形で評価する。
+        素材セクターは設備投資が大きく減価償却が重いため、EBITDAの方が実態に近い。
+      </div>
+      <div class="method-tags">
+        <span class="method-tag tag-best">鉄鋼 ◎</span>
+        <span class="method-tag tag-best">海運 ◎</span>
+        <span class="method-tag tag-best">セメント ◎</span>
+        <span class="method-tag tag-ok">非鉄 ○</span>
+        <span class="method-tag tag-ok">製紙 ○</span>
+      </div>
+    </div>
+
+    <div class="formula-box" style="background:var(--gradient);">
+      <div class="formula">
+        <span class="var">EV</span><span class="op">=</span><span class="var">時価総額 + 純有利子負債 − 関連会社株式</span>
+      </div>
+      <div class="formula" style="margin-top:8px;">
+        <span class="var">EV/EBITDA</span><span class="op">=</span><span class="var">EV ÷ EBITDA</span>
+      </div>
+      <div class="note">EBITDA = 営業利益 + 減価償却費（+ のれん償却）</div>
+    </div>
+
+    <div class="calc-box">
+      <div class="calc-title">📝 計算例：日本製鉄（5401）</div>
+      <div class="calc-row"><span class="calc-label">時価総額</span><span class="calc-value">¥3.5兆</span></div>
+      <div class="calc-row"><span class="calc-label">純有利子負債</span><span class="calc-value">¥1.8兆</span></div>
+      <div class="calc-row"><span class="calc-label">関連会社株式（持分法）</span><span class="calc-value">▲¥0.5兆</span></div>
+      <div class="calc-row"><span class="calc-label">EV</span><span class="calc-value">¥4.8兆</span></div>
+      <div class="calc-row"><span class="calc-label">EBITDA（今期予想）</span><span class="calc-value">¥1.0兆</span></div>
+      <div class="calc-row result"><span class="calc-label">EV/EBITDA</span><span class="calc-value">4.8x</span></div>
+    </div>
+
+    <div class="card">
+      <p>
+        <strong>素材セクターの目安：</strong><br/>
+        鉄鋼：4-7x（日本製鉄5x前後、ArcelorMittal 4-5x）<br/>
+        非鉄（製錬）：5-8x ｜ 非鉄（鉱山）：4-6x<br/>
+        セメント：6-8x ｜ 製紙：5-7x<br/>
+        海運：3-5x（ボラが大きいため低め）<br/>
+        ガラス：6-10x（ディスプレイ寄りなら高め）<br/><br/>
+        <strong>→ 同じ「素材」でもサブセクターで倍率が異なる。同業比較（Peer Comparison）が基本。</strong>
+      </p>
+    </div>
+
+    <div class="tip-box">
+      <div class="tip-title">💡 EV/EBITDAを使うときの注意</div>
+      <div class="tip-body">
+        <strong>「今期EBITDA」で計算すると罠にはまる。</strong>今期がサイクルのピークなら、EBITDA は過大→EV/EBITDAは過小に見える（割安に見えるが実は割高）。<br/><br/>
+        <strong>対処：</strong>「ミッドサイクルEBITDA」（過去7-10年の平均EBITDA）を使う。
+        または「来期予想EBITDA」と「ミッドサイクルEBITDA」の両方で計算して幅を出す。
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== MID-CYCLE PE ==================== -->
+  <div class="tab-content" id="tab-midcycle">
+    <div class="method-card" style="border-color:var(--blue);">
+      <h3>② ミッドサイクルPE — サイクルの罠を回避</h3>
+      <div class="method-sub">正常化利益ベースのPER。シクリカル株に最適</div>
+      <div class="method-desc">
+        過去7-10年の<strong>平均EPS（またはROE×BPS）</strong>を「正常な利益水準」と仮定し、
+        現在の株価をその正常化利益で割ったPER。サイクルのピーク/ボトムに騙されない。
+      </div>
+      <div class="method-tags">
+        <span class="method-tag tag-best">鉄鋼 ◎</span>
+        <span class="method-tag tag-best">非鉄（鉱山）◎</span>
+        <span class="method-tag tag-best">海運 ◎</span>
+        <span class="method-tag tag-ok">石油元売 ○</span>
+      </div>
+    </div>
+
+    <div class="formula-box" style="background:linear-gradient(135deg,#1e3a5f,#3b82f6);">
+      <div class="formula">
+        <span class="var">ミッドサイクルPE</span><span class="op">=</span><span class="var">現在株価 ÷ ミッドサイクルEPS</span>
+      </div>
+      <div class="note">ミッドサイクルEPS = 過去7-10年のEPS平均（異常年を除外）</div>
+    </div>
+
+    <div class="calc-box">
+      <div class="calc-title">📝 計算例：住友金属鉱山（5713）</div>
+      <div class="calc-row"><span class="calc-label">現在株価</span><span class="calc-value">¥4,500</span></div>
+      <div class="calc-row"><span class="calc-label">今期予想EPS</span><span class="calc-value">¥450（高水準）</span></div>
+      <div class="calc-row"><span class="calc-label">今期PER（単純）</span><span class="calc-value">10.0x</span></div>
+      <div class="calc-row"><span class="calc-label">過去10年平均EPS</span><span class="calc-value">¥280</span></div>
+      <div class="calc-row result"><span class="calc-label">ミッドサイクルPE</span><span class="calc-value">16.1x</span></div>
+    </div>
+
+    <div class="card">
+      <p>
+        単純PER 10xだと「割安に見える」が、ミッドサイクルPE 16xだと「適正〜やや割高」。
+        今期EPSが高いのはLME銅/金の上昇によるサイクル要因であり、持続しない可能性がある。<br/><br/>
+        <strong>→ 「PER 10xだから買い」は危険。ミッドサイクルで見て初めて正しい判断ができる。</strong>
+      </p>
+    </div>
+
+    <details>
+      <summary>ミッドサイクルEPSの代替計算法</summary>
+      <div class="detail-body">
+        <strong>方法A：</strong>過去10年のEPS単純平均（異常年＝赤字年やコロナ年を除外）<br/>
+        <strong>方法B：</strong>過去10年の平均ROE × 現在のBPS（自己資本ベース）<br/>
+        <strong>方法C：</strong>ミッドサイクルのコモディティ価格（鉄鉱石$90、銅$8,000等）を仮定→感応度分析で利益を推定<br/><br/>
+        方法Cが最も精緻。自分のExcelモデルにコモディティ前提のシナリオスイッチを入れておき、
+        「ミッドサイクル前提」「ブル前提」「ベア前提」で利益とバリュエーションを3通り出す。
+      </div>
+    </details>
+  </div>
+
+  <!-- ==================== P/NAV ==================== -->
+  <div class="tab-content" id="tab-pnav">
+    <div class="method-card" style="border-color:var(--purple);">
+      <h3>③ P/NAV — 鉱山・資源企業の本命手法</h3>
+      <div class="method-sub">保有資産（鉱山・油田）のDCF価値の合計で評価</div>
+      <div class="method-desc">
+        各鉱山/油田/LNGプロジェクトを個別にDCFで評価し、合算してNAV（純資産価値）を算出。
+        現在の時価総額をNAVで割ったP/NAVが1.0x未満なら割安、1.0x超なら割高。
+        資源企業（INPEX、住友鉱山、BHP等）で最も信頼されるバリュエーション手法。
+      </div>
+      <div class="method-tags">
+        <span class="method-tag tag-best">鉱山 ◎</span>
+        <span class="method-tag tag-best">E&P（INPEX）◎</span>
+        <span class="method-tag tag-ok">非鉄（鉱山権益）○</span>
+        <span class="method-tag tag-bad">製錬/鉄鋼 ✕</span>
+      </div>
+    </div>
+
+    <div class="formula-box" style="background:linear-gradient(135deg,#4c1d95,#8b5cf6);">
+      <div class="formula">
+        <span class="var">NAV</span><span class="op">=</span><span class="var">Σ（各資産のDCF価値）</span><span class="op">+</span><span class="var">現金</span><span class="op">−</span><span class="var">負債</span>
+      </div>
+      <div class="formula" style="margin-top:8px;">
+        <span class="var">P/NAV</span><span class="op">=</span><span class="var">時価総額 ÷ NAV</span>
+      </div>
+      <div class="note">各資産DCF = (生産量 × 価格 − コスト) を鉱山寿命で割引</div>
+    </div>
+
+    <div class="calc-box">
+      <div class="calc-title">📝 簡易例：INPEX（1605）のNAV</div>
+      <div class="calc-row"><span class="calc-label">イクシスLNG DCF</span><span class="calc-value">¥1.8兆</span></div>
+      <div class="calc-row"><span class="calc-label">アブダビ陸上油田 DCF</span><span class="calc-value">¥0.8兆</span></div>
+      <div class="calc-row"><span class="calc-label">その他権益合計 DCF</span><span class="calc-value">¥0.5兆</span></div>
+      <div class="calc-row"><span class="calc-label">探鉱ポテンシャル（リスク加重）</span><span class="calc-value">¥0.2兆</span></div>
+      <div class="calc-row"><span class="calc-label">ネットキャッシュ</span><span class="calc-value">▲¥0.3兆（純有利子負債）</span></div>
+      <div class="calc-row result"><span class="calc-label">NAV合計</span><span class="calc-value">¥3.0兆</span></div>
+      <div class="calc-row"><span class="calc-label">時価総額</span><span class="calc-value">¥2.7兆</span></div>
+      <div class="calc-row result"><span class="calc-label">P/NAV</span><span class="calc-value">0.9x → やや割安</span></div>
+    </div>
+
+    <div class="tip-box">
+      <div class="tip-title">💡 P/NAVの注意点</div>
+      <div class="tip-body">
+        NAVは<strong>コモディティ価格の前提で激変する</strong>。原油$70でNAV ¥2.5兆、$90でNAV ¥4.0兆、$50でNAV ¥1.5兆。
+        だから「NAV ¥3.0兆で割安」と言い切るのは危険。<br/><br/>
+        <strong>→ 必ず3つの価格シナリオ（ブル/ベース/ベア）でNAVを計算し、P/NAVの幅を示す。</strong>
+        「ベースケースでP/NAV 0.9x、ベアでも1.1x以下なら買い」のような議論がFMに刺さる。
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== SOTP ==================== -->
+  <div class="tab-content" id="tab-sotp">
+    <div class="method-card" style="border-color:var(--gold);">
+      <h3>④ SOTP（Sum-of-the-Parts）— 複合企業の必殺技</h3>
+      <div class="method-sub">セグメントごとに異なる倍率を適用して合算</div>
+      <div class="method-desc">
+        AGC、神戸製鋼、ENEOS等の多角化企業は、セグメントの性質が異なるため一律のEV/EBITDAでは
+        正しく評価できない。各セグメントを「同業の倍率」で個別評価し、合算する。
+        <strong>「コングロマリット・ディスカウント」が適正かどうかの議論</strong>にも使える。
+      </div>
+      <div class="method-tags">
+        <span class="method-tag tag-best">AGC ◎</span>
+        <span class="method-tag tag-best">神戸製鋼 ◎</span>
+        <span class="method-tag tag-best">ENEOS ◎</span>
+        <span class="method-tag tag-best">住友電工 ◎</span>
+        <span class="method-tag tag-ok">商船三井 ○</span>
+      </div>
+    </div>
+
+    <div class="calc-box">
+      <div class="calc-title">📝 SOTP例：AGC（5201）</div>
+      <div class="calc-row"><span class="calc-label">建築用ガラス EBITDA ¥600億 × 6x</span><span class="calc-value">¥3,600億</span></div>
+      <div class="calc-row"><span class="calc-label">自動車用ガラス EBITDA ¥400億 × 6x</span><span class="calc-value">¥2,400億</span></div>
+      <div class="calc-row"><span class="calc-label">ディスプレイ EBITDA ¥500億 × 10x</span><span class="calc-value">¥5,000億</span></div>
+      <div class="calc-row"><span class="calc-label">化学品 EBITDA ¥400億 × 12x</span><span class="calc-value">¥4,800億</span></div>
+      <div class="calc-row"><span class="calc-label">事業価値合計</span><span class="calc-value">¥1.58兆</span></div>
+      <div class="calc-row"><span class="calc-label">▲ 純有利子負債</span><span class="calc-value">▲¥0.4兆</span></div>
+      <div class="calc-row"><span class="calc-label">▲ 本社費用等PV</span><span class="calc-value">▲¥0.1兆</span></div>
+      <div class="calc-row result"><span class="calc-label">SOTP株主価値</span><span class="calc-value">¥1.08兆</span></div>
+      <div class="calc-row"><span class="calc-label">発行済株式数</span><span class="calc-value">2.3億株</span></div>
+      <div class="calc-row result"><span class="calc-label">SOTP株価</span><span class="calc-value">¥4,700/株</span></div>
+    </div>
+
+    <div class="card">
+      <p>
+        <strong>倍率の根拠が命。</strong>ディスプレイガラスにCorning並みの10xを適用するのか、
+        中国ガラスメーカー並みの5xを適用するのかで結果が全く変わる。
+        <strong>→ 同業のグローバルPeer Groupから倍率を導出する。</strong>
+        建築ガラス→Saint-Gobain/信義ガラス。ディスプレイ→Corning。化学品→特殊化学。
+      </p>
+    </div>
+  </div>
+
+  <!-- ==================== COST CURVE ==================== -->
+  <div class="tab-content" id="tab-costcurve">
+    <div class="method-card" style="border-color:var(--orange);">
+      <h3>⑤ コスト曲線バリュエーション — 鉱山のフロア価格</h3>
+      <div class="method-sub">「限界生産者のコスト＝価格のフロア」から逆算</div>
+      <div class="method-desc">
+        コスト曲線上の位置で、「この鉱山/工場が生き残れるか」を判断。
+        価格がコスト曲線の90パーセンタイルを下回れば高コスト生産者が退出→供給引締め→価格は底打つ。
+        <strong>「長期的に価格がいくらに収束するか」を推定するための手法。</strong>
+      </div>
+      <div class="method-tags">
+        <span class="method-tag tag-best">鉱山（銅/金/鉄鉱石）◎</span>
+        <span class="method-tag tag-ok">アルミ製錬 ○</span>
+        <span class="method-tag tag-ok">石化 ○</span>
+        <span class="method-tag tag-bad">加工業 ✕</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <p>
+        <strong>考え方：</strong>世界の鉱山をコスト順に並べると「コスト曲線」ができる。
+        左端が最低コスト（サウジの油田、ブラジルの鉄鉱石）、右端が最高コスト（カナダのオイルサンド等）。<br/><br/>
+        <strong>インセンティブ・プライス：</strong>新規鉱山投資がペイするために必要な価格。
+        銅なら$8,000-9,000/t、金なら$1,400-1,600/oz程度。
+        価格がインセンティブ・プライスを大幅に上回ればPhase 2（投資ラッシュ）が始まり、
+        下回ればPhase 4（投資停止）になる。<br/><br/>
+        <strong>→ 長期のコモディティ価格前提はインセンティブ・プライス近辺に設定するのが合理的。</strong>
+      </p>
+    </div>
+
+    <div class="tip-box">
+      <div class="tip-title">💡 コスト曲線データの入手</div>
+      <div class="tip-body">
+        <strong>Wood Mackenzie：</strong>鉱業/石油のコスト曲線の業界標準。高額だが最も詳細。<br/>
+        <strong>CRU：</strong>非鉄金属のコスト曲線。銅/アルミ/ニッケル。<br/>
+        <strong>セルサイドレポート：</strong>大手証券のセクターレポートにコスト曲線の簡易版が含まれることが多い。BHP/Rioの決算資料にも自社のコスト曲線上の位置が示される。<br/>
+        <strong>自分で作る：</strong>主要鉱山のAISC/C1コストを集めてExcelでランキング。公開情報で8割はカバー可能。
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== DCF TRAP ==================== -->
+  <div class="tab-content" id="tab-dcf_trap">
+    <div class="method-card" style="border-color:var(--red);">
+      <h3>⑥ DCFの罠 — シクリカル株にDCFを使うリスク</h3>
+      <div class="method-sub">「使えない」のではなく「使い方に注意が必要」</div>
+      <div class="method-desc">
+        DCF（割引キャッシュフロー法）はバリュエーションの王道だが、素材セクターには3つの落とし穴がある。
+        知った上で使えば強力。知らずに使うと大火傷する。
+      </div>
+      <div class="method-tags">
+        <span class="method-tag tag-bad">鉄鋼 △</span>
+        <span class="method-tag tag-bad">海運 △</span>
+        <span class="method-tag tag-ok">鉱山（P/NAV型）○</span>
+        <span class="method-tag tag-ok">安定CF型（LNG船）○</span>
+      </div>
+    </div>
+
+    <details>
+      <summary>罠①：直近の利益を永久に伸ばしてしまう</summary>
+      <div class="detail-body">
+        DCFの5年予想に「今期の高利益が続く」前提を置くと、サイクルのピークを永続化してしまう。
+        <strong>→ 対処：</strong>予想期間の中にサイクルの下降局面を必ず組み込む。
+        例：1-2年目は現在の利益水準、3-5年目はミッドサイクルに回帰、ターミナルバリューはミッドサイクルEBITDAベースで計算。
+      </div>
+    </details>
+    <details>
+      <summary>罠②：WACCの設定が難しい</summary>
+      <div class="detail-body">
+        素材企業はベータが高い（市場感応度が大きい）。CAPMでベータ1.5-2.0を使うとWACCが10-12%になり、ターミナルバリューが小さくなりすぎる。
+        <strong>→ 対処：</strong>同業平均のWACCを使う。また、WACCを±1%変動させた感度分析を必ず付ける。
+      </div>
+    </details>
+    <details>
+      <summary>罠③：ターミナルバリューがDCVの7-8割を占める</summary>
+      <div class="detail-body">
+        予想期間5年のFCFよりもターミナルバリューの方がはるかに大きくなりがち。
+        つまりDCFの結果はほぼ「永久成長率の仮定」で決まる。
+        <strong>→ 対処：</strong>ターミナルバリューをExit Multiple法（ミッドサイクルEBITDA × 適正倍率）で計算し、永久成長率モデルとクロスチェック。両方の中間を取る。
+      </div>
+    </details>
+
+    <div class="card">
+      <p>
+        <strong>結論：</strong>シクリカル銘柄のDCFは「使える場面が限られる」。
+        INPEXのP/NAV（各権益のDCF合算）や、商船三井のLNG船事業（長期契約でCFが安定）には有効。
+        鉄鋼や海運のドライバルクのような「利益が年で3倍変わる」事業にはEV/EBITDAやミッドサイクルPEの方が適切。
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- Comparison matrix -->
+<div class="section">
+  <div class="section-title"><div class="icon" style="background:#fef3c7;">📊</div>銘柄別・最適バリュエーション手法マトリクス</div>
+  <div class="card" style="padding:0;overflow-x:auto;">
+    <table class="comp-table">
+      <thead>
+        <tr>
+          <th style="min-width:100px;">銘柄</th>
+          <th>EV/<br/>EBITDA</th>
+          <th>ミッド<br/>サイクルPE</th>
+          <th>P/NAV</th>
+          <th>SOTP</th>
+          <th>コスト<br/>曲線</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>日本製鉄</td><td><span class="comp-best">◎</span></td><td><span class="comp-best">◎</span></td><td><span class="comp-bad">—</span></td><td><span class="comp-ok">○</span></td><td><span class="comp-bad">—</span></td></tr>
+        <tr><td>INPEX</td><td><span class="comp-ok">○</span></td><td><span class="comp-ok">○</span></td><td><span class="comp-best">◎</span></td><td><span class="comp-ok">○</span></td><td><span class="comp-best">◎</span></td></tr>
+        <tr><td>住友鉱山</td><td><span class="comp-ok">○</span></td><td><span class="comp-best">◎</span></td><td><span class="comp-best">◎</span></td><td><span class="comp-ok">○</span></td><td><span class="comp-best">◎</span></td></tr>
+        <tr><td>ENEOS</td><td><span class="comp-best">◎</span></td><td><span class="comp-ok">○</span></td><td><span class="comp-bad">—</span></td><td><span class="comp-best">◎</span></td><td><span class="comp-bad">—</span></td></tr>
+        <tr><td>AGC</td><td><span class="comp-ok">○</span></td><td><span class="comp-ok">○</span></td><td><span class="comp-bad">—</span></td><td><span class="comp-best">◎</span></td><td><span class="comp-bad">—</span></td></tr>
+        <tr><td>フジクラ</td><td><span class="comp-best">◎</span></td><td><span class="comp-ok">○</span></td><td><span class="comp-bad">—</span></td><td><span class="comp-ok">○</span></td><td><span class="comp-bad">—</span></td></tr>
+        <tr><td>商船三井</td><td><span class="comp-best">◎</span></td><td><span class="comp-ok">○</span></td><td><span class="comp-bad">—</span></td><td><span class="comp-best">◎</span></td><td><span class="comp-bad">—</span></td></tr>
+        <tr><td>東京製鐵</td><td><span class="comp-best">◎</span></td><td><span class="comp-best">◎</span></td><td><span class="comp-bad">—</span></td><td><span class="comp-bad">—</span></td><td><span class="comp-bad">—</span></td></tr>
+        <tr><td>レンゴー</td><td><span class="comp-best">◎</span></td><td><span class="comp-ok">○</span></td><td><span class="comp-bad">—</span></td><td><span class="comp-bad">—</span></td><td><span class="comp-bad">—</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Bloomberg -->
+<div class="section">
+  <div class="section-title"><div class="icon" style="background:#e8f4fd;">💻</div>Bloomberg活用</div>
+  <div class="bbg-box">
+    <div class="bbg-title">バリュエーション関連コマンド</div>
+    <span class="bbg-cmd">5401 JP Equity RV &lt;GO&gt;</span> <span class="bbg-comment">← 相対バリュエーション（Peer比較）</span><br/>
+    <span class="bbg-cmd">5401 JP Equity FA &lt;GO&gt;</span> <span class="bbg-comment">← 財務分析（EV/EBITDA自動計算）</span><br/>
+    <span class="bbg-cmd">5401 JP Equity ANR &lt;GO&gt;</span> <span class="bbg-comment">← アナリスト予想・TP一覧</span><br/>
+    <span class="bbg-cmd">5401 JP Equity DVD &lt;GO&gt;</span> <span class="bbg-comment">← 配当分析</span><br/>
+    <span class="bbg-cmd">EQS &lt;GO&gt;</span> <span class="bbg-comment">← 株式スクリーニング（EV/EBITDA、PBR等）</span><br/>
+    <span class="bbg-comment">-- Peer Comp: RV &lt;GO&gt; で日本製鉄vsJFEvs神戸製鋼を一覧比較</span><br/>
+    <span class="bbg-comment">-- SOTP: Excelで自作が最も柔軟。BDH関数でセグメントデータ取得</span>
+  </div>
+</div>
+
+<!-- Summary -->
+<div class="section">
+  <div class="section-title"><div class="icon" style="background:#d3f9d8;">✅</div>まとめ：バリュエーションの使い分け原則</div>
+  <div class="card">
+    <p>
+      <strong>原則1：1つの手法に頼らない。最低2つ以上で検証する。</strong><br/><br/>
+      <strong>原則2：サイクルの位置を考慮する。</strong>ピーク利益でEV/EBITDAを計算しない。ミッドサイクルを使う。<br/><br/>
+      <strong>原則3：コモディティ価格の前提を必ず明示する。</strong>「鉄鉱石$100前提でEV/EBITDA 5x」と書く。<br/><br/>
+      <strong>原則4：複合企業はSOTPが必須。</strong>AGC/ENEOS/神戸製鋼/住友電工を一律の倍率で見ると価値を見誤る。<br/><br/>
+      <strong>原則5：P/BRも補助指標として有用。</strong>日本の素材株はPBR 1x割れが多く、東証の要請もありPBR改善がカタリスト。PBR 0.5xの株がPBR 1.0xに是正されるだけで株価2倍。<br/><br/>
+      <strong>→ バリュエーションは「答え」ではなく「議論のフレームワーク」。</strong>
+      FMとの議論で「この銘柄はミッドサイクルPEで12x、SOTP比で15%ディスカウント」と定量的に示せることがアナリストの価値。
+    </p>
+  </div>
+</div>
+
+<div class="footnote">
+  素材セクター中級編 #5 / 7<br/>
+  次回：#6 クロスセクター連鎖分析
+</div>
+
+<script>
+function switchTab(id){
+  document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('tab-'+id).classList.add('active');
+  event.target.classList.add('active');
+}
+</script>
+</body>
+</html>

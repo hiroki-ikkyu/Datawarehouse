@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>素材セクター特別編 — バックテストの実践</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#f5f5f7;--card:#fff;--text:#1d1d1f;--sub:#6e6e73;--radius:16px;--shadow:0 1px 3px rgba(0,0,0,0.04);--gradient:linear-gradient(135deg,#0f172a 0%,#1e3a5f 50%,#059669 100%);--red:#dc2626;--green:#059669;--blue:#3b82f6;--purple:#7c3aed;--gold:#f59e0b;--orange:#e8590c;}
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{font-family:'DM Sans','Noto Sans JP',sans-serif;background:var(--bg);color:var(--text);line-height:1.7;padding:24px 16px 60px;max-width:800px;margin:0 auto;}
+  .header{text-align:center;margin-bottom:40px;padding:32px 20px;background:var(--gradient);border-radius:var(--radius);color:#fff;position:relative;overflow:hidden;}
+  .header::before{content:'🔬';position:absolute;font-size:120px;opacity:0.06;top:-10px;right:-10px;}
+  .header .series-tag{display:inline-block;background:rgba(255,255,255,0.15);padding:4px 14px;border-radius:20px;font-size:12px;letter-spacing:1px;text-transform:uppercase;margin-bottom:12px;}
+  .header h1{font-size:24px;font-weight:700;margin-bottom:8px;}
+  .header p{font-size:14px;opacity:0.7;}
+  .section{margin-bottom:36px;}
+  .section-title{font-size:18px;font-weight:700;margin-bottom:16px;display:flex;align-items:center;gap:8px;}
+  .section-title .icon{width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;}
+  .card{background:var(--card);border-radius:var(--radius);padding:20px;box-shadow:var(--shadow);margin-bottom:12px;}
+  .card p{font-size:14px;color:var(--sub);}
+  .card p strong{color:var(--text);}
+
+  .tab-bar{display:flex;gap:4px;margin-bottom:16px;background:#e9ecef;border-radius:10px;padding:3px;overflow-x:auto;}
+  .tab-btn{flex:1;padding:8px 4px;border:none;background:transparent;border-radius:8px;font-family:inherit;font-size:11px;font-weight:600;color:var(--sub);cursor:pointer;transition:all 0.2s;white-space:nowrap;min-width:50px;}
+  .tab-btn.active{background:var(--card);color:var(--text);box-shadow:0 1px 3px rgba(0,0,0,0.08);}
+  .tab-content{display:none;}
+  .tab-content.active{display:block;}
+
+  .code-box{background:#1e293b;border-radius:12px;padding:20px;margin-bottom:12px;font-family:'Courier New',monospace;font-size:11px;line-height:1.8;color:#e2e8f0;overflow-x:auto;}
+  .code-box .code-title{color:#86efac;font-weight:700;font-size:13px;margin-bottom:12px;font-family:'DM Sans','Noto Sans JP',sans-serif;}
+  .code-comment{color:#64748b;}
+  .code-keyword{color:#c084fc;}
+  .code-string{color:#fbbf24;}
+  .code-func{color:#60a5fa;}
+  .code-num{color:#4ade80;}
+
+  .flow-box{background:var(--card);border-radius:var(--radius);padding:20px;box-shadow:var(--shadow);margin-bottom:12px;}
+  .flow-title{font-weight:700;font-size:15px;margin-bottom:16px;}
+  .flow-step{display:flex;gap:12px;margin-bottom:12px;align-items:flex-start;}
+  .flow-num{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0;color:#fff;}
+  .flow-content{font-size:13px;color:var(--sub);line-height:1.7;flex:1;}
+  .flow-content strong{color:var(--text);}
+  .flow-arrow{text-align:center;color:var(--sub);font-size:14px;margin:4px 0 4px 14px;}
+
+  .signal-card{background:var(--card);border-radius:var(--radius);padding:20px;box-shadow:var(--shadow);border-left:4px solid;margin-bottom:12px;}
+  .signal-card h3{font-size:15px;font-weight:700;margin-bottom:6px;}
+  .signal-card .signal-desc{font-size:13px;color:var(--sub);line-height:1.8;margin-bottom:8px;}
+  .signal-logic{background:#f8f9fa;border-radius:10px;padding:12px;font-size:12px;line-height:1.8;color:var(--sub);font-family:'Courier New',monospace;}
+  .signal-logic strong{color:var(--text);font-family:'DM Sans','Noto Sans JP',sans-serif;}
+
+  .metrics-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;}
+  .metric-card{background:var(--card);border-radius:12px;padding:14px;box-shadow:var(--shadow);}
+  .metric-card .metric-name{font-weight:700;font-size:13px;margin-bottom:4px;}
+  .metric-card .metric-desc{font-size:11px;color:var(--sub);line-height:1.6;}
+  .metric-card .metric-formula{font-family:'Courier New',monospace;font-size:11px;color:var(--blue);margin-top:4px;}
+
+  .tip-box{background:#fffbeb;border:1px solid #fcd34d;border-radius:12px;padding:16px;margin-bottom:12px;}
+  .tip-box .tip-title{font-weight:700;font-size:13px;color:#92400e;margin-bottom:6px;}
+  .tip-box .tip-body{font-size:12px;color:#78350f;line-height:1.7;}
+  .warn-box{background:#fef2f2;border:1px solid #fca5a5;border-radius:12px;padding:16px;margin-bottom:12px;}
+  .warn-box .warn-title{font-weight:700;font-size:13px;color:#991b1b;margin-bottom:6px;}
+  .warn-box .warn-body{font-size:12px;color:#7f1d1d;line-height:1.7;}
+
+  details{background:var(--card);border-radius:12px;padding:16px;box-shadow:var(--shadow);margin-bottom:10px;}
+  details summary{font-weight:700;font-size:14px;cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center;}
+  details summary::after{content:'▸';transition:transform 0.2s;}
+  details[open] summary::after{transform:rotate(90deg);}
+  details .detail-body{margin-top:12px;font-size:13px;color:var(--sub);line-height:1.8;}
+  .footnote{margin-top:40px;text-align:center;font-size:12px;color:var(--sub);}
+  @media(max-width:520px){.metrics-grid{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="series-tag">素材セクター特別編</div>
+  <h1>バックテストの実践</h1>
+  <p>推奨・組入の根拠を「過去に機能したか」で検証する</p>
+</div>
+
+<!-- 1. What is backtesting -->
+<div class="section">
+  <div class="section-title"><div class="icon" style="background:#d1fae5;">📖</div>バックテストとは</div>
+  <div class="card">
+    <p>
+      <strong>「もしこのシグナルに従って過去に売買していたら、どんなリターンだったか？」</strong>を検証すること。
+      素材アナリストとしては、例えば「鉄鋼メタルスプレッドが拡大し始めたら日本製鉄を買う」というルールが
+      過去10年で有効だったかを定量的にテストできる。<br/><br/>
+      <strong>バックテストの3つの用途：</strong><br/>
+      ① 自分の投資シグナル（スプレッド/サイクル/バリュエーション）の有効性検証<br/>
+      ② FMへのプレゼンで「過去にも機能した戦略」として説得力を持たせる<br/>
+      ③ ペアトレードの過去パフォーマンスを確認してリスクを定量化
+    </p>
+  </div>
+</div>
+
+<!-- 2. Framework -->
+<div class="section">
+  <div class="section-title"><div class="icon" style="background:#dbeafe;">🏗</div>バックテストの5ステップ</div>
+
+  <div class="flow-box">
+    <div class="flow-title">基本フレームワーク</div>
+    <div class="flow-step">
+      <div class="flow-num" style="background:var(--blue);">1</div>
+      <div class="flow-content"><strong>仮説（シグナル）を定義する</strong><br/>
+      「何が起きたら買う/売るか」を明確なルールで定義。曖昧さを排除。<br/>
+      例：「LME銅在庫が3ヶ月移動平均を下回ったら住友鉱山をBuy」</div>
+    </div>
+    <div class="flow-arrow">↓</div>
+    <div class="flow-step">
+      <div class="flow-num" style="background:var(--purple);">2</div>
+      <div class="flow-content"><strong>データを準備する</strong><br/>
+      シグナルに必要なデータ（コモディティ価格、在庫、財務データ）と株価の時系列を揃える。<br/>
+      J-Quants API（日本株）＋Bloomberg/Trading Economics（コモディティ）</div>
+    </div>
+    <div class="flow-arrow">↓</div>
+    <div class="flow-step">
+      <div class="flow-num" style="background:var(--green);">3</div>
+      <div class="flow-content"><strong>エントリー/エグジットのルールを設定する</strong><br/>
+      いつ買う（エントリー）、いつ売る（エグジット）、ポジションサイズ、保有期間。<br/>
+      例：「シグナル発生日の翌営業日にBuy。3ヶ月後にSell」</div>
+    </div>
+    <div class="flow-arrow">↓</div>
+    <div class="flow-step">
+      <div class="flow-num" style="background:var(--gold);">4</div>
+      <div class="flow-content"><strong>シミュレーションを実行する</strong><br/>
+      過去のデータでシグナルを機械的に適用し、各トレードのリターンを計算。<br/>
+      Python（pandas/numpy）またはExcelで実装</div>
+    </div>
+    <div class="flow-arrow">↓</div>
+    <div class="flow-step">
+      <div class="flow-num" style="background:var(--red);">5</div>
+      <div class="flow-content"><strong>結果を評価する</strong><br/>
+      勝率、平均リターン、最大ドローダウン、シャープレシオ。<br/>
+      「ベンチマーク（TOPIX）に対してアルファが出ているか」が最終判断</div>
+    </div>
+  </div>
+</div>
+
+<!-- 3. Signal ideas -->
+<div class="section">
+  <div class="section-title"><div class="icon" style="background:#fef3c7;">📡</div>素材セクター向けシグナル例</div>
+
+  <div class="tab-bar">
+    <button class="tab-btn active" onclick="switchTab('sig_spread')">スプレッド系</button>
+    <button class="tab-btn" onclick="switchTab('sig_cycle')">サイクル系</button>
+    <button class="tab-btn" onclick="switchTab('sig_val')">バリュエーション系</button>
+    <button class="tab-btn" onclick="switchTab('sig_pair')">ペアトレード系</button>
+  </div>
+
+  <!-- Spread signals -->
+  <div class="tab-content active" id="tab-sig_spread">
+    <div class="signal-card" style="border-color:var(--blue);">
+      <h3>① 鉄鋼メタルスプレッド反転シグナル</h3>
+      <div class="signal-desc">
+        HRC価格と原料コスト（鉄鉱石×1.6＋原料炭×0.5）のスプレッドが底打ちから反転上昇し始めたら鉄鋼株をBuy。
+      </div>
+      <div class="signal-logic">
+        <strong>ルール：</strong><br/>
+        spread = HRC - (iron_ore * 1.6 + coking_coal * 0.5)<br/>
+        signal = spread の20日MAが60日MAを上回ったら → Buy 日本製鉄<br/>
+        exit = 20日MAが60日MAを下回ったら → Sell<br/>
+        <strong>期待：</strong>スプレッド拡大＝利益改善期に入るタイミングを捉える
+      </div>
+    </div>
+
+    <div class="signal-card" style="border-color:var(--green);">
+      <h3>② 石化スプレッド＄300割れからの回復</h3>
+      <div class="signal-desc">
+        エチレン-ナフサスプレッドが$300（損益分岐）を割った後、$300を回復したらBuy。
+      </div>
+      <div class="signal-logic">
+        <strong>ルール：</strong><br/>
+        spread = ethylene_cfr_asia - naphtha_cfr_japan<br/>
+        signal = spread が$300以下 → $300を再度上回った日 → Buy 石化関連<br/>
+        exit = 90日保有 or spread が再度$300割れ<br/>
+        <strong>期待：</strong>赤字ゾーンからの脱出＝最悪期通過シグナル
+      </div>
+    </div>
+  </div>
+
+  <!-- Cycle signals -->
+  <div class="tab-content" id="tab-sig_cycle">
+    <div class="signal-card" style="border-color:var(--purple);">
+      <h3>③ LME在庫の方向転換シグナル</h3>
+      <div class="signal-desc">
+        LME銅在庫が3ヶ月連続で減少（Phase 4→1への転換）したら住友鉱山をBuy。
+      </div>
+      <div class="signal-logic">
+        <strong>ルール：</strong><br/>
+        inv_change = LME_copper_inventory の月次変化<br/>
+        signal = inv_change が3ヶ月連続マイナス → Buy 住友鉱山<br/>
+        exit = inv_change が2ヶ月連続プラスに転じたら → Sell<br/>
+        <strong>期待：</strong>在庫減少＝需給タイト化→銅価格上昇→鉱山利益増
+      </div>
+    </div>
+
+    <div class="signal-card" style="border-color:var(--gold);">
+      <h3>④ 中国クレジット・インパルス先行シグナル</h3>
+      <div class="signal-desc">
+        中国のTSF（社会融資総量）の前年比成長率が加速に転じたら、6ヶ月後にコモディティ関連をBuy。
+      </div>
+      <div class="signal-logic">
+        <strong>ルール：</strong><br/>
+        impulse = TSF_yoy の3ヶ月MA の変化方向<br/>
+        signal = impulse がマイナス→プラスに転換 → Buy（6ヶ月後）コモディティバスケット<br/>
+        exit = impulse がプラス→マイナスに転換の6ヶ月後<br/>
+        <strong>期待：</strong>信用拡大→投資活発→素材需要増の因果チェーン（6-12ヶ月ラグ）
+      </div>
+    </div>
+  </div>
+
+  <!-- Valuation signals -->
+  <div class="tab-content" id="tab-sig_val">
+    <div class="signal-card" style="border-color:var(--orange);">
+      <h3>⑤ PBR 1x割れ＋配当利回り5%超</h3>
+      <div class="signal-desc">
+        PBR 1.0x未満かつ配当利回り5%超の素材株をスクリーニングしてBuy。東証PBR是正の流れに乗る。
+      </div>
+      <div class="signal-logic">
+        <strong>ルール：</strong><br/>
+        signal = PBR < 1.0 AND div_yield > 5% AND Net_Debt/EBITDA < 3.0<br/>
+        → 条件を満たす銘柄を等金額でBuy<br/>
+        exit = PBR > 1.0 に回復 or 12ヶ月保有<br/>
+        <strong>期待：</strong>バリュー＋インカムの二重の安全マージン。PBR是正がカタリスト
+      </div>
+    </div>
+
+    <div class="signal-card" style="border-color:var(--red);">
+      <h3>⑥ ミッドサイクルPEの割安シグナル</h3>
+      <div class="signal-desc">
+        ミッドサイクルPE（過去10年平均EPSベース）が過去レンジの下位20%に入ったらBuy。
+      </div>
+      <div class="signal-logic">
+        <strong>ルール：</strong><br/>
+        mid_pe = price / avg_eps_10yr<br/>
+        signal = mid_pe < percentile_20(過去10年のmid_pe) → Buy<br/>
+        exit = mid_pe > percentile_50 → Sell<br/>
+        <strong>期待：</strong>サイクル調整済みの「本当の割安」を捉える
+      </div>
+    </div>
+  </div>
+
+  <!-- Pair trade signals -->
+  <div class="tab-content" id="tab-sig_pair">
+    <div class="signal-card" style="border-color:var(--blue);">
+      <h3>⑦ 鉄鉱石上昇で鉱山Long / 鉄鋼Short</h3>
+      <div class="signal-desc">
+        鉄鉱石の20日MAが上昇トレンドに転じたら、BHP（又は住友鉱山）Long / JFE Shortのペアを組む。
+      </div>
+      <div class="signal-logic">
+        <strong>ルール：</strong><br/>
+        signal = iron_ore_20MA > iron_ore_60MA（ゴールデンクロス）<br/>
+        → Long 住友鉱山 / Short JFE（ベータ調整済み）<br/>
+        exit = デッドクロス or 60日保有<br/>
+        <strong>期待：</strong>鉄鉱石の売り手（鉱山）にプラス、買い手（鉄鋼）にマイナスの裏表を利用
+      </div>
+    </div>
+
+    <div class="signal-card" style="border-color:var(--green);">
+      <h3>⑧ フジクラ/古河電工のスプレッド回帰</h3>
+      <div class="signal-desc">
+        同業2社の株価比率（フジクラ÷古河電工）が過去平均から2σ以上乖離したら平均回帰を狙う。
+      </div>
+      <div class="signal-logic">
+        <strong>ルール：</strong><br/>
+        ratio = fujikura_price / furukawa_price<br/>
+        z_score = (ratio - ratio_mean_1yr) / ratio_std_1yr<br/>
+        signal = z_score > 2.0 → Short フジクラ / Long 古河電工<br/>
+        signal = z_score < -2.0 → Long フジクラ / Short 古河電工<br/>
+        exit = z_score が0に回帰<br/>
+        <strong>注意：</strong>構造的な乖離（フジクラのDC成長テーマ）が続く場合は回帰しない
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 4. Implementation -->
+<div class="section">
+  <div class="section-title"><div class="icon" style="background:#ede9fe;">💻</div>実装方法</div>
+
+  <div class="tab-bar">
+    <button class="tab-btn active" onclick="switchTab('impl_python')">Python</button>
+    <button class="tab-btn" onclick="switchTab('impl_excel')">Excel</button>
+    <button class="tab-btn" onclick="switchTab('impl_data')">データ入手</button>
+  </div>
+
+  <!-- Python -->
+  <div class="tab-content active" id="tab-impl_python">
+    <div class="code-box">
+      <div class="code-title">📝 Python バックテスト基本フレームワーク</div>
+<span class="code-keyword">import</span> pandas <span class="code-keyword">as</span> pd
+<span class="code-keyword">import</span> numpy <span class="code-keyword">as</span> np
+
+<span class="code-comment"># === Step 1: データ読み込み ===</span>
+<span class="code-comment"># J-Quants APIで日本株の日次終値を取得（既にセットアップ済み）</span>
+<span class="code-comment"># コモディティデータはCSVで用意（Bloomberg or Trading Economics）</span>
+stock = pd.<span class="code-func">read_csv</span>(<span class="code-string">'nippon_steel_5401.csv'</span>, parse_dates=[<span class="code-string">'date'</span>], index_col=<span class="code-string">'date'</span>)
+iron_ore = pd.<span class="code-func">read_csv</span>(<span class="code-string">'iron_ore_62fe.csv'</span>, parse_dates=[<span class="code-string">'date'</span>], index_col=<span class="code-string">'date'</span>)
+coking_coal = pd.<span class="code-func">read_csv</span>(<span class="code-string">'coking_coal.csv'</span>, parse_dates=[<span class="code-string">'date'</span>], index_col=<span class="code-string">'date'</span>)
+hrc = pd.<span class="code-func">read_csv</span>(<span class="code-string">'china_hrc.csv'</span>, parse_dates=[<span class="code-string">'date'</span>], index_col=<span class="code-string">'date'</span>)
+
+<span class="code-comment"># === Step 2: スプレッド計算 ===</span>
+df = pd.<span class="code-func">DataFrame</span>()
+df[<span class="code-string">'hrc'</span>] = hrc[<span class="code-string">'price'</span>]
+df[<span class="code-string">'raw_cost'</span>] = iron_ore[<span class="code-string">'price'</span>] * <span class="code-num">1.6</span> + coking_coal[<span class="code-string">'price'</span>] * <span class="code-num">0.5</span>
+df[<span class="code-string">'spread'</span>] = df[<span class="code-string">'hrc'</span>] - df[<span class="code-string">'raw_cost'</span>]
+df[<span class="code-string">'spread_ma20'</span>] = df[<span class="code-string">'spread'</span>].<span class="code-func">rolling</span>(<span class="code-num">20</span>).<span class="code-func">mean</span>()
+df[<span class="code-string">'spread_ma60'</span>] = df[<span class="code-string">'spread'</span>].<span class="code-func">rolling</span>(<span class="code-num">60</span>).<span class="code-func">mean</span>()
+df[<span class="code-string">'stock_price'</span>] = stock[<span class="code-string">'close'</span>]
+
+<span class="code-comment"># === Step 3: シグナル生成 ===</span>
+df[<span class="code-string">'signal'</span>] = <span class="code-num">0</span>
+df.<span class="code-func">loc</span>[df[<span class="code-string">'spread_ma20'</span>] > df[<span class="code-string">'spread_ma60'</span>], <span class="code-string">'signal'</span>] = <span class="code-num">1</span>   <span class="code-comment"># Buy</span>
+df.<span class="code-func">loc</span>[df[<span class="code-string">'spread_ma20'</span>] < df[<span class="code-string">'spread_ma60'</span>], <span class="code-string">'signal'</span>] = <span class="code-num">0</span>   <span class="code-comment"># Sell/Cash</span>
+
+<span class="code-comment"># === Step 4: リターン計算 ===</span>
+df[<span class="code-string">'stock_return'</span>] = df[<span class="code-string">'stock_price'</span>].<span class="code-func">pct_change</span>()
+df[<span class="code-string">'strategy_return'</span>] = df[<span class="code-string">'signal'</span>].<span class="code-func">shift</span>(<span class="code-num">1</span>) * df[<span class="code-string">'stock_return'</span>]  <span class="code-comment"># 翌日リターン</span>
+df[<span class="code-string">'cum_strategy'</span>] = (<span class="code-num">1</span> + df[<span class="code-string">'strategy_return'</span>]).<span class="code-func">cumprod</span>()
+df[<span class="code-string">'cum_buyhold'</span>] = (<span class="code-num">1</span> + df[<span class="code-string">'stock_return'</span>]).<span class="code-func">cumprod</span>()
+
+<span class="code-comment"># === Step 5: 評価指標 ===</span>
+total_return = df[<span class="code-string">'cum_strategy'</span>].<span class="code-func">iloc</span>[-<span class="code-num">1</span>] - <span class="code-num">1</span>
+sharpe = df[<span class="code-string">'strategy_return'</span>].<span class="code-func">mean</span>() / df[<span class="code-string">'strategy_return'</span>].<span class="code-func">std</span>() * np.<span class="code-func">sqrt</span>(<span class="code-num">252</span>)
+max_dd = (df[<span class="code-string">'cum_strategy'</span>] / df[<span class="code-string">'cum_strategy'</span>].<span class="code-func">cummax</span>() - <span class="code-num">1</span>).<span class="code-func">min</span>()
+win_rate = (df[df[<span class="code-string">'signal'</span>].<span class="code-func">shift</span>(<span class="code-num">1</span>)==<span class="code-num">1</span>][<span class="code-string">'stock_return'</span>] > <span class="code-num">0</span>).<span class="code-func">mean</span>()
+
+<span class="code-func">print</span>(f<span class="code-string">"Total Return: {total_return:.1%}"</span>)
+<span class="code-func">print</span>(f<span class="code-string">"Sharpe Ratio: {sharpe:.2f}"</span>)
+<span class="code-func">print</span>(f<span class="code-string">"Max Drawdown: {max_dd:.1%}"</span>)
+<span class="code-func">print</span>(f<span class="code-string">"Win Rate: {win_rate:.1%}"</span>)
+    </div>
+
+    <div class="tip-box">
+      <div class="tip-title">💡 shift(1)を忘れると未来のデータを使ってしまう</div>
+      <div class="tip-body">
+        <strong>最も重要な注意点：</strong>シグナルに<code>shift(1)</code>を使って「翌日に売買する」想定にしないと、「今日のシグナルで今日の株価を売買した」ことになる（Look-ahead bias）。これをやると結果が圧倒的に良くなるが、<strong>現実では不可能な取引</strong>。バックテストの信頼性が完全に崩壊する。
+      </div>
+    </div>
+  </div>
+
+  <!-- Excel -->
+  <div class="tab-content" id="tab-impl_excel">
+    <div class="card">
+      <p>
+        Pythonが苦手なら<strong>Excelでも十分バックテストできる</strong>。構造は同じ。<br/><br/>
+        <strong>列の構成：</strong><br/>
+        A: 日付 ｜ B: 株価 ｜ C: 鉄鉱石 ｜ D: 原料炭 ｜ E: HRC<br/>
+        F: スプレッド =E-C*1.6-D*0.5<br/>
+        G: 20日MA =AVERAGE(F[直近20日])<br/>
+        H: 60日MA =AVERAGE(F[直近60日])<br/>
+        I: シグナル =IF(G>H, 1, 0)<br/>
+        J: 日次リターン =B2/B1-1<br/>
+        K: 戦略リターン =I1*J2（前日のシグナル×翌日のリターン）<br/>
+        L: 累積リターン =PRODUCT(1+K$2:K2)<br/><br/>
+        <strong>評価：</strong>L列の最終値がトータルリターン。K列のAVERAGE/STDEVでシャープレシオ。
+      </p>
+    </div>
+  </div>
+
+  <!-- Data sources -->
+  <div class="tab-content" id="tab-impl_data">
+    <div class="card">
+      <p><strong>日本株の株価データ：</strong></p>
+    </div>
+    <div class="signal-card" style="border-color:var(--blue);">
+      <h3>J-Quants API（推奨。既にセットアップ済み）</h3>
+      <div class="signal-desc">日次終値/出来高/調整済み株価。カバレッジ全45銘柄。無料プランで十分。Python連携可能。</div>
+    </div>
+    <div class="card">
+      <p><strong>コモディティデータ：</strong></p>
+    </div>
+    <div class="signal-card" style="border-color:var(--green);">
+      <h3>Bloomberg（6月〜）</h3>
+      <div class="signal-desc">BDH関数で日次/月次の全コモディティ時系列を取得。Excel直接連携。最も強力。</div>
+    </div>
+    <div class="signal-card" style="border-color:var(--gold);">
+      <h3>Trading Economics / Investing.com（無料）</h3>
+      <div class="signal-desc">主要コモディティ（鉄鉱石/銅/原油/金/BDI）の日次データをCSVダウンロード可能。遅延あり。</div>
+    </div>
+    <div class="signal-card" style="border-color:var(--purple);">
+      <h3>FRED（セントルイス連銀）</h3>
+      <div class="signal-desc">一部のコモディティ（原油WTI/銅/アルミ）＋マクロデータ（PMI等）。無料API。Python連携容易。</div>
+    </div>
+  </div>
+</div>
+
+<!-- 5. Evaluation metrics -->
+<div class="section">
+  <div class="section-title"><div class="icon" style="background:#d1fae5;">📊</div>評価指標</div>
+
+  <div class="metrics-grid">
+    <div class="metric-card">
+      <div class="metric-name">トータルリターン</div>
+      <div class="metric-desc">戦略全期間の累積リターン。Buy&Holdと比較。</div>
+      <div class="metric-formula">(最終資産 / 初期資産) - 1</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-name">シャープレシオ</div>
+      <div class="metric-desc">リスク調整後リターン。1.0以上で良好、2.0以上で優秀。</div>
+      <div class="metric-formula">mean(return) / std(return) × √252</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-name">最大ドローダウン</div>
+      <div class="metric-desc">ピークからの最大下落率。リスク管理の最重要指標。</div>
+      <div class="metric-formula">min(累積リターン / 累積最大値 - 1)</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-name">勝率（Hit Rate）</div>
+      <div class="metric-desc">プラスリターンのトレードの比率。55%以上が目標。</div>
+      <div class="metric-formula">count(return > 0) / count(all trades)</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-name">Profit Factor</div>
+      <div class="metric-desc">総利益 ÷ 総損失。1.5以上で有効な戦略。</div>
+      <div class="metric-formula">sum(winning trades) / |sum(losing trades)|</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-name">アルファ</div>
+      <div class="metric-desc">ベンチマーク（TOPIX）超過リターン。これが正でないと意味がない。</div>
+      <div class="metric-formula">strategy_return - benchmark_return</div>
+    </div>
+  </div>
+</div>
+
+<!-- 6. Pitfalls -->
+<div class="section">
+  <div class="section-title"><div class="icon" style="background:#fee2e2;">⚠️</div>バックテストの7つの落とし穴</div>
+
+  <details>
+    <summary>① Look-ahead Bias（未来データの使用）</summary>
+    <div class="detail-body">
+      最大の罠。「今日のスプレッドで今日の株を売買」はできない。シグナルは常に<strong>1日以上前のデータ</strong>で生成し、翌日以降に売買する。決算データも発表日以降のみ使用可能。「四半期末のEPSで四半期中にトレード」は不可。
+    </div>
+  </details>
+  <details>
+    <summary>② Survivorship Bias（生存者バイアス）</summary>
+    <div class="detail-body">
+      上場廃止・倒産した銘柄がデータから除外されていると、「生き残った銘柄だけ」で良い結果が出る。素材セクターでは少ないが、過去の中小鉄鋼・非鉄メーカーの統合・上場廃止を考慮。
+    </div>
+  </details>
+  <details>
+    <summary>③ Over-fitting（過学習）</summary>
+    <div class="detail-body">
+      パラメータ（MA期間、閾値等）を過去データに最適化しすぎると、<strong>「過去にだけ機能する戦略」</strong>が出来上がる。<br/><br/>
+      <strong>対処：</strong><br/>
+      ・パラメータは少なくする（2-3個以内）<br/>
+      ・In-sample（前半7年）で構築→Out-of-sample（後半3年）で検証<br/>
+      ・「なぜこのシグナルが機能するか」の経済的ロジックを必ず持つ
+    </div>
+  </details>
+  <details>
+    <summary>④ 取引コストの無視</summary>
+    <div class="detail-body">
+      売買手数料、スリッページ（大型株でも0.1-0.3%）、ショートの貸株コスト（年1-3%）を含めないとバックテストは楽観的すぎる。<strong>片道0.1-0.2%の取引コスト</strong>を必ず差し引く。
+    </div>
+  </details>
+  <details>
+    <summary>⑤ 流動性の無視</summary>
+    <div class="detail-body">
+      小型の素材株（大和工業、共英製鋼等）は1日の出来高が少なく、大きなポジションを取ると市場インパクトが出る。バックテストでは「いくらでも買える」前提だが、現実は違う。<strong>出来高の5%以下のポジションサイズ</strong>を前提にする。
+    </div>
+  </details>
+  <details>
+    <summary>⑥ レジーム変化（構造変化）</summary>
+    <div class="detail-body">
+      過去10年で有効だったシグナルが今後も有効とは限らない。中国の構造変化（不動産→ハイテク）、脱炭素、EV化でコモディティの需要構造が変わっている。<strong>「なぜ機能するか」の論理が今後も成立するか</strong>を常に問う。
+    </div>
+  </details>
+  <details>
+    <summary>⑦ 少ないサンプル数</summary>
+    <div class="detail-body">
+      月次シグナルで10年＝120データポイント。トレード回数が20回以下だと統計的有意性がない。
+      <strong>最低30トレード</strong>のサンプルが欲しい。足りなければ対象銘柄を増やすか、日次に切り替える。
+    </div>
+  </details>
+</div>
+
+<!-- 7. Practical workflow -->
+<div class="section">
+  <div class="section-title"><div class="icon" style="background:#dbeafe;">🔄</div>実践ワークフロー</div>
+  <div class="card">
+    <p>
+      <strong>Step 1：</strong>中級編#1-6で学んだ分析手法から「バックテスト可能なシグナル」を1つ選ぶ<br/><br/>
+      <strong>Step 2：</strong>J-Quants APIで株価データ、Trading EconomicsでコモディティデータをCSV取得<br/><br/>
+      <strong>Step 3：</strong>PythonまたはExcelでシグナル→リターン計算を実装。<strong>最初は単純な戦略から。</strong>MAクロスオーバーで十分<br/><br/>
+      <strong>Step 4：</strong>評価指標（シャープ/勝率/ドローダウン）を計算。Buy&Holdと比較<br/><br/>
+      <strong>Step 5：</strong>In-sample/Out-of-sampleに分けて検証。Out-of-sampleでも機能するか確認<br/><br/>
+      <strong>Step 6：</strong>結果が良ければ投資メモに「過去10年のバックテストで年率+X%のアルファ、シャープY」と記載<br/><br/>
+      <strong>Step 7：</strong>Claude Codeで自動化。GitHub Actionsで毎日シグナルを更新→Morning Briefに組み込み
+    </p>
+  </div>
+
+  <div class="tip-box">
+    <div class="tip-title">💡 最初にやるべきバックテスト（推奨）</div>
+    <div class="tip-body">
+      <strong>「鉄鋼メタルスプレッドのMAクロス → 日本製鉄の株価」</strong><br/>
+      理由：① データが比較的入手しやすい ② 経済的ロジックが明快（スプレッド改善→利益改善→株価上昇）③ 中級編#1のスプレッド分析の直接的な検証 ④ FMへの説得力が高い<br/><br/>
+      これが機能すれば、同じフレームワークを銅/石化/石油精製に展開できる。
+    </div>
+  </div>
+</div>
+
+<div class="footnote">
+  素材セクター特別編 — バックテストの実践<br/>
+  ※ バックテストの結果は過去のパフォーマンスであり、将来の成果を保証するものではない
+</div>
+
+<script>
+function switchTab(id){
+  document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('tab-'+id).classList.add('active');
+  event.target.classList.add('active');
+}
+</script>
+</body>
+</html>

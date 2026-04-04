@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>素材セクター中級編 #1 — スプレッド分析の実践</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#f5f5f7;--card:#fff;--text:#1d1d1f;--sub:#6e6e73;--accent:#2c2c2e;--radius:16px;--shadow:0 1px 3px rgba(0,0,0,0.04);--shadow-lg:0 4px 20px rgba(0,0,0,0.08);--gradient:linear-gradient(135deg,#1e3a5f 0%,#2563eb 50%,#7c3aed 100%);--steel:#3b82f6;--chem:#10b981;--copper:#a855f7;--red:#c92a2a;--orange:#e8590c;--green:#2b8a3e;}
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{font-family:'DM Sans','Noto Sans JP',sans-serif;background:var(--bg);color:var(--text);line-height:1.7;padding:24px 16px 60px;max-width:800px;margin:0 auto;}
+  .header{text-align:center;margin-bottom:40px;padding:32px 20px;background:var(--gradient);border-radius:var(--radius);color:#fff;position:relative;overflow:hidden;}
+  .header::before{content:'📐';position:absolute;font-size:120px;opacity:0.06;top:-10px;right:-10px;}
+  .header .series-tag{display:inline-block;background:rgba(255,255,255,0.15);padding:4px 14px;border-radius:20px;font-size:12px;letter-spacing:1px;text-transform:uppercase;margin-bottom:12px;}
+  .header h1{font-size:26px;font-weight:700;margin-bottom:8px;}
+  .header p{font-size:14px;opacity:0.7;}
+  .section{margin-bottom:36px;}
+  .section-title{font-size:18px;font-weight:700;margin-bottom:16px;display:flex;align-items:center;gap:8px;}
+  .section-title .icon{width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;}
+  .card{background:var(--card);border-radius:var(--radius);padding:20px;box-shadow:var(--shadow);margin-bottom:12px;}
+  .card p{font-size:14px;color:var(--sub);}
+  .card p strong{color:var(--text);}
+
+  .tab-bar{display:flex;gap:4px;margin-bottom:16px;background:#e9ecef;border-radius:10px;padding:3px;}
+  .tab-btn{flex:1;padding:10px 4px;border:none;background:transparent;border-radius:8px;font-family:inherit;font-size:12px;font-weight:600;color:var(--sub);cursor:pointer;transition:all 0.2s;white-space:nowrap;}
+  .tab-btn.active{background:var(--card);color:var(--text);box-shadow:0 1px 3px rgba(0,0,0,0.08);}
+  .tab-content{display:none;}
+  .tab-content.active{display:block;}
+
+  /* Formula highlight */
+  .formula-box{border-radius:var(--radius);padding:24px;color:#fff;text-align:center;margin-bottom:16px;}
+  .formula-box.steel-bg{background:linear-gradient(135deg,#1e3a5f,#2563eb);}
+  .formula-box.chem-bg{background:linear-gradient(135deg,#064e3b,#10b981);}
+  .formula-box.copper-bg{background:linear-gradient(135deg,#4c1d95,#a855f7);}
+  .formula-box.refine-bg{background:linear-gradient(135deg,#7f1d1d,#ef4444);}
+  .formula-box .formula{font-size:16px;font-weight:700;margin-bottom:8px;letter-spacing:0.3px;}
+  .formula-box .formula .var{color:#93c5fd;}
+  .formula-box .formula .op{color:#fcd34d;margin:0 4px;}
+  .formula-box .note{font-size:12px;opacity:0.6;line-height:1.6;}
+
+  /* Calculation example */
+  .calc-box{background:#1e293b;border-radius:var(--radius);padding:20px;color:#e2e8f0;margin-bottom:12px;font-size:13px;line-height:2;}
+  .calc-box .calc-title{font-weight:700;font-size:14px;color:#93c5fd;margin-bottom:10px;}
+  .calc-row{display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:1px solid rgba(255,255,255,0.06);}
+  .calc-row:last-child{border-bottom:none;}
+  .calc-row .calc-label{color:#94a3b8;}
+  .calc-row .calc-value{font-weight:700;font-family:'DM Sans',monospace;}
+  .calc-row.result{background:rgba(59,130,246,0.1);border-radius:8px;padding:8px 12px;margin-top:8px;border:1px solid rgba(59,130,246,0.2);}
+  .calc-row.result .calc-label{color:#93c5fd;font-weight:600;}
+  .calc-row.result .calc-value{color:#60a5fa;font-size:16px;}
+  .calc-row.result-green{background:rgba(16,185,129,0.1);border-radius:8px;padding:8px 12px;margin-top:8px;border:1px solid rgba(16,185,129,0.2);}
+  .calc-row.result-green .calc-label{color:#6ee7b7;font-weight:600;}
+  .calc-row.result-green .calc-value{color:#34d399;font-size:16px;}
+  .calc-row.result-purple{background:rgba(168,85,247,0.1);border-radius:8px;padding:8px 12px;margin-top:8px;border:1px solid rgba(168,85,247,0.2);}
+  .calc-row.result-purple .calc-label{color:#c4b5fd;font-weight:600;}
+  .calc-row.result-purple .calc-value{color:#a78bfa;font-size:16px;}
+
+  /* Waterfall chart simulation */
+  .waterfall{background:var(--card);border-radius:var(--radius);padding:20px;box-shadow:var(--shadow);margin-bottom:12px;}
+  .waterfall-title{font-weight:700;font-size:14px;margin-bottom:16px;}
+  .wf-bars{display:flex;align-items:flex-end;gap:6px;height:180px;padding:0 4px;}
+  .wf-bar{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;}
+  .wf-bar .bar{width:100%;border-radius:6px 6px 0 0;transition:height 0.3s;min-height:4px;position:relative;}
+  .wf-bar .bar-val{font-size:10px;font-weight:700;color:var(--text);margin-bottom:4px;}
+  .wf-bar .bar-label{font-size:9px;color:var(--sub);margin-top:6px;text-align:center;line-height:1.3;}
+  .wf-bar .bar.positive{background:var(--green);}
+  .wf-bar .bar.negative{background:var(--red);}
+  .wf-bar .bar.neutral{background:#868e96;}
+  .wf-bar .bar.result-bar{background:var(--steel);}
+
+  /* Tip box */
+  .tip-box{background:#fffbeb;border:1px solid #fcd34d;border-radius:12px;padding:16px;margin-bottom:12px;}
+  .tip-box .tip-title{font-weight:700;font-size:13px;color:#92400e;margin-bottom:6px;}
+  .tip-box .tip-body{font-size:12px;color:#78350f;line-height:1.7;}
+
+  .warn-box{background:#fef2f2;border:1px solid #fca5a5;border-radius:12px;padding:16px;margin-bottom:12px;}
+  .warn-box .warn-title{font-weight:700;font-size:13px;color:#991b1b;margin-bottom:6px;}
+  .warn-box .warn-body{font-size:12px;color:#7f1d1d;line-height:1.7;}
+
+  /* Bloomberg box */
+  .bbg-box{background:#1a1a2e;border-radius:12px;padding:16px;margin-bottom:12px;font-family:'DM Sans',monospace;color:#ff6600;font-size:12px;line-height:2;}
+  .bbg-box .bbg-title{color:#ff9933;font-weight:700;font-size:13px;margin-bottom:8px;}
+  .bbg-cmd{color:#ffcc00;}
+  .bbg-comment{color:#666;}
+
+  /* Data source table */
+  .src-table{width:100%;border-collapse:collapse;font-size:12px;background:var(--card);border-radius:12px;overflow:hidden;box-shadow:var(--shadow);}
+  .src-table th{text-align:left;padding:10px 12px;background:#f1f3f5;font-weight:600;font-size:11px;}
+  .src-table td{padding:10px 12px;border-bottom:1px solid #f1f3f5;}
+  .src-table tr:last-child td{border-bottom:none;}
+
+  details{background:var(--card);border-radius:12px;padding:16px;box-shadow:var(--shadow);margin-bottom:10px;}
+  details summary{font-weight:700;font-size:14px;cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center;}
+  details summary::after{content:'▸';transition:transform 0.2s;}
+  details[open] summary::after{transform:rotate(90deg);}
+  details .detail-body{margin-top:12px;font-size:13px;color:var(--sub);line-height:1.8;}
+
+  .footnote{margin-top:40px;text-align:center;font-size:12px;color:var(--sub);}
+  @media(max-width:520px){.wf-bars{height:140px;}}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="series-tag">素材セクター中級編 #1</div>
+  <h1>スプレッド分析の実践</h1>
+  <p>鉄鋼・石化・銅製錬・石油精製 — 利益の源泉を分解する</p>
+</div>
+
+<!-- Intro -->
+<div class="section">
+  <div class="section-title"><div class="icon" style="background:#dbeafe;">📖</div>スプレッド分析とは</div>
+  <div class="card">
+    <p>
+      素材セクターの企業は「原料を買って、加工して、製品を売る」ビジネス。
+      利益の大半は<strong>「製品価格 − 原料コスト」＝スプレッド</strong>で決まる。
+      原料も製品も市況で動くため、売上高や利益の絶対額よりも<strong>スプレッドの方向</strong>を見ることがアナリストの基本技。<br/><br/>
+      この回では4つのスプレッドを実際の数字で計算する：<br/>
+      <strong>① 鉄鋼メタルスプレッド ② 石化スプレッド ③ 銅製錬マージン ④ 石油精製マージン</strong>
+    </p>
+  </div>
+</div>
+
+<!-- TABS -->
+<div class="tab-bar">
+  <button class="tab-btn active" onclick="switchTab('steel_sp')">鉄鋼</button>
+  <button class="tab-btn" onclick="switchTab('chem_sp')">石化</button>
+  <button class="tab-btn" onclick="switchTab('cu_sp')">銅製錬</button>
+  <button class="tab-btn" onclick="switchTab('refine_sp')">石油精製</button>
+</div>
+
+<!-- ==================== STEEL ==================== -->
+<div class="tab-content active" id="tab-steel_sp">
+  <div class="section">
+    <div class="section-title"><div class="icon" style="background:#dbeafe;">🔩</div>鉄鋼メタルスプレッド</div>
+
+    <div class="formula-box steel-bg">
+      <div class="formula">
+        <span class="var">メタルスプレッド</span>
+        <span class="op">=</span>
+        <span class="var">鋼材価格</span>
+        <span class="op">−</span>
+        <span class="var">（鉄鉱石コスト + 原料炭コスト）</span>
+      </div>
+      <div class="note">原料を1トンの鋼材に必要な量に換算してから差し引く（係数が重要）</div>
+    </div>
+
+    <div class="calc-box">
+      <div class="calc-title">📝 計算例：中国HRC（熱延コイル）のスプレッド</div>
+      <div class="calc-row"><span class="calc-label">① HRC価格（中国 上海）</span><span class="calc-value">$520/t</span></div>
+      <div class="calc-row"><span class="calc-label">② 鉄鉱石 62% Fe CFR中国</span><span class="calc-value">$105/t</span></div>
+      <div class="calc-row"><span class="calc-label">③ 原料炭 Premium HCC FOB豪州</span><span class="calc-value">$230/t</span></div>
+      <div class="calc-row"><span class="calc-label">④ 鉄鉱石所要量（HRC 1tあたり）</span><span class="calc-value">× 1.6t</span></div>
+      <div class="calc-row"><span class="calc-label">⑤ 原料炭所要量（HRC 1tあたり）</span><span class="calc-value">× 0.5t</span></div>
+      <div class="calc-row"><span class="calc-label">⑥ 鉄鉱石コスト = $105 × 1.6</span><span class="calc-value">= $168</span></div>
+      <div class="calc-row"><span class="calc-label">⑦ 原料炭コスト = $230 × 0.5</span><span class="calc-value">= $115</span></div>
+      <div class="calc-row"><span class="calc-label">⑧ 合計原料コスト</span><span class="calc-value">= $283</span></div>
+      <div class="calc-row result"><span class="calc-label">メタルスプレッド = $520 − $283</span><span class="calc-value">= $237/t</span></div>
+    </div>
+
+    <!-- Waterfall -->
+    <div class="waterfall">
+      <div class="waterfall-title">ウォーターフォール：HRC $520/t の内訳</div>
+      <div class="wf-bars">
+        <div class="wf-bar"><div class="bar-val">$168</div><div class="bar negative" style="height:58%;"></div><div class="bar-label">鉄鉱石<br/>$105×1.6t</div></div>
+        <div class="wf-bar"><div class="bar-val">$115</div><div class="bar negative" style="height:40%;"></div><div class="bar-label">原料炭<br/>$230×0.5t</div></div>
+        <div class="wf-bar"><div class="bar-val">$60</div><div class="bar neutral" style="height:20%;"></div><div class="bar-label">エネルギー<br/>電力/ガス</div></div>
+        <div class="wf-bar"><div class="bar-val">$50</div><div class="bar neutral" style="height:17%;"></div><div class="bar-label">人件費<br/>固定費</div></div>
+        <div class="wf-bar"><div class="bar-val">$40</div><div class="bar neutral" style="height:14%;"></div><div class="bar-label">減価償却<br/>その他</div></div>
+        <div class="wf-bar"><div class="bar-val">$87</div><div class="bar positive" style="height:30%;"></div><div class="bar-label">⬆ 利益<br/>EBITDA</div></div>
+      </div>
+    </div>
+
+    <div class="tip-box">
+      <div class="tip-title">💡 アナリストTIP：係数を覚える</div>
+      <div class="tip-body">
+        <strong>HRC 1トン製造に必要な量：</strong>鉄鉱石 ≈ 1.55-1.65t、原料炭 ≈ 0.45-0.55t（コークス比0.35t、歩留まり含む）。
+        この係数は高炉の効率や品位で変動するが、概算では<strong>鉄鉱石×1.6、原料炭×0.5</strong>で十分。
+        これだけ覚えておけば、鉄鉱石/原料炭の価格変動から即座に鉄鋼のコスト変動を推定できる。
+      </div>
+    </div>
+
+    <div class="warn-box">
+      <div class="warn-title">⚠ 注意：紐付き vs 店売りのタイムラグ</div>
+      <div class="warn-body">
+        日本の鉄鋼メーカーは原料を<strong>1-3ヶ月前に仕入れ</strong>、鋼材は<strong>紐付き（四半期/半期交渉）</strong>で販売。
+        原料が急騰しても鋼材値上げが追いつかない期間はスプレッドが縮小する。
+        逆に原料が下がり始めても、既に高値で買った在庫を使うため、すぐにはスプレッド改善しない。
+        <strong>→ スポットのスプレッドと実際の決算利益にはズレがある。</strong>
+      </div>
+    </div>
+
+    <div class="bbg-box">
+      <div class="bbg-title">Bloomberg端末でのデータ取得（6月〜使用可能）</div>
+      <span class="bbg-cmd">TIOC IODEX &lt;GO&gt;</span> <span class="bbg-comment">← 鉄鉱石62% Fe CFR中国</span><br/>
+      <span class="bbg-cmd">MBTD COAL &lt;GO&gt;</span> <span class="bbg-comment">← Premium HCC FOB豪州</span><br/>
+      <span class="bbg-cmd">SHFE HRC &lt;GO&gt;</span> <span class="bbg-comment">← 中国HRC先物（上海先物取引所）</span><br/>
+      <span class="bbg-cmd">TSI HRC &lt;GO&gt;</span> <span class="bbg-comment">← TSI Hot Rolled Coil（国際指標）</span><br/>
+      <span class="bbg-comment">-- Excel: =BDH("MBTIIO62 Index","PX_LAST","20240101","20241231")</span>
+    </div>
+
+    <details>
+      <summary>日本製鉄のスプレッドを推定する方法</summary>
+      <div class="detail-body">
+        日本製鉄は紐付き比率約7割。製品ミックスも中国とは異なる（ハイテン・電磁鋼板比率が高い）。<br/><br/>
+        <strong>簡易推定：</strong><br/>
+        ① 決算資料の「単価」（円/トン）と「原料コスト」を取得<br/>
+        ② 単価 − 原料コスト/トン ≈ メタルスプレッド（円ベース）<br/>
+        ③ 為替（USD/JPY）で$ベースに換算してグローバル比較<br/><br/>
+        <strong>精緻な推定：</strong><br/>
+        ① 鉄鉱石の四半期平均CFR価格 × 1.6t × 為替 ＝ 鉄鉱石コスト（円/t）<br/>
+        ② 原料炭の四半期平均FOB × 0.5t × 為替 ＋ 海上運賃 ＝ 原料炭コスト<br/>
+        ③ 日本製鉄の平均販売単価（IR資料）− (①+②) ＝ 推定スプレッド<br/><br/>
+        日本製鉄のIR資料には「主原料価格感応度」が記載されている（鉄鉱石$1/t変動で年間○○億円影響、等）。これも活用。
+      </div>
+    </details>
+  </div>
+</div>
+
+<!-- ==================== PETROCHEM ==================== -->
+<div class="tab-content" id="tab-chem_sp">
+  <div class="section">
+    <div class="section-title"><div class="icon" style="background:#d1fae5;">🧪</div>石化スプレッド（ナフサ−エチレン）</div>
+
+    <div class="formula-box chem-bg">
+      <div class="formula">
+        <span class="var">石化スプレッド</span>
+        <span class="op">=</span>
+        <span class="var">エチレン価格</span>
+        <span class="op">−</span>
+        <span class="var">ナフサ価格</span>
+      </div>
+      <div class="note">「エチレンスプレッド」とも呼ぶ。石化メーカーの利益の核心</div>
+    </div>
+
+    <div class="calc-box">
+      <div class="calc-title">📝 計算例：アジアのエチレン−ナフサスプレッド</div>
+      <div class="calc-row"><span class="calc-label">① エチレンCFR NE Asia</span><span class="calc-value">$950/t</span></div>
+      <div class="calc-row"><span class="calc-label">② ナフサCFR Japan</span><span class="calc-value">$620/t</span></div>
+      <div class="calc-row result-green"><span class="calc-label">エチレンスプレッド = $950 − $620</span><span class="calc-value">= $330/t</span></div>
+    </div>
+
+    <div class="card">
+      <p>
+        <strong>$300/tが「損益分岐点」の目安。</strong>
+        スプレッドが$300を上回ればナフサクラッカーは黒字、下回れば赤字圧力。
+        ただし各社の効率（新鋭/老朽）で分岐点は異なる。<br/><br/>
+        <strong>ナフサ価格 ≈ 原油（ドバイ）× 0.065前後</strong>で概算可能。
+        原油$80/bbl → ナフサ≈$520/t。原油$100/bbl → ナフサ≈$650/t。
+      </p>
+    </div>
+
+    <div class="calc-box">
+      <div class="calc-title">📝 関連スプレッド：PE（ポリエチレン）− ナフサ</div>
+      <div class="calc-row"><span class="calc-label">① HDPE CFR NE Asia</span><span class="calc-value">$1,050/t</span></div>
+      <div class="calc-row"><span class="calc-label">② ナフサCFR Japan</span><span class="calc-value">$620/t</span></div>
+      <div class="calc-row result-green"><span class="calc-label">PEスプレッド = $1,050 − $620</span><span class="calc-value">= $430/t</span></div>
+    </div>
+
+    <div class="tip-box">
+      <div class="tip-title">💡 アナリストTIP：スプレッドの「チェーン」を追う</div>
+      <div class="tip-body">
+        石化は<strong>原油→ナフサ→エチレン→PE/PP/PVC</strong>の連鎖。
+        各段階のスプレッドを追うことで、利益がバリューチェーンのどこに蓄積しているか分かる。<br/><br/>
+        <strong>・ナフサ→エチレン：</strong>ナフサクラッカーの利益（三井化学、住友化学等）<br/>
+        <strong>・エチレン→PE/PP：</strong>ポリオレフィンメーカーの利益<br/>
+        <strong>・ナフサ→PVC（塩ビ）：</strong>信越化学（4063）の塩ビ事業の利益<br/><br/>
+        信越化学の米国塩ビ事業は<strong>エタン→PVC</strong>のスプレッドで見る（米国はエタンクラッカー主流）。
+        エタンは天然ガス連動で安く、PVCは住宅需要に連動。このスプレッドが拡大すると信越の利益が急増。
+      </div>
+    </div>
+
+    <div class="bbg-box">
+      <div class="bbg-title">Bloomberg端末でのデータ取得</div>
+      <span class="bbg-cmd">ICIS ETH &lt;GO&gt;</span> <span class="bbg-comment">← エチレンCFR NEアジア</span><br/>
+      <span class="bbg-cmd">NAPHJN &lt;GO&gt;</span> <span class="bbg-comment">← ナフサCFR Japan（Platts）</span><br/>
+      <span class="bbg-cmd">ICIS PE &lt;GO&gt;</span> <span class="bbg-comment">← HDPE CFR NEアジア</span><br/>
+      <span class="bbg-cmd">PGCRDUBA Index &lt;GO&gt;</span> <span class="bbg-comment">← ドバイ原油</span><br/>
+      <span class="bbg-comment">-- ナフサ概算: =BDH("PGCRDUBA Index","PX_LAST")*0.065*7.45</span>
+    </div>
+
+    <details>
+      <summary>なぜ日本の石化は中東・米国に不利なのか</summary>
+      <div class="detail-body">
+        <strong>原料の違い：</strong><br/>
+        ・日本：ナフサクラッカー（$600-700/tのナフサを使用）<br/>
+        ・米国：エタンクラッカー（$200-300/t相当のエタンを使用）<br/>
+        ・中東：エタン＋LPG（政府補助で極めて安価）<br/><br/>
+        同じエチレンを作るのに、日本は原料費が2-3倍高い。
+        このコスト差が日本の石化メーカーの構造的な低収益性の原因。
+        日本勢は<strong>機能性化学品（半導体材料・電子材料）</strong>へのシフトで差別化を図っている。
+      </div>
+    </details>
+  </div>
+</div>
+
+<!-- ==================== COPPER ==================== -->
+<div class="tab-content" id="tab-cu_sp">
+  <div class="section">
+    <div class="section-title"><div class="icon" style="background:#ede9fe;">🥇</div>銅製錬マージン（TC/RC分析）</div>
+
+    <div class="formula-box copper-bg">
+      <div class="formula">
+        <span class="var">製錬マージン</span>
+        <span class="op">=</span>
+        <span class="var">TC/RC</span>
+        <span class="op">+</span>
+        <span class="var">Free Metal</span>
+        <span class="op">+</span>
+        <span class="var">副産物</span>
+        <span class="op">−</span>
+        <span class="var">製造コスト</span>
+      </div>
+      <div class="note">TC/RC＝鉱山が支払う「加工賃」。LME銅価格そのものより重要</div>
+    </div>
+
+    <div class="calc-box">
+      <div class="calc-title">📝 計算例：銅スメルターのマージン</div>
+      <div class="calc-row"><span class="calc-label">① LME銅価格</span><span class="calc-value">$9,200/t</span></div>
+      <div class="calc-row"><span class="calc-label">② TC/RC（ベンチマーク）</span><span class="calc-value">$80/t（TC）+ 8¢/lb（RC）</span></div>
+      <div class="calc-row"><span class="calc-label">③ TC/RCの合計（概算）</span><span class="calc-value">≈ $256/t</span></div>
+      <div class="calc-row"><span class="calc-label">④ Free Metal（精鉱品位30%、支払96.5%の場合）</span><span class="calc-value">≈ $97/t of Cu</span></div>
+      <div class="calc-row"><span class="calc-label">⑤ 副産物（金・銀・硫酸）</span><span class="calc-value">≈ $80/t of Cu</span></div>
+      <div class="calc-row"><span class="calc-label">⑥ 合計収入 = ③+④+⑤</span><span class="calc-value">= $433/t of Cu</span></div>
+      <div class="calc-row"><span class="calc-label">⑦ 製造コスト（エネルギー+人件費+修繕）</span><span class="calc-value">≈ $300/t of Cu</span></div>
+      <div class="calc-row result-purple"><span class="calc-label">製錬マージン ≈ $433 − $300</span><span class="calc-value">= $133/t of Cu</span></div>
+    </div>
+
+    <div class="warn-box">
+      <div class="warn-title">⚠ 2024-25年のTC/RC急落問題</div>
+      <div class="warn-body">
+        中国の製錬能力急拡大で世界の銅精鉱が争奪状態に。
+        2024年のスポットTC/RCは一時<strong>$10/t以下</strong>まで急落（ベンチマークは$80/t）。
+        スポットが長期化すると日本のスメルター（パンパシ銅、住友鉱山）の利益が大幅圧縮。
+        <strong>→ TC/RCのトレンドは非鉄セクターで最も重要な先行指標。</strong>
+      </div>
+    </div>
+
+    <div class="tip-box">
+      <div class="tip-title">💡 TC/RC vs LMEの効き方の違い</div>
+      <div class="tip-body">
+        <strong>製錬型（三菱マテリアル等）：</strong>TC/RCが利益の大半。LME変動は在庫評価でのみ影響。<br/>
+        <strong>鉱山型（住友鉱山）：</strong>LME価格がダイレクトに利益を左右。TC/RCは「控除」として効く。<br/><br/>
+        住友鉱山の銅事業利益 ≈ (LME銅 − C1コスト) × 鉱山生産量 + 製錬マージン × 製錬量<br/>
+        鉱山と製錬の利益を分けて推定することが重要。
+      </div>
+    </div>
+
+    <div class="bbg-box">
+      <div class="bbg-title">Bloomberg端末でのデータ取得</div>
+      <span class="bbg-cmd">LMCADS03 &lt;GO&gt;</span> <span class="bbg-comment">← LME銅 3ヶ月物</span><br/>
+      <span class="bbg-cmd">MBTCSPSA &lt;GO&gt;</span> <span class="bbg-comment">← 銅TC/RCスポット（Fastmarkets）</span><br/>
+      <span class="bbg-cmd">GOLDLNPM &lt;GO&gt;</span> <span class="bbg-comment">← 金価格（副産物推定用）</span><br/>
+      <span class="bbg-comment">-- 在庫: LMCADY &lt;GO&gt; ← LME銅在庫</span>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== REFINING ==================== -->
+<div class="tab-content" id="tab-refine_sp">
+  <div class="section">
+    <div class="section-title"><div class="icon" style="background:#fee2e2;">🛢</div>石油精製マージン</div>
+
+    <div class="formula-box refine-bg">
+      <div class="formula">
+        <span class="var">精製マージン</span>
+        <span class="op">=</span>
+        <span class="var">石油製品の加重平均販売価格</span>
+        <span class="op">−</span>
+        <span class="var">原油購入価格</span>
+      </div>
+      <div class="note">「クラッキングマージン」「シンガポール複合マージン」とも。在庫影響を除くのが鍵</div>
+    </div>
+
+    <div class="calc-box">
+      <div class="calc-title">📝 計算例：シンガポール複合精製マージン（簡易版）</div>
+      <div class="calc-row"><span class="calc-label">① ドバイ原油</span><span class="calc-value">$82/bbl</span></div>
+      <div class="calc-row"><span class="calc-label">② ガソリン（シンガポール）</span><span class="calc-value">$95/bbl</span></div>
+      <div class="calc-row"><span class="calc-label">③ 灯油/ジェット燃料</span><span class="calc-value">$98/bbl</span></div>
+      <div class="calc-row"><span class="calc-label">④ 軽油</span><span class="calc-value">$96/bbl</span></div>
+      <div class="calc-row"><span class="calc-label">⑤ 重油（HSFO 380）</span><span class="calc-value">$65/bbl</span></div>
+      <div class="calc-row"><span class="calc-label">⑥ 製品加重平均（得率で加重）</span><span class="calc-value">≈ $90/bbl</span></div>
+      <div class="calc-row result"><span class="calc-label">精製マージン ≈ $90 − $82</span><span class="calc-value">= $8/bbl</span></div>
+    </div>
+
+    <div class="card">
+      <p>
+        <strong>$5-6/bblが日本の元売の損益分岐点の目安。</strong>$8/bblなら良好。$3以下なら厳しい。
+        シンガポール複合マージンはPlattsが日次で算出。世界の精製業のベンチマーク。<br/><br/>
+        <strong>入門編で解説した「在庫影響」をここで除く：</strong><br/>
+        元売決算の「営業利益」から「在庫影響」を控除 → 「実力ベースの営業利益」を算出。
+        ENEOSは決算資料でこの数字を明示している。
+      </p>
+    </div>
+
+    <div class="calc-box">
+      <div class="calc-title">📝 在庫影響の除去（ENEOS的な計算）</div>
+      <div class="calc-row"><span class="calc-label">① 報告ベース営業利益</span><span class="calc-value">¥3,500億</span></div>
+      <div class="calc-row"><span class="calc-label">② 在庫評価益（原油上昇による）</span><span class="calc-value">¥800億</span></div>
+      <div class="calc-row result"><span class="calc-label">実力ベース営業利益 = ①−②</span><span class="calc-value">= ¥2,700億</span></div>
+    </div>
+
+    <div class="warn-box">
+      <div class="warn-title">⚠ 在庫評価のワナ（再掲・超重要）</div>
+      <div class="warn-body">
+        原油上昇期に「好決算！」と報道されても、在庫益が大きければ実力は低い。
+        逆に原油下落期に「減益」と出ても、在庫損を除けば実力は改善していることもある。
+        <strong>→ 在庫影響除きを見ないと元売の分析は100%間違える。</strong>
+        これは非鉄金属（LME連動の在庫評価）にも全く同じことが言える。
+      </div>
+    </div>
+
+    <div class="bbg-box">
+      <div class="bbg-title">Bloomberg端末でのデータ取得</div>
+      <span class="bbg-cmd">PGCRDUBA Index &lt;GO&gt;</span> <span class="bbg-comment">← ドバイ原油</span><br/>
+      <span class="bbg-cmd">MOGSRE05 Index &lt;GO&gt;</span> <span class="bbg-comment">← シンガポール複合精製マージン</span><br/>
+      <span class="bbg-cmd">MOGSJN92 Index &lt;GO&gt;</span> <span class="bbg-comment">← ガソリン92RON シンガポール</span><br/>
+      <span class="bbg-comment">-- ENEOS在庫影響: 決算資料 or BDVD 5020 JP &lt;GO&gt;</span>
+    </div>
+
+    <details>
+      <summary>ネルソン指数と製油所の「複雑度」</summary>
+      <div class="detail-body">
+        <strong>ネルソン複雑度指数（Nelson Complexity Index）：</strong>
+        製油所の二次装置（FCC/コーカー/水素化分解等）の充実度を示す指標。<br/><br/>
+        <strong>高い（NCI 10+）＝</strong>重質原油を軽質化できる＝安い重質原油を使ってマージン拡大<br/>
+        <strong>低い（NCI 5-6）＝</strong>軽質原油しか処理できない＝原油選択の幅が狭い<br/><br/>
+        日本の製油所は概ねNCI 6-8。米国メキシコ湾岸は10-14。
+        複雑度が高い製油所ほど、重質-軽質の原油価格差（Heavy-Light differential）から利益を得られる。
+      </div>
+    </details>
+  </div>
+</div>
+
+<!-- ==================== DATA SOURCES ==================== -->
+<div class="section">
+  <div class="section-title"><div class="icon" style="background:#e8f4fd;">🗂</div>スプレッドデータの入手先（Bloomberg以外）</div>
+  <div class="card" style="padding:0;overflow:hidden;">
+    <table class="src-table">
+      <thead><tr><th>データ</th><th>無料/有料</th><th>入手先</th></tr></thead>
+      <tbody>
+        <tr><td>鉄鉱石（62% Fe）</td><td>無料（遅延）</td><td>Trading Economics、Investing.com、SteelHome</td></tr>
+        <tr><td>原料炭（HCC）</td><td>有料</td><td>Platts/S&P Global、Fastmarkets。概算はTrading Economics</td></tr>
+        <tr><td>中国HRC先物</td><td>無料</td><td>上海先物取引所（SHFE）、Investing.com</td></tr>
+        <tr><td>ナフサCFR Japan</td><td>有料</td><td>Platts。概算＝ドバイ原油×0.065×7.45（$/t換算）</td></tr>
+        <tr><td>エチレン価格</td><td>有料</td><td>ICIS、Platts。概算はJPX Plattsのナフサ先物から逆算</td></tr>
+        <tr><td>LME銅/ニッケル/亜鉛</td><td>無料（遅延）</td><td>LME公式サイト、Investing.com、Kitco</td></tr>
+        <tr><td>金価格</td><td>無料</td><td>COMEX先物、Kitco、LBMA Gold Fix</td></tr>
+        <tr><td>精製マージン</td><td>有料</td><td>Platts Singapore Complex Margin。概算はReuters</td></tr>
+        <tr><td>ドバイ原油</td><td>無料</td><td>Investing.com、Trading Economics</td></tr>
+        <tr><td>TC/RC</td><td>有料</td><td>Fastmarkets、CRU。年次ベンチマークは業界ニュースで把握可</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="tip-box" style="margin-top:12px;">
+    <div class="tip-title">💡 Bloomberg Anywhereが使えるまでの代替</div>
+    <div class="tip-body">
+      6月までBloombergが使えない期間は、<strong>Trading Economics</strong>（無料・遅延データ）と
+      <strong>Investing.com</strong>（リアルタイム一部無料）で主要コモディティ価格を追える。
+      J-Quants API（Claude Code統合済み）で日本株の株価・財務データは取得可能。
+      スプレッドは<strong>Excelで手計算</strong>するのが最も確実で理解も深まる。
+    </div>
+  </div>
+</div>
+
+<!-- Summary -->
+<div class="section">
+  <div class="section-title"><div class="icon" style="background:#d3f9d8;">✅</div>まとめ：4つのスプレッドの勘所</div>
+  <div class="card">
+    <p>
+      <strong>① 鉄鋼：</strong>HRC − (鉄鉱石×1.6 + 原料炭×0.5)。中国HRC先物が先行指標。紐付きラグに注意。<br/><br/>
+      <strong>② 石化：</strong>エチレン − ナフサ。$300/tが分岐点。日本は原料コスト高で構造不利。信越化学は米国エタンベースで別ゲーム。<br/><br/>
+      <strong>③ 銅製錬：</strong>TC/RC + Free Metal + 副産物。TC/RCのトレンドが最重要。鉱山型と製錬型で効き方が違う。<br/><br/>
+      <strong>④ 石油精製：</strong>製品加重平均 − 原油。$5-6/bblが分岐点。<strong>在庫影響は必ず除く。</strong>
+    </p>
+  </div>
+</div>
+
+<div class="footnote">
+  素材セクター中級編 #1 / 7<br/>
+  次回：#2 コモディティサイクルの見極め方
+</div>
+
+<script>
+function switchTab(id){
+  document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('tab-'+id).classList.add('active');
+  event.target.classList.add('active');
+}
+</script>
+</body>
+</html>

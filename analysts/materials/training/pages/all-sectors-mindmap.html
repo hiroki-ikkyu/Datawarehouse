@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>素材セクター 全体マインドマップ</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0f1117;--card:rgba(255,255,255,0.06);--border:rgba(255,255,255,0.08);--text:#e8e8ed;--sub:#8e8e93;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'DM Sans','Noto Sans JP',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;}
+.header{text-align:center;padding:28px 20px 16px;}
+.header .tag{display:inline-block;background:rgba(255,255,255,0.08);padding:4px 14px;border-radius:20px;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--sub);margin-bottom:8px;}
+.header h1{font-size:22px;font-weight:700;background:linear-gradient(135deg,#60a5fa,#a78bfa,#f472b6);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.header p{font-size:12px;color:var(--sub);margin-top:4px;}
+.controls{display:flex;justify-content:center;gap:6px;padding:8px 12px 16px;flex-wrap:wrap;}
+.ctrl-btn{padding:7px 14px;border-radius:20px;border:1px solid var(--border);background:var(--card);color:var(--sub);font-family:inherit;font-size:11px;font-weight:600;cursor:pointer;transition:all 0.2s;white-space:nowrap;}
+.ctrl-btn:hover,.ctrl-btn.active{background:rgba(255,255,255,0.12);color:var(--text);border-color:rgba(255,255,255,0.2);}
+.legend{display:flex;justify-content:center;gap:12px;flex-wrap:wrap;padding:4px 16px 12px;font-size:10px;color:var(--sub);}
+.legend-item{display:flex;align-items:center;gap:4px;}
+.legend-dot{width:8px;height:8px;border-radius:50%;}
+.map-container{width:100%;overflow:auto;-webkit-overflow-scrolling:touch;padding:0 8px 40px;}
+svg{display:block;margin:0 auto;}
+.tooltip{position:fixed;background:#1c1c1e;border:1px solid rgba(255,255,255,0.15);border-radius:12px;padding:14px 16px;font-size:12px;color:var(--text);max-width:280px;line-height:1.7;pointer-events:none;opacity:0;transition:opacity 0.15s;z-index:100;box-shadow:0 8px 30px rgba(0,0,0,0.5);}
+.tooltip.show{opacity:1;}
+.tooltip .tt-title{font-weight:700;font-size:13px;margin-bottom:6px;}
+.tooltip .tt-body{color:var(--sub);}
+.footnote{text-align:center;font-size:11px;color:var(--sub);padding:0 16px 40px;opacity:0.6;}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="tag">素材セクター入門 — 全体マップ</div>
+  <h1>8セクター マインドマップ</h1>
+  <p>川上→川下の全バリューチェーンを一望</p>
+</div>
+
+<div class="controls" id="controlBar"></div>
+
+<div class="legend" id="legendBar"></div>
+
+<div class="map-container" id="mapContainer"></div>
+
+<div class="tooltip" id="tooltip">
+  <div class="tt-title" id="ttTitle"></div>
+  <div class="tt-body" id="ttBody"></div>
+</div>
+
+<div class="footnote">タップで詳細表示 ｜ 上部ボタンでセクター切替</div>
+
+<script>
+const COLORS = {
+  mining:'#f59e0b', oil:'#ef4444', steel:'#3b82f6', nonferrous:'#8b5cf6',
+  wire:'#06b6d4', glass:'#6b7280', paper:'#a16207', shipping:'#2563eb',
+  L1:'#fbbf24', L2:'#60a5fa', L3:'#34d399', L4:'#f9a8d4'
+};
+
+const SECTORS = [
+  { id:'mining', label:'#1 石炭・鉱業', color:COLORS.mining, data:{
+    id:'mining_root',label:'石炭・鉱業',labelEn:'Mining',color:COLORS.mining,
+    info:'地球の地殻から鉱物資源を掘り出す最上流産業',
+    children:[
+      {id:'iron_ore',label:'鉄鉱石',color:COLORS.L1,info:'鉄鋼の原料。Fe含有率が価格を左右。BHP/Rio/Vale寡占',children:[
+        {id:'io_bf',label:'高炉向け（#3鉄鋼）',color:COLORS.L3,info:'焼結鉱→高炉で銑鉄に。日本製鉄・JFE等が輸入'},
+        {id:'io_dri',label:'DRI向け（直接還元）',color:COLORS.L3,info:'天然ガス/水素で還元。電炉のグリーンスチール原料'}
+      ]},
+      {id:'coking_coal',label:'原料炭',color:COLORS.L1,info:'コークス製造用。製鉄に不可欠。豪州産が主力',children:[
+        {id:'cc_coke',label:'コークス→高炉',color:COLORS.L3,info:'原料炭を蒸し焼き→コークスに。高炉の還元剤＋燃料'},
+      ]},
+      {id:'thermal_coal',label:'一般炭',color:COLORS.L1,info:'火力発電用。脱炭素で先進国縮小もアジア新興国では主力',children:[
+        {id:'tc_power',label:'火力発電',color:COLORS.L3,info:'石炭火力。セメントキルンの燃料にも使用'},
+        {id:'tc_cement',label:'セメント燃料（#6）',color:COLORS.L3,info:'セメントキルンの熱源。石油コークスとも競合'}
+      ]},
+      {id:'copper_mine',label:'銅鉱山',color:COLORS.L1,info:'Dr.Copper。EV/再エネ/DCで需要急増。チリ・ペルーが主産地',children:[
+        {id:'cu_smelt',label:'製錬→銅地金（#4）',color:COLORS.L3,info:'精鉱→製錬→99.99%銅地金。TC/RCで製錬利益が決まる'},
+        {id:'cu_wire',label:'電線・ケーブル（#5）',color:COLORS.L3,info:'銅地金→荒引線→電線。世界の銅需要の30%が電線向け'}
+      ]},
+      {id:'gold_mine',label:'金',color:COLORS.L1,info:'安全資産。中央銀行の購入が新ドライバー。AISC$1,200/oz前後',children:[
+        {id:'au_invest',label:'投資/中央銀行',color:COLORS.L3,info:'ETF、金地金、中央銀行外貨準備。実質金利と逆相関'},
+        {id:'au_smmg',label:'住友鉱山 菱刈',color:COLORS.L3,info:'世界有数の高品位金鉱山（40g/t超）。副産物利益に貢献'}
+      ]},
+      {id:'nickel_mine',label:'ニッケル',color:COLORS.L1,info:'ステンレス70%＋EV電池。インドネシア急増で供給過剰',children:[
+        {id:'ni_ss',label:'ステンレス鋼',color:COLORS.L3,info:'耐食性付与。Class 2（NPI/FeNi）が原料'},
+        {id:'ni_bat',label:'EV電池正極材',color:COLORS.L3,info:'NMC/NCA電池。Class 1（高純度）が必要。住友鉱山'}
+      ]}
+    ]
+  }},
+  { id:'oil', label:'#2 石油・エネルギー', color:COLORS.oil, data:{
+    id:'oil_root',label:'石油・エネルギー',labelEn:'Oil & Energy',color:COLORS.oil,
+    info:'世界エネルギー供給の55%。原油・天然ガス・LNG',
+    children:[
+      {id:'crude',label:'原油',color:COLORS.L1,info:'WTI/Brent/Dubai。OPEC+が供給を管理',children:[
+        {id:'lpg',label:'LPG',color:COLORS.L2,info:'プロパン/ブタン。家庭用燃料＋化学原料'},
+        {id:'naphtha',label:'ナフサ',color:COLORS.L2,info:'石化の最重要原料。日本はナフサクラッカー主流',children:[
+          {id:'ethylene',label:'エチレン→PE/PVC',color:COLORS.L3,info:'石化の基礎。ポリエチレン、塩ビ（信越化学4063）'},
+          {id:'propylene',label:'プロピレン→PP',color:COLORS.L3,info:'ポリプロピレン。自動車部品・食品容器'},
+          {id:'btx',label:'BTX→PET/PS',color:COLORS.L3,info:'芳香族。パラキシレン→PETボトル/ポリエステル繊維'}
+        ]},
+        {id:'gasoline',label:'ガソリン',color:COLORS.L2,info:'自動車燃料。EV普及で長期需要減。ENEOS国内5割'},
+        {id:'kerosene',label:'灯油/ジェット燃料',color:COLORS.L2,info:'暖房用＋航空燃料。SAF（持続可能航空燃料）が注目'},
+        {id:'diesel',label:'軽油',color:COLORS.L2,info:'トラック・建機・船舶用。景気の代理変数'},
+        {id:'heavyoil',label:'重油/残渣',color:COLORS.L2,info:'発電用（縮小）＋船舶燃料＋アスファルト＋石油コークス'}
+      ]},
+      {id:'lng_gas',label:'LNG/天然ガス',color:COLORS.L1,info:'−162℃に液化。日本は世界最大級の輸入国（年7,000万t）',children:[
+        {id:'lng_power',label:'LNG火力発電',color:COLORS.L3,info:'石炭→LNG転換の「橋渡し」。電力コストに直結'},
+        {id:'lng_chem',label:'化学原料',color:COLORS.L3,info:'メタノール、アンモニア、水素の原料にも'},
+        {id:'lng_ship',label:'LNG船（#8海運）',color:COLORS.L3,info:'商船三井約90隻。15-25年長期傭船契約で安定CF'}
+      ]}
+    ]
+  }},
+  { id:'steel', label:'#3 鉄鋼', color:COLORS.steel, data:{
+    id:'steel_root',label:'鉄鋼',labelEn:'Steel',color:COLORS.steel,
+    info:'産業のコメ。世界粗鋼19億t、中国54%。スプレッドが全て',
+    children:[
+      {id:'bf',label:'高炉（BF）',color:COLORS.L1,info:'鉄鉱石＋原料炭→銑鉄→鋼。日本製鉄/JFE/神戸製鋼',children:[
+        {id:'hrc',label:'熱延コイル（HRC）',color:COLORS.L2,info:'最も基本的な鋼板。中国HRC価格が世界を支配',children:[
+          {id:'crc',label:'冷延→表面処理',color:COLORS.L3,info:'冷間圧延→亜鉛めっき（GA/GI）。自動車外板'},
+          {id:'highten',label:'ハイテン鋼板',color:COLORS.L3,info:'高張力鋼板。590MPa超。日本製鉄・JFEが世界リーダー'}
+        ]},
+        {id:'plate',label:'厚板',color:COLORS.L2,info:'造船・橋梁・建機向け。新造船受注に連動'},
+        {id:'emsteel',label:'電磁鋼板',color:COLORS.L2,info:'EV駆動モーター用。無方向性が成長分野。戦略製品'}
+      ]},
+      {id:'eaf',label:'電炉（EAF）',color:COLORS.L1,info:'鉄スクラップ原料。CO2は高炉の1/4。東京製鐵・大和工業',children:[
+        {id:'hbeam',label:'H形鋼',color:COLORS.L2,info:'建築の柱・梁。国内建設投資に連動'},
+        {id:'rebar',label:'棒鋼（鉄筋）',color:COLORS.L2,info:'RC造の鉄筋。電炉メーカーの主力'},
+        {id:'eaf_thin',label:'電炉薄板（挑戦中）',color:COLORS.L2,info:'東京製鐵が高炉品質の薄板に挑戦。脱炭素で追い風'}
+      ]},
+      {id:'pipe',label:'鋼管',color:COLORS.L1,info:'油井管（OCTG）＋ラインパイプ。原油価格に連動',children:[
+        {id:'octg',label:'OCTG→油井',color:COLORS.L3,info:'シームレスパイプ。掘削リグ数に需要連動。USS'},
+        {id:'linepipe',label:'ラインパイプ→LNG',color:COLORS.L3,info:'石油・ガスの輸送管。大径UOEパイプ'}
+      ]},
+      {id:'specialsteel',label:'特殊鋼',color:COLORS.L1,info:'ステンレス・工具鋼・軸受鋼。大同特殊鋼/山陽特殊製鋼',children:[
+        {id:'ss_auto',label:'自動車エンジン部品',color:COLORS.L3,info:'クランクシャフト、ベアリング。EV化で構造変化'},
+        {id:'ss_aero',label:'航空機・タービン',color:COLORS.L3,info:'高合金鋼。超高付加価値ニッチ'}
+      ]}
+    ]
+  }},
+  { id:'nonferrous', label:'#4 非鉄金属', color:COLORS.nonferrous, data:{
+    id:'nf_root',label:'非鉄金属',labelEn:'Non-Ferrous',color:COLORS.nonferrous,
+    info:'鉄以外の金属すべて。LMEで価格決定。製錬型が日本の主流',
+    children:[
+      {id:'cu_smelt2',label:'銅（製錬）',color:COLORS.L1,info:'精鉱→製錬→地金。TC/RC＋Free Metal＋副産物が利益源',children:[
+        {id:'cu_wire2',label:'電線向け（#5）',color:COLORS.L3,info:'銅地金→荒引線→電線・ケーブル'},
+        {id:'cu_board',label:'基板・電子部品',color:COLORS.L3,info:'銅箔→プリント基板。5G/EV向け。三井金属の電解銅箔'},
+        {id:'cu_byproduct',label:'副産物（金・銀・硫酸）',color:COLORS.L3,info:'銅製錬から金・銀を回収。隠れた利益源'}
+      ]},
+      {id:'al',label:'アルミニウム',color:COLORS.L1,info:'鉄の1/3の重さ。「電気の缶詰」。日本は地金全量輸入',children:[
+        {id:'al_auto',label:'自動車軽量化',color:COLORS.L3,info:'EV車体（ギガキャスト）。鉄vsアルミの競争'},
+        {id:'al_can',label:'缶材・建材',color:COLORS.L3,info:'飲料缶、サッシ。UACJ(5741)が圧延大手'},
+      ]},
+      {id:'ni2',label:'ニッケル（製錬）',color:COLORS.L1,info:'ステンレス70%＋EV電池。住友鉱山がHPAL',children:[
+        {id:'ni_cathode',label:'NCA正極材→テスラ',color:COLORS.L3,info:'住友鉱山。ニッケル鉱山→正極材の一貫体制'}
+      ]},
+      {id:'zn2',label:'亜鉛',color:COLORS.L1,info:'めっき用60%。鉄鋼生産量に連動。三井金属',children:[
+        {id:'zn_galv',label:'亜鉛めっき鋼板（#3）',color:COLORS.L3,info:'鉄鋼の防食処理。鉄鋼セクターと連動'}
+      ]},
+      {id:'battery_mat',label:'電池材料',color:COLORS.L1,info:'リチウム/コバルト/マンガン。EV需要',children:[
+        {id:'li',label:'リチウム',color:COLORS.L3,info:'供給過剰で$80k→$10k/tに暴落。SQM/Albemarle'},
+        {id:'solidstate',label:'全固体電池材料',color:COLORS.L3,info:'出光（硫化リチウム）、三井金属（固体電解質）。次世代'},
+      ]},
+      {id:'recycle',label:'リサイクル（都市鉱山）',color:COLORS.L1,info:'E-wasteから貴金属回収。DOWA(5714)が先行',children:[
+        {id:'ewaste',label:'電子機器→貴金属回収',color:COLORS.L3,info:'基板から金・銀・パラジウム・銅を回収。環境事業'}
+      ]}
+    ]
+  }},
+  { id:'wire', label:'#5 線材・ケーブル', color:COLORS.wire, data:{
+    id:'wire_root',label:'線材・ケーブル',labelEn:'Wire & Cable',color:COLORS.wire,
+    info:'電力・通信・自動車のインフラ神経網。DC需要で爆発成長',
+    children:[
+      {id:'power_cable',label:'電力ケーブル',color:COLORS.L1,info:'銅導体＋XLPE絶縁。送電線・配電線。住友電工',children:[
+        {id:'submarine',label:'海底ケーブル',color:COLORS.L2,info:'洋上風力接続。Prysmian/Nexans/住友電工の3強寡占。受注残3年超'},
+        {id:'grid',label:'送電網更新',color:COLORS.L2,info:'再エネ接続・老朽化更新。GX政策で投資加速'}
+      ]},
+      {id:'optical',label:'光ファイバー・光接続',color:COLORS.L1,info:'石英ガラスで光伝送。DC/AI需要で爆発成長',children:[
+        {id:'mpo',label:'MPOコネクタ（フジクラ）',color:COLORS.L2,info:'DC内高密度光接続。需要＞供給で値上げ浸透'},
+        {id:'swr',label:'SWR高密度光ケーブル',color:COLORS.L2,info:'スパイダーウェブリボン。DCの限られたスペースに大容量配線'},
+        {id:'fusion',label:'融着接続機',color:COLORS.L2,info:'光ファイバー精密接続装置。フジクラ世界トップ級'},
+        {id:'transceiver',label:'光トランシーバー',color:COLORS.L2,info:'800G→1.6T→3.2T。GPU間接続で帯域要求が指数関数的増大'}
+      ]},
+      {id:'harness',label:'自動車ハーネス',color:COLORS.L1,info:'車の神経系。住友電工/Yazaki/Aptivの3強',children:[
+        {id:'hv_harness',label:'高電圧ハーネス（EV）',color:COLORS.L2,info:'400-800V。太い銅線＋高性能絶縁。単価数倍'},
+        {id:'eth_harness',label:'車載イーサネット',color:COLORS.L2,info:'ADAS/自動運転で車内通信量激増。Ethernet移行'}
+      ]},
+      {id:'electron_dev',label:'電子デバイス',color:COLORS.L1,info:'FPC、化合物半導体基板。フジクラ/住友電工',children:[
+        {id:'fpc',label:'FPC（スマホ/車載）',color:COLORS.L2,info:'フレキシブルプリント基板。iPhone等。フジクラ'},
+        {id:'gan_sic',label:'GaN/SiC基板',color:COLORS.L2,info:'パワー半導体向け。EV用インバーター。住友電工'}
+      ]}
+    ]
+  }},
+  { id:'glass', label:'#6 ガラス・セメント', color:COLORS.glass, data:{
+    id:'gc_root',label:'ガラス・セメント',labelEn:'Glass & Cement',color:COLORS.glass,
+    info:'窯業。エネルギーコスト30-40%の重厚長大産業',
+    children:[
+      {id:'flat_glass',label:'建築用板ガラス',color:COLORS.L1,info:'窓ガラス・Low-E。AGC/NSG/Saint-Gobain。中国60%',children:[
+        {id:'lowe',label:'Low-Eガラス（断熱）',color:COLORS.L3,info:'ZEB規制で需要増。高機能化トレンド'},
+        {id:'solar_glass',label:'太陽光パネル用',color:COLORS.L3,info:'超白板ガラス。再エネ拡大で安定需要。AGC'}
+      ]},
+      {id:'auto_glass',label:'自動車用ガラス',color:COLORS.L1,info:'ADAS対応でフロントガラス高付加価値化。HUD/調光',children:[
+        {id:'hud',label:'HUD用楔形ガラス',color:COLORS.L3,info:'ヘッドアップディスプレイ。光学歪み管理が技術障壁'},
+        {id:'glass_roof',label:'大型ガラスルーフ（EV）',color:COLORS.L3,info:'テスラ全車種採用。ガラス使用量+20-30%'}
+      ]},
+      {id:'display_glass',label:'ディスプレイ用ガラス',color:COLORS.L1,info:'液晶/OLED基板。Corning50%,AGC20%。高マージン',children:[
+        {id:'gen105',label:'Gen10.5（大型TV）',color:COLORS.L3,info:'65-75インチTV。面積ベースで需要を見る'},
+        {id:'oled_sub',label:'OLED基板',color:COLORS.L3,info:'有機EL用。薄型化。IT用（タブレット/ノートPC）も'}
+      ]},
+      {id:'spec_glass',label:'特殊ガラス',color:COLORS.L1,info:'半導体/医薬品/ガラス繊維。成長テーマ豊富',children:[
+        {id:'euv_mask',label:'EUVフォトマスク基板',color:COLORS.L3,info:'合成石英。半導体露光に不可欠。AGC/HOYA'},
+        {id:'glass_fiber',label:'ガラス繊維→風力ブレード',color:COLORS.L3,info:'FRP補強材。日本電気硝子'}
+      ]},
+      {id:'cement',label:'セメント',color:COLORS.L1,info:'石灰石→キルン1,450℃→クリンカ→セメント。太平洋セメント',children:[
+        {id:'cem_const',label:'建設向け（公共＋民間）',color:COLORS.L2,info:'国内需要はピーク比半減。国土強靭化で下支え'},
+        {id:'cem_waste',label:'廃棄物処理（環境事業）',color:COLORS.L2,info:'キルン1,450℃で廃棄物完全焼却。燃料費削減＋処理受託収入'},
+        {id:'cem_overseas',label:'海外（米国/アジア）',color:COLORS.L2,info:'太平洋セメントのCalPortland。成熟国内を海外で補完'}
+      ]}
+    ]
+  }},
+  { id:'paper', label:'#7 紙・パッケージング', color:COLORS.paper, data:{
+    id:'paper_root',label:'紙・パッケージング',labelEn:'Paper & Packaging',color:COLORS.paper,
+    info:'「紙は斜陽」は半分だけ正しい。段ボール＋ESGが変える',
+    children:[
+      {id:'print_paper',label:'印刷用紙（衰退）',color:COLORS.L1,info:'新聞/雑誌/コピー用紙。年率▲3-5%で構造的縮小',children:[
+        {id:'news',label:'新聞用紙',color:COLORS.L3,info:'15年で需要半減以下。抄紙機停機・転換を加速'},
+        {id:'coated',label:'塗工紙（チラシ/カタログ）',color:COLORS.L3,info:'デジタル広告に置換。縮小継続'}
+      ]},
+      {id:'containerboard',label:'板紙・段ボール（成長）',color:COLORS.L1,info:'EC拡大で年率+1-2%成長。古紙配合90%超',children:[
+        {id:'liner',label:'ライナー（段ボール表面）',color:COLORS.L2,info:'クラフトライナー＋ジュートライナー'},
+        {id:'medium',label:'中芯（波型の部分）',color:COLORS.L2,info:'段ボールの構造材。古紙100%使用'},
+        {id:'box',label:'段ボール箱（加工品）',color:COLORS.L2,info:'レンゴーが原紙→シート→箱の一貫体制。EC物流'}
+      ]},
+      {id:'tissue',label:'家庭紙',color:COLORS.L1,info:'ティッシュ/トイレットペーパー。安定だが価格競争激しい',children:[
+        {id:'diaper',label:'紙おむつ（大人用成長）',color:COLORS.L3,info:'高齢化で大人用おむつ増。大王製紙のアジア展開'}
+      ]},
+      {id:'func_material',label:'機能材料',color:COLORS.L1,info:'製紙技術を応用した高付加価値品。転換の柱',children:[
+        {id:'cnf',label:'CNF（セルロースナノファイバー）',color:COLORS.L3,info:'鉄の1/5重量で5倍強度。日本製紙・王子が開発リード'},
+        {id:'barrier',label:'バリアコート紙',color:COLORS.L3,info:'プラ代替の紙容器。PE lamフリー。脱プラの本命'},
+        {id:'dissolve',label:'溶解パルプ→レーヨン',color:COLORS.L3,info:'再生繊維の原料。バイオマス化学品。日本製紙'}
+      ]},
+      {id:'biomass_pw',label:'バイオマス発電',color:COLORS.L1,info:'黒液自家発＋FIT売電。隠れた収益源',children:[
+        {id:'blackliquor',label:'黒液自家発電',color:COLORS.L3,info:'パルプ化副産物を燃焼。電力自給率が高い'},
+        {id:'fit_sell',label:'FIT売電',color:COLORS.L3,info:'余剰電力を固定価格で売電。日本製紙・王子'}
+      ]}
+    ]
+  }},
+  { id:'shipping', label:'#8 海運', color:COLORS.shipping, data:{
+    id:'ship_root',label:'海運',labelEn:'Shipping',color:COLORS.shipping,
+    info:'世界貿易の90%を運ぶ究極のシクリカル。素材の動脈',
+    children:[
+      {id:'drybulk',label:'ドライバルク',color:COLORS.L1,info:'鉄鉱石/石炭/穀物のバラ積み。BDIが指標',children:[
+        {id:'cape',label:'Capesize（鉄鉱石/石炭）',color:COLORS.L2,info:'18万DWT超。豪州/ブラジル→中国。BDIの40%'},
+        {id:'panamax',label:'Panamax（穀物/石炭）',color:COLORS.L2,info:'6-8万DWT。パナマ運河通過可。穀物トレード'},
+        {id:'handy',label:'Supramax/Handy',color:COLORS.L2,info:'小型。マイナーバルク（セメント/木材チップ等）'}
+      ]},
+      {id:'tanker',label:'タンカー',color:COLORS.L1,info:'原油/石油製品。OPEC+の増減産で荷動き変動。WS指標',children:[
+        {id:'vlcc',label:'VLCC（超大型原油）',color:COLORS.L2,info:'30万DWT。中東→アジア。トンマイル効果'},
+        {id:'mr',label:'MR（石油製品）',color:COLORS.L2,info:'4-5万DWT。精製品の地域間輸送'}
+      ]},
+      {id:'container',label:'コンテナ船（ONE）',color:COLORS.L1,info:'工業製品/消費財。NYK38%,MOL31%,K-Line31%出資',children:[
+        {id:'one_profit',label:'ONE持分法利益',color:COLORS.L2,info:'SCFI連動。2021-22年バブル→正常化。長期契約比率向上中'},
+        {id:'redsea',label:'紅海危機→迂回',color:COLORS.L2,info:'フーシ派攻撃→喜望峰迂回→実質船腹減→運賃上昇'}
+      ]},
+      {id:'lng_ship2',label:'LNG船',color:COLORS.L1,info:'15-25年長期傭船。債券的な安定CF。商船三井90隻',children:[
+        {id:'lng_longterm',label:'長期傭船契約',color:COLORS.L3,info:'Take-or-Pay型。カタール/米国の新規プロジェクト'},
+      ]},
+      {id:'car_carrier',label:'自動車船',color:COLORS.L1,info:'完成車輸送。NYK/MOLが世界Top3。EV重量増でタイト',children:[
+        {id:'china_ev_exp',label:'中国EV輸出急増',color:COLORS.L3,info:'BYD等のEV輸出→自動車船需要を押し上げ'}
+      ]}
+    ]
+  }}
+];
+
+let currentSector = 'mining';
+const infoMap = {};
+
+function flattenForInfo(node){
+  infoMap[node.id]={title:node.label+(node.labelEn?' ('+node.labelEn+')':''),body:node.info||''};
+  (node.children||[]).forEach(c=>flattenForInfo(c));
+}
+SECTORS.forEach(s=>flattenForInfo(s.data));
+
+// Build controls
+const ctrlBar = document.getElementById('controlBar');
+SECTORS.forEach(s=>{
+  const b = document.createElement('button');
+  b.className = 'ctrl-btn'+(s.id===currentSector?' active':'');
+  b.textContent = s.label;
+  b.style.borderColor = s.color+'66';
+  b.onclick = ()=>{ currentSector=s.id; document.querySelectorAll('.ctrl-btn').forEach(x=>x.classList.remove('active')); b.classList.add('active'); render(); };
+  ctrlBar.appendChild(b);
+});
+
+function countLeaves(node){
+  if(!node.children||node.children.length===0) return 1;
+  return node.children.reduce((s,c)=>s+countLeaves(c),0);
+}
+
+function render(){
+  const sector = SECTORS.find(s=>s.id===currentSector);
+  const data = sector.data;
+  const nodes=[], links=[];
+
+  function traverse(node,x,yStart,yEnd,depth){
+    const y=(yStart+yEnd)/2;
+    nodes.push({id:node.id,label:node.label,labelEn:node.labelEn||'',color:node.color,x,y,depth});
+    const children=node.children||[];
+    if(children.length>0){
+      const childH=(yEnd-yStart)/children.length;
+      children.forEach((child,i)=>{
+        const cy1=yStart+childH*i, cy2=cy1+childH;
+        const cx=x+240;
+        const result=traverse(child,cx,cy1,cy2,depth+1);
+        if(result) links.push({x1:x,y1:y,x2:result.x,y2:result.y,color:child.color});
+      });
+    }
+    return {x,y};
+  }
+
+  const leaves=countLeaves(data);
+  const totalH=Math.max(leaves*48,300);
+  const W=1100;
+  traverse(data,120,20,totalH,0);
+
+  let svg=`<svg width="${W}" height="${totalH+40}" viewBox="0 0 ${W} ${totalH+40}" xmlns="http://www.w3.org/2000/svg">`;
+  svg+=`<defs><filter id="glow"><feGaussianBlur stdDeviation="3" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>`;
+
+  links.forEach(l=>{
+    const mx=(l.x1+l.x2)/2;
+    svg+=`<path d="M${l.x1+70} ${l.y1} C${mx} ${l.y1}, ${mx} ${l.y2}, ${l.x2-70} ${l.y2}" fill="none" stroke="${l.color}" stroke-width="1.5" opacity="0.25"/>`;
+  });
+
+  nodes.forEach(n=>{
+    const w=n.depth===0?140:n.depth===1?120:110;
+    const h=n.labelEn?46:34;
+    const rx=n.depth===0?24:10;
+    svg+=`<g style="cursor:pointer" onmouseenter="showTT(event,'${n.id}')" onmouseleave="hideTT()" ontouchstart="showTT(event,'${n.id}')">`;
+    if(n.depth===0){
+      svg+=`<rect x="${n.x-w/2}" y="${n.y-h/2}" width="${w}" height="${h}" rx="${rx}" fill="${n.color}" filter="url(#glow)" opacity="0.3"/>`;
+      svg+=`<rect x="${n.x-w/2}" y="${n.y-h/2}" width="${w}" height="${h}" rx="${rx}" fill="${n.color}" opacity="0.9"/>`;
+    } else {
+      svg+=`<rect x="${n.x-w/2}" y="${n.y-h/2}" width="${w}" height="${h}" rx="${rx}" fill="rgba(255,255,255,0.06)" stroke="${n.color}" stroke-width="1.5" opacity="0.9"/>`;
+    }
+    const tc=n.depth===0?'#fff':'#e8e8ed';
+    const fs=n.depth===0?14:n.depth===1?12:11;
+    const ly=n.labelEn?n.y-5:n.y+4;
+    svg+=`<text x="${n.x}" y="${ly}" text-anchor="middle" fill="${tc}" font-family="'DM Sans','Noto Sans JP',sans-serif" font-size="${fs}" font-weight="700">${n.label}</text>`;
+    if(n.labelEn) svg+=`<text x="${n.x}" y="${n.y+11}" text-anchor="middle" fill="rgba(255,255,255,0.4)" font-family="'DM Sans',sans-serif" font-size="9">${n.labelEn}</text>`;
+    svg+=`</g>`;
+  });
+  svg+=`</svg>`;
+  document.getElementById('mapContainer').innerHTML=svg;
+}
+
+function showTT(e,id){
+  const tt=document.getElementById('tooltip');
+  const info=infoMap[id];
+  if(!info)return;
+  document.getElementById('ttTitle').textContent=info.title;
+  document.getElementById('ttBody').textContent=info.body;
+  const touch=e.touches?e.touches[0]:e;
+  let left=touch.clientX+12,top=touch.clientY-60;
+  if(left+290>window.innerWidth)left=touch.clientX-290;
+  if(top<10)top=touch.clientY+20;
+  tt.style.left=left+'px';tt.style.top=top+'px';tt.classList.add('show');
+}
+function hideTT(){document.getElementById('tooltip').classList.remove('show');}
+document.addEventListener('touchstart',e=>{if(!e.target.closest('g'))hideTT();});
+
+render();
+</script>
+</body>
+</html>

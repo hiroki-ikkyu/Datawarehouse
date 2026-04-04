@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>素材セクター中級編 #4 — 中国データの読み方</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#f5f5f7;--card:#fff;--text:#1d1d1f;--sub:#6e6e73;--accent:#2c2c2e;--radius:16px;--shadow:0 1px 3px rgba(0,0,0,0.04);--gradient:linear-gradient(135deg,#991b1b 0%,#dc2626 50%,#f59e0b 100%);--red:#dc2626;--orange:#e8590c;--green:#2b8a3e;--blue:#3b82f6;--purple:#8b5cf6;--gold:#f59e0b;}
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{font-family:'DM Sans','Noto Sans JP',sans-serif;background:var(--bg);color:var(--text);line-height:1.7;padding:24px 16px 60px;max-width:800px;margin:0 auto;}
+  .header{text-align:center;margin-bottom:40px;padding:32px 20px;background:var(--gradient);border-radius:var(--radius);color:#fff;position:relative;overflow:hidden;}
+  .header::before{content:'🇨🇳';position:absolute;font-size:120px;opacity:0.08;top:-10px;right:-10px;}
+  .header .series-tag{display:inline-block;background:rgba(255,255,255,0.15);padding:4px 14px;border-radius:20px;font-size:12px;letter-spacing:1px;text-transform:uppercase;margin-bottom:12px;}
+  .header h1{font-size:26px;font-weight:700;margin-bottom:8px;}
+  .header p{font-size:14px;opacity:0.7;}
+  .section{margin-bottom:36px;}
+  .section-title{font-size:18px;font-weight:700;margin-bottom:16px;display:flex;align-items:center;gap:8px;}
+  .section-title .icon{width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;}
+  .card{background:var(--card);border-radius:var(--radius);padding:20px;box-shadow:var(--shadow);margin-bottom:12px;}
+  .card p{font-size:14px;color:var(--sub);}
+  .card p strong{color:var(--text);}
+
+  /* Calendar */
+  .cal-table{width:100%;border-collapse:collapse;font-size:12px;background:var(--card);border-radius:12px;overflow:hidden;box-shadow:var(--shadow);}
+  .cal-table th{text-align:left;padding:10px 12px;background:#fef2f2;font-weight:600;font-size:11px;color:#991b1b;}
+  .cal-table td{padding:10px 12px;border-bottom:1px solid #f1f3f5;vertical-align:top;}
+  .cal-table tr:last-child td{border-bottom:none;}
+  .cal-date{font-weight:700;color:var(--red);white-space:nowrap;}
+  .cal-impact{font-size:10px;font-weight:600;padding:2px 6px;border-radius:4px;color:#fff;white-space:nowrap;}
+  .impact-high{background:var(--red);}
+  .impact-mid{background:var(--orange);}
+  .impact-low{background:var(--blue);}
+
+  /* Data deep dive cards */
+  .data-card{background:var(--card);border-radius:var(--radius);padding:20px;box-shadow:var(--shadow);border-left:4px solid;margin-bottom:12px;}
+  .data-card .data-header{display:flex;align-items:center;gap:8px;margin-bottom:10px;}
+  .data-badge{padding:4px 10px;border-radius:8px;font-size:11px;font-weight:700;color:#fff;}
+  .data-card h3{font-size:15px;font-weight:700;}
+  .data-card .data-desc{font-size:13px;color:var(--sub);line-height:1.8;margin-bottom:10px;}
+  .data-card .data-how{font-size:12px;line-height:1.7;}
+  .data-bull{color:var(--green);font-weight:600;}
+  .data-bear{color:var(--red);font-weight:600;}
+
+  .tab-bar{display:flex;gap:4px;margin-bottom:16px;background:#e9ecef;border-radius:10px;padding:3px;overflow-x:auto;}
+  .tab-btn{flex:1;padding:8px 4px;border:none;background:transparent;border-radius:8px;font-family:inherit;font-size:11px;font-weight:600;color:var(--sub);cursor:pointer;transition:all 0.2s;white-space:nowrap;min-width:50px;}
+  .tab-btn.active{background:var(--card);color:var(--text);box-shadow:0 1px 3px rgba(0,0,0,0.08);}
+  .tab-content{display:none;}
+  .tab-content.active{display:block;}
+
+  .calc-box{background:#1e293b;border-radius:var(--radius);padding:20px;color:#e2e8f0;margin-bottom:12px;font-size:13px;line-height:2;}
+  .calc-box .calc-title{font-weight:700;font-size:14px;color:#fca5a5;margin-bottom:10px;}
+  .calc-row{display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:1px solid rgba(255,255,255,0.06);}
+  .calc-row:last-child{border-bottom:none;}
+  .calc-row .calc-label{color:#94a3b8;flex:1;}
+  .calc-row .calc-value{font-weight:700;font-family:'DM Sans',monospace;text-align:right;}
+
+  .tip-box{background:#fffbeb;border:1px solid #fcd34d;border-radius:12px;padding:16px;margin-bottom:12px;}
+  .tip-box .tip-title{font-weight:700;font-size:13px;color:#92400e;margin-bottom:6px;}
+  .tip-box .tip-body{font-size:12px;color:#78350f;line-height:1.7;}
+  .warn-box{background:#fef2f2;border:1px solid #fca5a5;border-radius:12px;padding:16px;margin-bottom:12px;}
+  .warn-box .warn-title{font-weight:700;font-size:13px;color:#991b1b;margin-bottom:6px;}
+  .warn-box .warn-body{font-size:12px;color:#7f1d1d;line-height:1.7;}
+
+  .bbg-box{background:#1a1a2e;border-radius:12px;padding:16px;margin-bottom:12px;font-family:'DM Sans',monospace;color:#ff6600;font-size:12px;line-height:2;}
+  .bbg-box .bbg-title{color:#ff9933;font-weight:700;font-size:13px;margin-bottom:8px;}
+  .bbg-cmd{color:#ffcc00;}
+  .bbg-comment{color:#666;}
+
+  .src-table{width:100%;border-collapse:collapse;font-size:12px;background:var(--card);border-radius:12px;overflow:hidden;box-shadow:var(--shadow);}
+  .src-table th{text-align:left;padding:10px 12px;background:#f1f3f5;font-weight:600;font-size:11px;}
+  .src-table td{padding:10px 12px;border-bottom:1px solid #f1f3f5;vertical-align:top;}
+  .src-table tr:last-child td{border-bottom:none;}
+
+  /* Flow chart */
+  .flow-box{background:var(--card);border-radius:var(--radius);padding:20px;box-shadow:var(--shadow);margin-bottom:12px;}
+  .flow-title{font-weight:700;font-size:14px;margin-bottom:16px;}
+  .flow-step{display:flex;gap:12px;margin-bottom:12px;align-items:flex-start;}
+  .flow-num{width:28px;height:28px;border-radius:50%;background:var(--red);color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;}
+  .flow-content{font-size:13px;color:var(--sub);line-height:1.7;flex:1;}
+  .flow-content strong{color:var(--text);}
+  .flow-arrow{text-align:center;color:var(--sub);font-size:14px;margin:4px 0 4px 10px;}
+
+  details{background:var(--card);border-radius:12px;padding:16px;box-shadow:var(--shadow);margin-bottom:10px;}
+  details summary{font-weight:700;font-size:14px;cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center;}
+  details summary::after{content:'▸';transition:transform 0.2s;}
+  details[open] summary::after{transform:rotate(90deg);}
+  details .detail-body{margin-top:12px;font-size:13px;color:var(--sub);line-height:1.8;}
+
+  .callout-box{border-radius:var(--radius);padding:24px;color:#fff;margin-bottom:12px;}
+  .callout-box h3{font-size:17px;font-weight:700;margin-bottom:10px;}
+  .callout-box p{font-size:13px;opacity:0.9;line-height:1.8;}
+
+  .footnote{margin-top:40px;text-align:center;font-size:12px;color:var(--sub);}
+  @media(max-width:520px){.flow-step{flex-direction:column;gap:6px;}}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="series-tag">素材セクター中級編 #4</div>
+  <h1>中国データの読み方</h1>
+  <p>素材サイクルの7割を支配する中国経済データの実践的な読解法</p>
+</div>
+
+<!-- 1. Why China -->
+<div class="section">
+  <div class="section-title"><div class="icon" style="background:#fee2e2;">📖</div>なぜ中国データが最重要か</div>
+  <div class="callout-box" style="background:linear-gradient(135deg,#991b1b,#dc2626);">
+    <h3>世界のコモディティ需要における中国シェア</h3>
+    <p>
+      鉄鋼 54% ｜ アルミ 60% ｜ 銅 55% ｜ ニッケル 55% ｜ セメント 55% ｜ 石炭 50%超<br/>
+      原油輸入 世界最大 ｜ LNG輸入 世界最大級 ｜ 鉄鉱石輸入 世界の75%<br/><br/>
+      日本の素材企業の決算は、日本経済よりも<strong>中国経済に左右される</strong>。
+      中国のPMIが1ポイント動けば、鉄鉱石/銅/鉄鋼の価格が数%動き、
+      日本製鉄やINPEXの利益が数百億円変動する。
+    </p>
+  </div>
+
+  <div class="warn-box">
+    <div class="warn-title">⚠ 中国データの注意点（最初に知っておくべき）</div>
+    <div class="warn-body">
+      <strong>① 統計の信頼性：</strong>GDP等の大きな数字は「目標に合わせて調整される」との疑念が常にある。ミクロデータ（電力消費、貨物量等）の方が信頼度が高い。<br/>
+      <strong>② 春節のブレ：</strong>1-2月は春節（旧正月）で大きく歪む。統計局は1-2月合算で発表することが多い。<br/>
+      <strong>③ 基準年の変更：</strong>統計方法が突然変わることがある。前年比の不連続に注意。<br/>
+      <strong>④ 政策の突然の変更：</strong>「粗鋼減産令」「不動産規制」「輸出関税」が予告なく出る。データの連続性が断たれる。
+    </div>
+  </div>
+</div>
+
+<!-- 2. Monthly Calendar -->
+<div class="section">
+  <div class="section-title"><div class="icon" style="background:#fef3c7;">📅</div>月次データカレンダー（素材アナリスト向け）</div>
+
+  <div class="card" style="padding:0;overflow:hidden;">
+    <table class="cal-table">
+      <thead><tr><th>発表日（目安）</th><th>データ</th><th>発表元</th><th>影響度</th></tr></thead>
+      <tbody>
+        <tr>
+          <td class="cal-date">毎月1日</td>
+          <td><strong>製造業PMI（公式）</strong><br/>50超＝拡大。大企業・国有企業に偏る</td>
+          <td>国家統計局</td>
+          <td><span class="cal-impact impact-high">最高</span></td>
+        </tr>
+        <tr>
+          <td class="cal-date">毎月1-3日</td>
+          <td><strong>Caixin製造業PMI</strong><br/>民間版。中小企業を含む。公式との差に注目</td>
+          <td>Caixin/S&P Global</td>
+          <td><span class="cal-impact impact-high">最高</span></td>
+        </tr>
+        <tr>
+          <td class="cal-date">毎月7-10日</td>
+          <td><strong>貿易統計（輸出入）</strong><br/>鉄鋼輸出量、鉄鉱石/銅精鉱/原油の輸入量</td>
+          <td>海関総署</td>
+          <td><span class="cal-impact impact-high">最高</span></td>
+        </tr>
+        <tr>
+          <td class="cal-date">毎月10-15日</td>
+          <td><strong>社会融資総量・新規融資</strong><br/>信用サイクルの最重要指標</td>
+          <td>中国人民銀行</td>
+          <td><span class="cal-impact impact-high">最高</span></td>
+        </tr>
+        <tr>
+          <td class="cal-date">毎月15日頃</td>
+          <td><strong>鉱工業生産/固定資産投資/小売売上高</strong><br/>「三大マクロ指標」一斉発表</td>
+          <td>国家統計局</td>
+          <td><span class="cal-impact impact-high">最高</span></td>
+        </tr>
+        <tr>
+          <td class="cal-date">毎月15日頃</td>
+          <td><strong>不動産統計（販売/着工/投資）</strong><br/>三大マクロと同時発表。鉄鋼/セメント/ガラスに直結</td>
+          <td>国家統計局</td>
+          <td><span class="cal-impact impact-high">最高</span></td>
+        </tr>
+        <tr>
+          <td class="cal-date">毎月中旬</td>
+          <td><strong>粗鋼生産量</strong><br/>月次。前年比で中国の鉄鋼供給圧力を判断</td>
+          <td>国家統計局</td>
+          <td><span class="cal-impact impact-mid">高</span></td>
+        </tr>
+        <tr>
+          <td class="cal-date">週次</td>
+          <td><strong>鉄鋼社会在庫（HRC/鉄筋/線材）</strong><br/>流通在庫。需給の最もリアルタイムな指標</td>
+          <td>Mysteel/SteelHome</td>
+          <td><span class="cal-impact impact-mid">高</span></td>
+        </tr>
+        <tr>
+          <td class="cal-date">月末</td>
+          <td><strong>LPR（ローンプライムレート）</strong><br/>金融緩和/引締めの方向性</td>
+          <td>中国人民銀行</td>
+          <td><span class="cal-impact impact-low">中</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="tip-box">
+    <div class="tip-title">💡 「毎月1日」と「毎月15日」が山場</div>
+    <div class="tip-body">
+      素材アナリストのカレンダーに<strong>毎月1日（PMI）と15日前後（マクロ一斉発表）</strong>を必ずマーク。
+      この2日に中国の景気の方向が更新される。特にPMIは東京時間10:30発表で、
+      日本のマーケットオープン前に確認できるため、朝のモーニングブリーフに組み込むべき最重要データ。
+    </div>
+  </div>
+</div>
+
+<!-- 3. Deep dives by data type -->
+<div class="section">
+  <div class="section-title"><div class="icon" style="background:#dbeafe;">🔍</div>データ別・深掘り解説</div>
+
+  <div class="tab-bar">
+    <button class="tab-btn active" onclick="switchTab('pmi')">PMI</button>
+    <button class="tab-btn" onclick="switchTab('property')">不動産</button>
+    <button class="tab-btn" onclick="switchTab('credit')">信用サイクル</button>
+    <button class="tab-btn" onclick="switchTab('steeldata')">鉄鋼データ</button>
+    <button class="tab-btn" onclick="switchTab('trade')">貿易統計</button>
+  </div>
+
+  <!-- PMI -->
+  <div class="tab-content active" id="tab-pmi">
+    <div class="data-card" style="border-color:var(--red);">
+      <div class="data-header">
+        <span class="data-badge" style="background:var(--red);">PMI</span>
+        <h3>製造業PMI — 最速の景気シグナル</h3>
+      </div>
+      <div class="data-desc">
+        毎月1日に発表される「先月の景況感」。購買担当者へのアンケートに基づく。
+        <strong>50が好不況の分水嶺</strong>。50超＝拡大、50割れ＝縮小。
+        水準だけでなく<strong>「前月からの変化方向」</strong>が重要。49→50.5は「まだ50付近」だが「改善方向」。
+      </div>
+    </div>
+
+    <div class="calc-box">
+      <div class="calc-title">📝 PMIの読み方：サブ指数まで見る</div>
+      <div class="calc-row"><span class="calc-label">総合PMI</span><span class="calc-value">50.1 → 見出しはこれ</span></div>
+      <div class="calc-row"><span class="calc-label">新規受注</span><span class="calc-value">51.3 → 需要の方向（最重要）</span></div>
+      <div class="calc-row"><span class="calc-label">生産</span><span class="calc-value">51.8 → 工場の稼働状況</span></div>
+      <div class="calc-row"><span class="calc-label">新規輸出受注</span><span class="calc-value">48.5 → 海外需要の弱さ</span></div>
+      <div class="calc-row"><span class="calc-label">原材料在庫</span><span class="calc-value">47.8 → 在庫調整の進行度</span></div>
+      <div class="calc-row"><span class="calc-label">仕入価格</span><span class="calc-value">52.0 → コモディティ価格の方向</span></div>
+    </div>
+
+    <div class="tip-box">
+      <div class="tip-title">💡 公式PMI vs Caixin PMIの使い分け</div>
+      <div class="tip-body">
+        <strong>公式PMI（国家統計局）：</strong>大企業・国有企業に偏る。サンプル3,200社。鉄鋼・セメント等の重厚長大企業の景況感を反映。<br/>
+        <strong>Caixin PMI（S&P Global）：</strong>中小・民間企業を含む。サンプル500社。より民間経済の実態を反映。<br/><br/>
+        <strong>両者の乖離が重要：</strong>公式50.5でCaixin49.0なら「大企業は持ちこたえているが中小企業は苦しい」。
+        素材セクターは大企業（国有鉄鋼メーカー等）の動向が重要なので公式PMIを主に見るが、
+        Caixinの方が「実態」に近いことも多い。
+      </div>
+    </div>
+  </div>
+
+  <!-- Property -->
+  <div class="tab-content" id="tab-property">
+    <div class="data-card" style="border-color:var(--orange);">
+      <div class="data-header">
+        <span class="data-badge" style="background:var(--orange);">🏠</span>
+        <h3>不動産データ — 鉄鋼/セメント/ガラスの命運</h3>
+      </div>
+      <div class="data-desc">
+        中国の鉄鋼需要の約30%、セメントの50%超が不動産向け。
+        恒大・碧桂園問題後の不動産セクターの回復/低迷が素材需要を直接左右する。
+        3つの指標を見る。
+      </div>
+    </div>
+
+    <div class="data-card" style="border-color:#f59e0b;margin-left:16px;">
+      <h3 style="font-size:14px;">① 不動産開発投資（累計前年比%）</h3>
+      <div class="data-desc">
+        デベロッパーの投資額。土地取得＋建設工事を含む。2022年以降マイナスが続く。
+        <strong>底打ちの兆候</strong>（マイナス幅の縮小）がサイクル転換のシグナル。
+      </div>
+    </div>
+    <div class="data-card" style="border-color:#f59e0b;margin-left:16px;">
+      <h3 style="font-size:14px;">② 新築住宅着工面積（累計前年比%）</h3>
+      <div class="data-desc">
+        実際に建設が始まった面積。鉄鋼/セメントの需要に最も直結する指標。
+        2024年で前年比▲20-30%のペース。着工面積のYoY改善＝鉄鋼需要回復の先行シグナル。
+      </div>
+    </div>
+    <div class="data-card" style="border-color:#f59e0b;margin-left:16px;">
+      <h3 style="font-size:14px;">③ 不動産販売面積・販売額</h3>
+      <div class="data-desc">
+        消費者サイドの需要。販売が回復→デベロッパーのCF改善→着工回復、の順序で効く。
+        販売面積は着工面積に<strong>6-12ヶ月先行</strong>する傾向。
+      </div>
+    </div>
+
+    <div class="warn-box">
+      <div class="warn-title">⚠ 不動産の「底」は何度もフェイントする</div>
+      <div class="warn-body">
+        2022年以降、中国政府は何度も不動産支援策を打ち出しているが、データは一時的に改善→再悪化を繰り返している。
+        「今度こそ底打ち」と楽観するのは危険。<strong>3ヶ月連続で改善が確認されるまでは懐疑的</strong>に見るのが安全。
+        単月のデータジャンプに飛びつかない。
+      </div>
+    </div>
+  </div>
+
+  <!-- Credit -->
+  <div class="tab-content" id="tab-credit">
+    <div class="data-card" style="border-color:var(--purple);">
+      <div class="data-header">
+        <span class="data-badge" style="background:var(--purple);">💳</span>
+        <h3>信用サイクル — コモディティに6-12ヶ月先行</h3>
+      </div>
+      <div class="data-desc">
+        中国の<strong>社会融資総量（TSF: Total Social Financing）</strong>は、銀行融資だけでなく
+        シャドーバンキング、債券発行、株式発行を含む包括的な信用指標。
+        信用が拡大すれば投資が活発化→コモディティ需要が増加、の因果関係。
+      </div>
+    </div>
+
+    <div class="calc-box">
+      <div class="calc-title">📝 クレジット・インパルスの考え方</div>
+      <div class="calc-row"><span class="calc-label">社会融資総量（TSF）ストック前年比</span><span class="calc-value">信用の「水準」</span></div>
+      <div class="calc-row"><span class="calc-label">TSFフロー（新規）/ GDP比</span><span class="calc-value">信用の「流量」</span></div>
+      <div class="calc-row"><span class="calc-label">TSFフローの前年比変化率</span><span class="calc-value">信用の「加速度」=インパルス</span></div>
+    </div>
+
+    <div class="card">
+      <p>
+        <strong>クレジット・インパルス＝信用創造の「加速度」。</strong>
+        TSFの量そのものではなく、増え方の「勢い」を見る。<br/><br/>
+        <strong>インパルスがプラスに転じる → 6-12ヶ月後にコモディティ需要が回復</strong><br/>
+        <strong>インパルスがマイナスに転じる → 6-12ヶ月後にコモディティ需要が減速</strong><br/><br/>
+        これは素材セクターで最もパワフルな先行指標の一つ。#2サイクル分析と組み合わせて使う。
+      </p>
+    </div>
+
+    <div class="tip-box">
+      <div class="tip-title">💡 信用データの見方のコツ</div>
+      <div class="tip-body">
+        <strong>「政府債券」の急増に注意：</strong>TSFの中で地方政府特別債の発行が急増すると、数字が膨らむが民間需要ではない。
+        「政府債券を除くTSF」で見ると民間の信用需要の実態がわかる。<br/><br/>
+        <strong>新規人民元融資の「中長期企業向け」：</strong>設備投資向け融資。これが増えていれば企業の投資意欲が回復している証拠。短期融資や手形（票据）だけ増えているなら「見せかけの回復」。
+      </div>
+    </div>
+  </div>
+
+  <!-- Steel Data -->
+  <div class="tab-content" id="tab-steeldata">
+    <div class="data-card" style="border-color:var(--blue);">
+      <div class="data-header">
+        <span class="data-badge" style="background:var(--blue);">🔩</span>
+        <h3>中国鉄鋼データ — カバレッジ直結の最重要情報</h3>
+      </div>
+      <div class="data-desc">
+        日本の鉄鋼アナリストが最も頻繁に見る中国データ群。月次/週次で追う。
+      </div>
+    </div>
+
+    <div class="flow-box">
+      <div class="flow-title">鉄鋼データのウォッチフロー（週次〜月次）</div>
+      <div class="flow-step">
+        <div class="flow-num">1</div>
+        <div class="flow-content"><strong>週次：社会在庫（Mysteel）</strong><br/>HRC/鉄筋/線材の流通在庫。毎週木曜更新。在庫の増減方向で翌週の価格を予想。春節明けの在庫ピーク→取り崩し速度が毎年の最初の注目点。</div>
+      </div>
+      <div class="flow-arrow">↓</div>
+      <div class="flow-step">
+        <div class="flow-num">2</div>
+        <div class="flow-content"><strong>週次：高炉稼働率</strong><br/>Mysteel調査。全国247高炉の稼働率。85%超＝フル稼働。80%割れ＝減産局面。政府の減産指導の影響を反映。</div>
+      </div>
+      <div class="flow-arrow">↓</div>
+      <div class="flow-step">
+        <div class="flow-num">3</div>
+        <div class="flow-content"><strong>月次：粗鋼生産量（国家統計局）</strong><br/>前年比で供給サイドのトレンド。月産8,500万t超なら「フル生産」。年間10億t前後が近年の水準。「粗鋼減産令」（年間生産を前年以下に抑える政策）の有無を確認。</div>
+      </div>
+      <div class="flow-arrow">↓</div>
+      <div class="flow-step">
+        <div class="flow-num">4</div>
+        <div class="flow-content"><strong>月次：鉄鋼輸出量（海関総署）</strong><br/>月間800万t超は「大量輸出」。内需不足の余剰を海外に吐き出している証拠。アジアの鋼材市況を下押しし、日本の鉄鋼メーカーの輸出競争力を毀損。</div>
+      </div>
+      <div class="flow-arrow">↓</div>
+      <div class="flow-step">
+        <div class="flow-num">5</div>
+        <div class="flow-content"><strong>日次/週次：SHFE HRC先物</strong><br/>上海先物取引所。投機筋も参加。日本の鉄鋼株の先行指標。朝のモーニングブリーフに前日終値を入れる。</div>
+      </div>
+    </div>
+
+    <div class="tip-box">
+      <div class="tip-title">💡 Mysteelのデータを入手する方法</div>
+      <div class="tip-body">
+        Mysteel（我的钢铁网）は中国鉄鋼データの最大手。有料サービスだが、一部データは無料で閲覧可能（mysteel.net、英語版あり）。
+        Bloomberg端末でもMysteel由来の在庫データの一部が取得可能。
+        代替として<strong>SteelHome（steelhome.cn）</strong>も無料で主要データを公開。
+        英語なら<strong>Kallanish Steel</strong>（kallanish.com）がニュース＋データを提供。
+      </div>
+    </div>
+  </div>
+
+  <!-- Trade -->
+  <div class="tab-content" id="tab-trade">
+    <div class="data-card" style="border-color:var(--green);">
+      <div class="data-header">
+        <span class="data-badge" style="background:var(--green);">🚢</span>
+        <h3>貿易統計 — 素材の「荷動き」を直接見る</h3>
+      </div>
+      <div class="data-desc">
+        海関総署（税関）が毎月7-10日に発表。品目別の輸出入量・金額がわかる。
+        素材アナリストが注目すべき品目を厳選。
+      </div>
+    </div>
+
+    <div class="calc-box">
+      <div class="calc-title">📝 注目すべき輸入品目</div>
+      <div class="calc-row"><span class="calc-label">鉄鉱石（輸入量）</span><span class="calc-value">月間1億t前後。高炉の原料需要を示す</span></div>
+      <div class="calc-row"><span class="calc-label">原油（輸入量）</span><span class="calc-value">月間4,500万t前後。製油所の稼働と戦略備蓄</span></div>
+      <div class="calc-row"><span class="calc-label">銅精鉱（輸入量）</span><span class="calc-value">中国スメルターの増産意欲→TC/RC影響</span></div>
+      <div class="calc-row"><span class="calc-label">LNG（輸入量）</span><span class="calc-value">季節性あり。冬場に急増。スポット価格に影響</span></div>
+      <div class="calc-row"><span class="calc-label">石炭（輸入量）</span><span class="calc-value">国内生産＋輸入で電力・鉄鋼の燃料需要</span></div>
+    </div>
+    <div class="calc-box">
+      <div class="calc-title">📝 注目すべき輸出品目</div>
+      <div class="calc-row"><span class="calc-label">鉄鋼（輸出量）</span><span class="calc-value">月間800万t超＝世界の供給過剰シグナル</span></div>
+      <div class="calc-row"><span class="calc-label">アルミ製品（輸出量）</span><span class="calc-value">地金輸出は制限。半製品・製品で迂回輸出</span></div>
+      <div class="calc-row"><span class="calc-label">太陽光パネル</span><span class="calc-value">間接的に特殊ガラス/銅線の需要指標</span></div>
+    </div>
+
+    <details>
+      <summary>貿易統計のデータ入手先</summary>
+      <div class="detail-body">
+        <strong>無料：</strong>海関総署公式サイト（中国語）、Trading Economics（主要品目の遅延データ）、Reuters記事（速報ベース）<br/>
+        <strong>有料：</strong>Bloomberg（ECTR CN &lt;GO&gt;）、Wind（中国系金融端末）、CEIC<br/>
+        <strong>実務的には：</strong>毎月の貿易統計発表後にReuters/Bloombergが即座に記事化するので、英語の速報記事で主要数字を把握→Excelの月次トラッキングシートに手入力、が最も効率的。
+      </div>
+    </details>
+  </div>
+</div>
+
+<!-- 4. Practical Workflow -->
+<div class="section">
+  <div class="section-title"><div class="icon" style="background:#d1fae5;">🔄</div>実践ワークフロー：月次の中国データルーティン</div>
+
+  <div class="flow-box">
+    <div class="flow-title">素材アナリストの月次中国データルーティン</div>
+    <div class="flow-step">
+      <div class="flow-num" style="background:var(--gold);">1日</div>
+      <div class="flow-content"><strong>PMI（公式＋Caixin）を確認</strong><br/>50超/割れと前月からの方向。サブ指数（新規受注/仕入価格）まで見る。Morning Briefに「中国PMI: 50.3（前月50.1、改善方向）」と一行入れる。</div>
+    </div>
+    <div class="flow-arrow">↓</div>
+    <div class="flow-step">
+      <div class="flow-num" style="background:var(--green);">7-10日</div>
+      <div class="flow-content"><strong>貿易統計を確認</strong><br/>鉄鉱石/原油/銅精鉱の輸入量、鉄鋼の輸出量をExcelトラッキングシートに入力。前年比と3ヶ月移動平均でトレンドを確認。</div>
+    </div>
+    <div class="flow-arrow">↓</div>
+    <div class="flow-step">
+      <div class="flow-num" style="background:var(--purple);">10-15日</div>
+      <div class="flow-content"><strong>信用データ（TSF/新規融資）を確認</strong><br/>クレジット・インパルスの方向を更新。政府債券を除くTSFフローに注目。「信用は加速中か減速中か」を判断。</div>
+    </div>
+    <div class="flow-arrow">↓</div>
+    <div class="flow-step">
+      <div class="flow-num" style="background:var(--red);">15日前後</div>
+      <div class="flow-content"><strong>三大マクロ＋不動産＋粗鋼を確認</strong><br/>鉱工業生産/固定資産投資/小売＋不動産販売・着工＋粗鋼生産量。月次レポートの中核データ。全部をExcelに入力して前月比/前年比/3MA更新。</div>
+    </div>
+    <div class="flow-arrow">↓</div>
+    <div class="flow-step">
+      <div class="flow-num" style="background:var(--blue);">毎週</div>
+      <div class="flow-content"><strong>鉄鋼社会在庫＋高炉稼働率＋SHFE先物</strong><br/>Mysteel/SteelHomeで週次データを追跡。在庫の増減方向をMorning Briefに「先週比▲5万t、6週連続減少」のように入れる。</div>
+    </div>
+    <div class="flow-arrow">↓</div>
+    <div class="flow-step">
+      <div class="flow-num" style="background:#6b7280;">月末</div>
+      <div class="flow-content"><strong>月次まとめレポートを作成</strong><br/>上記を統合して「中国マクロ月次サマリー」を1ページにまとめる。PMI/信用/不動産/鉄鋼のトレンドを4象限で可視化→ファンドマネージャーに共有。</div>
+    </div>
+  </div>
+</div>
+
+<!-- 5. Common pitfalls -->
+<div class="section">
+  <div class="section-title"><div class="icon" style="background:#fee2e2;">⚠️</div>よくあるミスと対処法</div>
+
+  <details>
+    <summary>❌ 春節バイアスを無視する</summary>
+    <div class="detail-body">
+      春節（旧正月）は毎年日付が変わる（1月下旬〜2月中旬）。春節の前後で工場が2-3週間停止するため、1月と2月のデータは大きく歪む。<br/><br/>
+      <strong>対処：</strong>1-2月は合算して前年同期比で見る。国家統計局も1-2月合算で発表することが多い。3月のデータで「春節後の実力」を初めて判断できる。
+    </div>
+  </details>
+  <details>
+    <summary>❌ 前年比だけで判断する（ベース効果の罠）</summary>
+    <div class="detail-body">
+      前年が異常値（コロナ後の急回復期、大規模停電、環境規制の一時停止など）だった場合、前年比は実態を反映しない。<br/><br/>
+      <strong>対処：</strong>前年比だけでなく「2年前比CAGR」「前月比（季節調整後）」「3ヶ月移動平均の方向」を併用する。特に「前月比・季節調整後」が実態に最も近い。
+    </div>
+  </details>
+  <details>
+    <summary>❌ 「政策期待」でデータを読む</summary>
+    <div class="detail-body">
+      中国政府が「景気刺激策を打つ」と報じられると、データが改善する前に市場が織り込む。
+      しかし実際の政策効果がデータに現れるまで3-6ヶ月かかることが多い。<br/><br/>
+      <strong>対処：</strong>政策の「アナウンス」ではなく「実際のデータ」で判断する。「TSFが実際に増えたか」「着工が実際に回復したか」を確認してから投資判断を動かす。
+    </div>
+  </details>
+  <details>
+    <summary>❌ 中国GDP成長率を額面通り受け取る</summary>
+    <div class="detail-body">
+      GDP成長率は政治的に「管理された」数字との見方が根強い。<br/><br/>
+      <strong>代替指標（Li Keqiang Index）：</strong><br/>
+      ① 電力消費量（嘘がつきにくい）<br/>
+      ② 鉄道貨物輸送量（物理的に検証可能）<br/>
+      ③ 中長期銀行融資（金融当局のデータ）<br/><br/>
+      これら3つの加重平均で「実質的なGDP」を推定する手法。元首相・李克強がかつて「自分はこの3つを見る」と語ったことが由来。素材アナリストにとっても有用な補助指標。
+    </div>
+  </details>
+</div>
+
+<!-- 6. Data sources -->
+<div class="section">
+  <div class="section-title"><div class="icon" style="background:#e8f4fd;">🗂</div>データソース一覧</div>
+  <div class="card" style="padding:0;overflow:hidden;">
+    <table class="src-table">
+      <thead><tr><th>データ</th><th>無料ソース</th><th>有料ソース</th></tr></thead>
+      <tbody>
+        <tr><td><strong>PMI</strong></td><td>国家統計局、Caixin公式、Trading Economics</td><td>Bloomberg ECST</td></tr>
+        <tr><td><strong>マクロ指標（生産/投資/不動産）</strong></td><td>国家統計局（stats.gov.cn）、Trading Economics</td><td>Bloomberg ECST、Wind、CEIC</td></tr>
+        <tr><td><strong>貿易統計</strong></td><td>海関総署、Reuters記事</td><td>Bloomberg ECTR CN、Wind</td></tr>
+        <tr><td><strong>社会融資総量</strong></td><td>中国人民銀行（pbc.gov.cn）</td><td>Bloomberg、Wind</td></tr>
+        <tr><td><strong>鉄鋼社会在庫/高炉稼働率</strong></td><td>SteelHome（一部）</td><td>Mysteel、Bloomberg</td></tr>
+        <tr><td><strong>SHFE先物（HRC/鉄筋/銅）</strong></td><td>Investing.com、TradingView</td><td>Bloomberg</td></tr>
+        <tr><td><strong>不動産高頻度</strong></td><td>—</td><td>Wind（30大都市成約面積・日次）</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="bbg-box">
+    <div class="bbg-title">Bloombergでの中国データ取得</div>
+    <span class="bbg-cmd">ECST CN &lt;GO&gt;</span> <span class="bbg-comment">← 中国経済統計ダッシュボード</span><br/>
+    <span class="bbg-cmd">ECTR CN &lt;GO&gt;</span> <span class="bbg-comment">← 中国貿易統計</span><br/>
+    <span class="bbg-cmd">CHPMINDX Index GP &lt;GO&gt;</span> <span class="bbg-comment">← 公式製造業PMIチャート</span><br/>
+    <span class="bbg-cmd">NAPMPMI Index GP &lt;GO&gt;</span> <span class="bbg-comment">← 比較：米ISM PMI</span><br/>
+    <span class="bbg-cmd">CNTSFYTD Index &lt;GO&gt;</span> <span class="bbg-comment">← 社会融資総量（累計）</span><br/>
+    <span class="bbg-cmd">CHVAIOY Index &lt;GO&gt;</span> <span class="bbg-comment">← 鉱工業生産前年比</span><br/>
+    <span class="bbg-cmd">CNFREIOY Index &lt;GO&gt;</span> <span class="bbg-comment">← 不動産開発投資前年比</span><br/>
+    <span class="bbg-comment">-- 鉄鋼: SHFE HRC1 Comdty GP &lt;GO&gt; ← 中国HRC先物チャート</span>
+  </div>
+</div>
+
+<!-- Summary -->
+<div class="section">
+  <div class="section-title"><div class="icon" style="background:#d3f9d8;">✅</div>まとめ：中国データ読解の5原則</div>
+  <div class="card">
+    <p>
+      <strong>原則1：単月ではなく3ヶ月移動平均でトレンドを見る。</strong>春節・ベース効果・統計改定で単月はブレが大きい。<br/><br/>
+      <strong>原則2：水準より変化方向。</strong>PMI 49.5でも前月48.0から改善していれば「改善方向」。<br/><br/>
+      <strong>原則3：信用サイクルが先行し、実体経済が追随する。</strong>TSF→固定資産投資→鉄鋼需要の順。6-12ヶ月のラグ。<br/><br/>
+      <strong>原則4：不動産は全ての素材に波及する。</strong>着工面積が鉄鋼/セメント/ガラス/銅の共通ドライバー。<br/><br/>
+      <strong>原則5：政策のアナウンスではなくデータの実現を待つ。</strong>「刺激策→即買い」ではなく「データ確認→判断」。
+    </p>
+  </div>
+</div>
+
+<div class="footnote">
+  素材セクター中級編 #4 / 7<br/>
+  次回：#5 バリュエーション手法
+</div>
+
+<script>
+function switchTab(id){
+  document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('tab-'+id).classList.add('active');
+  event.target.classList.add('active');
+}
+</script>
+</body>
+</html>

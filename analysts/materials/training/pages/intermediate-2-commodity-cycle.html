@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>素材セクター中級編 #2 — コモディティサイクルの見極め方</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#f5f5f7;--card:#fff;--text:#1d1d1f;--sub:#6e6e73;--accent:#2c2c2e;--radius:16px;--shadow:0 1px 3px rgba(0,0,0,0.04);--shadow-lg:0 4px 20px rgba(0,0,0,0.08);--gradient:linear-gradient(135deg,#0f172a 0%,#1e3a5f 50%,#0ea5e9 100%);--phase1:#3b82f6;--phase2:#f59e0b;--phase3:#ef4444;--phase4:#8b5cf6;--green:#2b8a3e;--red:#c92a2a;--orange:#e8590c;}
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{font-family:'DM Sans','Noto Sans JP',sans-serif;background:var(--bg);color:var(--text);line-height:1.7;padding:24px 16px 60px;max-width:800px;margin:0 auto;}
+  .header{text-align:center;margin-bottom:40px;padding:32px 20px;background:var(--gradient);border-radius:var(--radius);color:#fff;position:relative;overflow:hidden;}
+  .header::before{content:'🔄';position:absolute;font-size:120px;opacity:0.06;top:-10px;right:-10px;}
+  .header .series-tag{display:inline-block;background:rgba(255,255,255,0.15);padding:4px 14px;border-radius:20px;font-size:12px;letter-spacing:1px;text-transform:uppercase;margin-bottom:12px;}
+  .header h1{font-size:26px;font-weight:700;margin-bottom:8px;}
+  .header p{font-size:14px;opacity:0.7;}
+  .section{margin-bottom:36px;}
+  .section-title{font-size:18px;font-weight:700;margin-bottom:16px;display:flex;align-items:center;gap:8px;}
+  .section-title .icon{width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;}
+  .card{background:var(--card);border-radius:var(--radius);padding:20px;box-shadow:var(--shadow);margin-bottom:12px;}
+  .card p{font-size:14px;color:var(--sub);}
+  .card p strong{color:var(--text);}
+
+  /* Cycle diagram */
+  .cycle-canvas{background:var(--card);border-radius:var(--radius);padding:24px;box-shadow:var(--shadow);margin-bottom:16px;overflow-x:auto;}
+  .cycle-svg-wrap{min-width:340px;display:flex;justify-content:center;}
+
+  /* Phase cards */
+  .phase-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  .phase-card{background:var(--card);border-radius:var(--radius);padding:20px;box-shadow:var(--shadow);border-top:4px solid;position:relative;}
+  .phase-card .phase-num{position:absolute;top:12px;right:16px;font-size:32px;font-weight:800;opacity:0.08;}
+  .phase-card h3{font-size:15px;font-weight:700;margin-bottom:8px;display:flex;align-items:center;gap:6px;}
+  .phase-card .phase-desc{font-size:12px;color:var(--sub);line-height:1.7;margin-bottom:10px;}
+  .phase-tag{display:inline-block;font-size:10px;padding:3px 8px;border-radius:6px;font-weight:600;color:#fff;margin-right:4px;margin-bottom:4px;}
+  .phase-card.p1{border-color:var(--phase1);}
+  .phase-card.p2{border-color:var(--phase2);}
+  .phase-card.p3{border-color:var(--phase3);}
+  .phase-card.p4{border-color:var(--phase4);}
+
+  /* Signal table */
+  .sig-table{width:100%;border-collapse:collapse;font-size:12px;background:var(--card);border-radius:12px;overflow:hidden;box-shadow:var(--shadow);}
+  .sig-table th{text-align:left;padding:10px 12px;background:#f1f3f5;font-weight:600;font-size:11px;}
+  .sig-table td{padding:10px 12px;border-bottom:1px solid #f1f3f5;vertical-align:top;}
+  .sig-table tr:last-child td{border-bottom:none;}
+  .signal-up{color:var(--green);font-weight:700;}
+  .signal-down{color:var(--red);font-weight:700;}
+  .signal-flat{color:var(--orange);font-weight:700;}
+
+  /* Indicator dashboard */
+  .dash-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+  .dash-item{background:var(--card);border-radius:12px;padding:14px;box-shadow:var(--shadow);}
+  .dash-item .dash-name{font-weight:700;font-size:13px;margin-bottom:4px;}
+  .dash-item .dash-what{font-size:11px;color:var(--sub);margin-bottom:6px;line-height:1.5;}
+  .dash-item .dash-read{font-size:11px;line-height:1.6;}
+  .dash-bull{color:var(--green);font-weight:600;}
+  .dash-bear{color:var(--red);font-weight:600;}
+
+  /* Tab system */
+  .tab-bar{display:flex;gap:4px;margin-bottom:16px;background:#e9ecef;border-radius:10px;padding:3px;overflow-x:auto;}
+  .tab-btn{flex:1;padding:8px 4px;border:none;background:transparent;border-radius:8px;font-family:inherit;font-size:11px;font-weight:600;color:var(--sub);cursor:pointer;transition:all 0.2s;white-space:nowrap;min-width:50px;}
+  .tab-btn.active{background:var(--card);color:var(--text);box-shadow:0 1px 3px rgba(0,0,0,0.08);}
+  .tab-content{display:none;}
+  .tab-content.active{display:block;}
+
+  /* China signal box */
+  .china-box{background:linear-gradient(135deg,#991b1b,#dc2626);border-radius:var(--radius);padding:24px;color:#fff;margin-bottom:12px;}
+  .china-box h3{font-size:17px;font-weight:700;margin-bottom:10px;}
+  .china-box p{font-size:13px;opacity:0.9;line-height:1.8;}
+
+  /* Capex cycle */
+  .capex-visual{background:#1e293b;border-radius:var(--radius);padding:24px;color:#e2e8f0;margin-bottom:12px;}
+  .capex-visual .capex-title{font-weight:700;font-size:14px;color:#93c5fd;margin-bottom:16px;}
+  .capex-row{display:flex;align-items:center;gap:12px;margin-bottom:12px;font-size:13px;}
+  .capex-arrow{font-size:18px;flex-shrink:0;}
+  .capex-step{background:rgba(255,255,255,0.06);border-radius:10px;padding:10px 14px;flex:1;border-left:3px solid;}
+  .capex-step.s1{border-color:var(--phase1);}
+  .capex-step.s2{border-color:var(--phase2);}
+  .capex-step.s3{border-color:var(--phase3);}
+  .capex-step.s4{border-color:var(--phase4);}
+  .capex-step strong{color:#93c5fd;}
+  .capex-step .capex-sub{font-size:11px;color:#64748b;margin-top:4px;}
+
+  .tip-box{background:#fffbeb;border:1px solid #fcd34d;border-radius:12px;padding:16px;margin-bottom:12px;}
+  .tip-box .tip-title{font-weight:700;font-size:13px;color:#92400e;margin-bottom:6px;}
+  .tip-box .tip-body{font-size:12px;color:#78350f;line-height:1.7;}
+  .warn-box{background:#fef2f2;border:1px solid #fca5a5;border-radius:12px;padding:16px;margin-bottom:12px;}
+  .warn-box .warn-title{font-weight:700;font-size:13px;color:#991b1b;margin-bottom:6px;}
+  .warn-box .warn-body{font-size:12px;color:#7f1d1d;line-height:1.7;}
+
+  .bbg-box{background:#1a1a2e;border-radius:12px;padding:16px;margin-bottom:12px;font-family:'DM Sans',monospace;color:#ff6600;font-size:12px;line-height:2;}
+  .bbg-box .bbg-title{color:#ff9933;font-weight:700;font-size:13px;margin-bottom:8px;}
+  .bbg-cmd{color:#ffcc00;}
+  .bbg-comment{color:#666;}
+
+  details{background:var(--card);border-radius:12px;padding:16px;box-shadow:var(--shadow);margin-bottom:10px;}
+  details summary{font-weight:700;font-size:14px;cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center;}
+  details summary::after{content:'▸';transition:transform 0.2s;}
+  details[open] summary::after{transform:rotate(90deg);}
+  details .detail-body{margin-top:12px;font-size:13px;color:var(--sub);line-height:1.8;}
+
+  .footnote{margin-top:40px;text-align:center;font-size:12px;color:var(--sub);}
+  @media(max-width:520px){.phase-grid,.dash-grid{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="series-tag">素材セクター中級編 #2</div>
+  <h1>コモディティサイクルの見極め方</h1>
+  <p>「今どのフェーズにいるか」を判断する実践フレームワーク</p>
+</div>
+
+<!-- 1. Why cycles matter -->
+<div class="section">
+  <div class="section-title"><div class="icon" style="background:#dbeafe;">📖</div>なぜサイクルが最重要か</div>
+  <div class="card">
+    <p>
+      素材セクターの株は<strong>「バリュエーション」より「サイクルのタイミング」</strong>で買う。
+      PERが低い＝割安ではなく、利益がピークで下がり始めるシグナルかもしれない（<strong>PERの罠</strong>）。
+      逆にPERが高い＝割高ではなく、利益がボトムで回復し始めるシグナルかもしれない。<br/><br/>
+      <strong>→ 今コモディティサイクルのどのフェーズにいるかを正しく判断することが、素材アナリストの最大の仕事。</strong>
+    </p>
+  </div>
+
+  <div class="warn-box">
+    <div class="warn-title">⚠ シクリカル銘柄のPERの罠</div>
+    <div class="warn-body">
+      <strong>PER 5倍＝「安い！買い」ではない。</strong>利益がサイクルのピークにあり、ここから下がるなら来年のPERは20倍かもしれない。<br/>
+      <strong>PER 30倍＝「高い！売り」ではない。</strong>利益がサイクルのボトムにあり、ここから回復するなら来年のPERは8倍かもしれない。<br/><br/>
+      素材株は「<strong>PERが最も低い時に売り、最も高い時に買う</strong>」のが正しいことが多い。直感の逆。
+    </div>
+  </div>
+</div>
+
+<!-- 2. The 4-Phase Framework -->
+<div class="section">
+  <div class="section-title"><div class="icon" style="background:#fff3bf;">🔄</div>4フェーズ・フレームワーク</div>
+
+  <!-- SVG Cycle Diagram -->
+  <div class="cycle-canvas">
+    <div class="cycle-svg-wrap">
+      <svg width="340" height="340" viewBox="0 0 340 340" xmlns="http://www.w3.org/2000/svg">
+        <!-- Circle path -->
+        <circle cx="170" cy="170" r="130" fill="none" stroke="#e5e7eb" stroke-width="3"/>
+        <!-- Arrows on circle -->
+        <path d="M170 40 A130 130 0 0 1 300 170" fill="none" stroke="#3b82f6" stroke-width="4" stroke-linecap="round"/>
+        <path d="M300 170 A130 130 0 0 1 170 300" fill="none" stroke="#f59e0b" stroke-width="4" stroke-linecap="round"/>
+        <path d="M170 300 A130 130 0 0 1 40 170" fill="none" stroke="#ef4444" stroke-width="4" stroke-linecap="round"/>
+        <path d="M40 170 A130 130 0 0 1 170 40" fill="none" stroke="#8b5cf6" stroke-width="4" stroke-linecap="round"/>
+        <!-- Arrow heads -->
+        <polygon points="296,158 308,170 296,182" fill="#3b82f6"/>
+        <polygon points="182,296 170,308 158,296" fill="#f59e0b"/>
+        <polygon points="44,182 32,170 44,158" fill="#ef4444"/>
+        <polygon points="158,44 170,32 182,44" fill="#8b5cf6"/>
+        <!-- Phase labels -->
+        <text x="248" y="95" font-family="'DM Sans','Noto Sans JP',sans-serif" font-size="12" font-weight="700" fill="#3b82f6" text-anchor="middle">Phase 1</text>
+        <text x="248" y="110" font-family="'DM Sans','Noto Sans JP',sans-serif" font-size="10" fill="#6b7280" text-anchor="middle">供給不足・価格上昇</text>
+        <text x="260" y="248" font-family="'DM Sans','Noto Sans JP',sans-serif" font-size="12" font-weight="700" fill="#f59e0b" text-anchor="middle">Phase 2</text>
+        <text x="260" y="263" font-family="'DM Sans','Noto Sans JP',sans-serif" font-size="10" fill="#6b7280" text-anchor="middle">投資ラッシュ</text>
+        <text x="85" y="258" font-family="'DM Sans','Noto Sans JP',sans-serif" font-size="12" font-weight="700" fill="#ef4444" text-anchor="middle">Phase 3</text>
+        <text x="85" y="273" font-family="'DM Sans','Noto Sans JP',sans-serif" font-size="10" fill="#6b7280" text-anchor="middle">供給過剰・価格暴落</text>
+        <text x="80" y="100" font-family="'DM Sans','Noto Sans JP',sans-serif" font-size="12" font-weight="700" fill="#8b5cf6" text-anchor="middle">Phase 4</text>
+        <text x="80" y="115" font-family="'DM Sans','Noto Sans JP',sans-serif" font-size="10" fill="#6b7280" text-anchor="middle">淘汰・投資停止</text>
+        <!-- Center -->
+        <text x="170" y="165" font-family="'DM Sans','Noto Sans JP',sans-serif" font-size="14" font-weight="700" fill="#1d1d1f" text-anchor="middle">コモディティ</text>
+        <text x="170" y="183" font-family="'DM Sans','Noto Sans JP',sans-serif" font-size="14" font-weight="700" fill="#1d1d1f" text-anchor="middle">サイクル</text>
+      </svg>
+    </div>
+  </div>
+
+  <!-- 4 Phase cards -->
+  <div class="phase-grid">
+    <div class="phase-card p1">
+      <div class="phase-num">1</div>
+      <h3>🔵 Phase 1：供給不足・価格上昇</h3>
+      <div class="phase-desc">
+        需要が供給を上回る。在庫が減少し、価格が上昇。企業の利益が急拡大。
+        前のサイクルの投資不足が原因。「スーパーサイクル」論が出始める。
+      </div>
+      <span class="phase-tag" style="background:var(--phase1);">在庫減少</span>
+      <span class="phase-tag" style="background:var(--phase1);">価格上昇</span>
+      <span class="phase-tag" style="background:var(--phase1);">利益急拡大</span>
+      <span class="phase-tag" style="background:var(--phase1);">株価↑↑</span>
+    </div>
+    <div class="phase-card p2">
+      <div class="phase-num">2</div>
+      <h3>🟡 Phase 2：投資ラッシュ・ピーク</h3>
+      <div class="phase-desc">
+        高価格に誘われて世界中で新規投資（新鉱山・新製錬所・新造船）が殺到。
+        「もっと上がる」楽観が支配。だが投資→供給開始まで3-10年のラグ。利益は高水準だが減速し始め。
+      </div>
+      <span class="phase-tag" style="background:var(--phase2);">Capex急増</span>
+      <span class="phase-tag" style="background:var(--phase2);">楽観ピーク</span>
+      <span class="phase-tag" style="background:var(--phase2);">価格高止まり</span>
+      <span class="phase-tag" style="background:var(--phase2);">株価→天井圏</span>
+    </div>
+    <div class="phase-card p3">
+      <div class="phase-num">3</div>
+      <h3>🔴 Phase 3：供給過剰・価格暴落</h3>
+      <div class="phase-desc">
+        Phase 2の投資が一斉に稼働開始。供給が需要を大幅に上回る。在庫が積み上がり価格暴落。
+        企業は赤字転落。「構造的に需要がない」悲観論が支配。
+      </div>
+      <span class="phase-tag" style="background:var(--phase3);">在庫積増</span>
+      <span class="phase-tag" style="background:var(--phase3);">価格暴落</span>
+      <span class="phase-tag" style="background:var(--phase3);">赤字/減配</span>
+      <span class="phase-tag" style="background:var(--phase3);">株価↓↓</span>
+    </div>
+    <div class="phase-card p4">
+      <div class="phase-num">4</div>
+      <h3>🟣 Phase 4：淘汰・投資停止</h3>
+      <div class="phase-desc">
+        高コスト生産者が脱落（鉱山閉鎖・工場停機）。新規投資が完全に停止。
+        供給が絞られ始める。まだ悲観的だが、需給バランスが静かに改善中。
+        <strong>ここが本当の買い場。</strong>
+      </div>
+      <span class="phase-tag" style="background:var(--phase4);">減産・スクラップ</span>
+      <span class="phase-tag" style="background:var(--phase4);">Capex凍結</span>
+      <span class="phase-tag" style="background:var(--phase4);">悲観ピーク</span>
+      <span class="phase-tag" style="background:var(--phase4);">株価→底値圏</span>
+    </div>
+  </div>
+
+  <div class="tip-box">
+    <div class="tip-title">💡 投資タイミングの原則</div>
+    <div class="tip-body">
+      <strong>Phase 4（悲観のピーク）で買い、Phase 2（楽観のピーク）で売る</strong>のが理論上の最適解。
+      しかし実際にはPhase 4で「もっと下がるかもしれない」恐怖との戦い。
+      だからこそ、次のセクションの「先行指標」を使ってサイクルの転換点を早期に検知することが重要。
+    </div>
+  </div>
+</div>
+
+<!-- 3. The Capex Cycle -->
+<div class="section">
+  <div class="section-title"><div class="icon" style="background:#ede9fe;">🏗</div>設備投資サイクル（Capex Cycle）= サイクルの時計</div>
+
+  <div class="capex-visual">
+    <div class="capex-title">Capexサイクルの流れ（鉱業の場合：5-10年サイクル）</div>
+    <div class="capex-step s1">
+      <strong>① 価格上昇 → 利益急増</strong>
+      <div class="capex-sub">高炉・鉱山は利益を内部留保。「投資余力がある」</div>
+    </div>
+    <div style="text-align:center;color:#64748b;font-size:16px;padding:4px 0;">↓</div>
+    <div class="capex-step s2">
+      <strong>② 経営陣が強気化 → 大型投資決定</strong>
+      <div class="capex-sub">新鉱山開発、製錬所増設、新造船発注。「需要は続く」と信じる</div>
+    </div>
+    <div style="text-align:center;color:#64748b;font-size:16px;padding:4px 0;">↓ 3-10年のタイムラグ</div>
+    <div class="capex-step s3">
+      <strong>③ 投資が一斉に完成 → 供給洪水</strong>
+      <div class="capex-sub">需要は既にピークアウト。しかし供給は止められない</div>
+    </div>
+    <div style="text-align:center;color:#64748b;font-size:16px;padding:4px 0;">↓</div>
+    <div class="capex-step s4">
+      <strong>④ 価格暴落 → 投資凍結 → 供給不足の種</strong>
+      <div class="capex-sub">新規プロジェクトがゼロに。数年後に再び供給不足→Phase 1へ戻る</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <p>
+      <strong>→ 業界のCapex動向を追えば、3-5年後の供給を予測できる。</strong>
+      BHP/Rioの年次報告書の「Growth Projects」、鉄鋼各社の「設備投資計画」、
+      造船の「新造船発注量（オーダーブック）」が供給サイクルの時計。<br/><br/>
+      <strong>コモディティごとの投資→供給のリードタイム：</strong><br/>
+      鉱山（銅/金）：5-10年 ｜ LNGプロジェクト：4-7年 ｜ 鉄鋼高炉：3-5年 ｜ 造船：2-3年 ｜ 石化プラント：3-5年
+    </p>
+  </div>
+</div>
+
+<!-- 4. Leading indicators by commodity -->
+<div class="section">
+  <div class="section-title"><div class="icon" style="background:#d1fae5;">📡</div>コモディティ別・先行指標ダッシュボード</div>
+
+  <div class="tab-bar">
+    <button class="tab-btn active" onclick="switchTab('ind_steel')">鉄鋼</button>
+    <button class="tab-btn" onclick="switchTab('ind_copper')">銅</button>
+    <button class="tab-btn" onclick="switchTab('ind_oil')">原油</button>
+    <button class="tab-btn" onclick="switchTab('ind_ship')">海運</button>
+    <button class="tab-btn" onclick="switchTab('ind_paper')">紙・パルプ</button>
+  </div>
+
+  <!-- Steel indicators -->
+  <div class="tab-content active" id="tab-ind_steel">
+    <div class="dash-grid">
+      <div class="dash-item">
+        <div class="dash-name">🇨🇳 中国PMI（製造業）</div>
+        <div class="dash-what">国家統計局が毎月1日発表。50が分水嶺。</div>
+        <div class="dash-read"><span class="dash-bull">50超＝拡大→鉄鋼需要↑</span><br/><span class="dash-bear">50割れ＝縮小→鉄鋼需要↓</span></div>
+      </div>
+      <div class="dash-item">
+        <div class="dash-name">🇨🇳 中国粗鋼生産量</div>
+        <div class="dash-what">国家統計局が月次発表。前年比で見る。</div>
+        <div class="dash-read"><span class="dash-bear">増加＝供給圧力↑→価格↓</span><br/><span class="dash-bull">減産令＝供給絞り→価格↑</span></div>
+      </div>
+      <div class="dash-item">
+        <div class="dash-name">📊 中国社会在庫（鉄鋼）</div>
+        <div class="dash-what">Mysteel等が週次発表。HRC/鉄筋の流通在庫。</div>
+        <div class="dash-read"><span class="dash-bear">在庫積増＝需要弱い</span><br/><span class="dash-bull">在庫減少＝需要が供給を上回る</span></div>
+      </div>
+      <div class="dash-item">
+        <div class="dash-name">🏠 中国不動産着工面積</div>
+        <div class="dash-what">鉄鋼需要の30%が不動産。月次統計。</div>
+        <div class="dash-read"><span class="dash-bull">着工回復＝鉄鋼需要回復</span><br/><span class="dash-bear">着工低迷＝鉄鋼余剰→輸出増</span></div>
+      </div>
+      <div class="dash-item">
+        <div class="dash-name">🚢 中国鉄鋼輸出量</div>
+        <div class="dash-what">中国海関が月次発表。輸出増＝世界市況の圧力。</div>
+        <div class="dash-read"><span class="dash-bear">輸出急増（月1,000万t超）＝世界の供給過剰</span><br/><span class="dash-bull">輸出減＝内需回復シグナル</span></div>
+      </div>
+      <div class="dash-item">
+        <div class="dash-name">💹 SHFE HRC先物</div>
+        <div class="dash-what">上海先物取引所。日本鉄鋼株の先行指標。</div>
+        <div class="dash-read"><span class="dash-bull">先物上昇＝スプレッド改善期待</span><br/><span class="dash-bear">先物下落＝スプレッド縮小懸念</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Copper indicators -->
+  <div class="tab-content" id="tab-ind_copper">
+    <div class="dash-grid">
+      <div class="dash-item">
+        <div class="dash-name">📦 LME銅在庫</div>
+        <div class="dash-what">LME公認倉庫の在庫量。日次発表。</div>
+        <div class="dash-read"><span class="dash-bull">在庫減少（10万t以下）＝タイト</span><br/><span class="dash-bear">在庫増加（30万t超）＝余剰</span></div>
+      </div>
+      <div class="dash-item">
+        <div class="dash-name">📈 LMEカーブ形状</div>
+        <div class="dash-what">現物 vs 3ヶ月先物のスプレッド。</div>
+        <div class="dash-read"><span class="dash-bull">バックワーデーション＝供給逼迫</span><br/><span class="dash-bear">コンタンゴ＝供給余剰</span></div>
+      </div>
+      <div class="dash-item">
+        <div class="dash-name">🔧 TC/RCスポット</div>
+        <div class="dash-what">Fastmarketsが週次発表。</div>
+        <div class="dash-read"><span class="dash-bull">TC/RC上昇＝精鉱余剰（スメルター有利）</span><br/><span class="dash-bear">TC/RC下落＝精鉱逼迫（スメルター不利）</span></div>
+      </div>
+      <div class="dash-item">
+        <div class="dash-name">🌍 鉱山ディスラプション</div>
+        <div class="dash-what">チリ/ペルーの鉱山ストライキ、落盤、水不足。</div>
+        <div class="dash-read"><span class="dash-bull">大規模停止＝供給ショック→価格急騰</span><br/>Chuquicamata、Escondida等をフォロー</div>
+      </div>
+      <div class="dash-item">
+        <div class="dash-name">🏭 中国銅精鉱輸入量</div>
+        <div class="dash-what">中国の製錬需要のバロメーター。月次。</div>
+        <div class="dash-read"><span class="dash-bear">輸入急増＝中国スメルター増産→TC/RC下落圧力</span></div>
+      </div>
+      <div class="dash-item">
+        <div class="dash-name">⚡ 世界のEV販売台数</div>
+        <div class="dash-what">EV 1台＝銅80kg使用。長期需要ドライバー。</div>
+        <div class="dash-read"><span class="dash-bull">EV普及加速＝銅の構造的需要増</span><br/>月次：中国自動車工業協会、IEA Global EV Data</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Oil indicators -->
+  <div class="tab-content" id="tab-ind_oil">
+    <div class="dash-grid">
+      <div class="dash-item">
+        <div class="dash-name">🛢 OPEC+生産量</div>
+        <div class="dash-what">IEA/OPEC月報で発表。遵守率も重要。</div>
+        <div class="dash-read"><span class="dash-bull">減産遵守＝供給引締め→価格支持</span><br/><span class="dash-bear">増産シグナル＝供給増→価格下落</span></div>
+      </div>
+      <div class="dash-item">
+        <div class="dash-name">🇺🇸 米国原油在庫（EIA）</div>
+        <div class="dash-what">EIA（エネルギー情報局）が毎週水曜発表。</div>
+        <div class="dash-read"><span class="dash-bull">在庫取崩し＝需要＞供給</span><br/><span class="dash-bear">在庫積増＝需要＜供給</span></div>
+      </div>
+      <div class="dash-item">
+        <div class="dash-name">🔧 米国リグカウント</div>
+        <div class="dash-what">Baker Hughes社が毎週金曜発表。掘削リグ数。</div>
+        <div class="dash-read"><span class="dash-bear">リグ増加＝シェール増産→供給増</span><br/><span class="dash-bull">リグ減少＝生産減→将来の供給不足</span></div>
+      </div>
+      <div class="dash-item">
+        <div class="dash-name">📈 WTI/Brentカーブ</div>
+        <div class="dash-what">先物カーブの形状。</div>
+        <div class="dash-read"><span class="dash-bull">バックワーデーション＝現物タイト</span><br/><span class="dash-bear">コンタンゴ＝余剰→洋上貯蔵</span></div>
+      </div>
+      <div class="dash-item">
+        <div class="dash-name">🇸🇦 サウジ財政均衡油価</div>
+        <div class="dash-what">約$80-90/bbl。これが減産/増産の意思決定基準。</div>
+        <div class="dash-read"><span class="dash-bull">原油＜均衡油価→サウジ減産圧力</span><br/><span class="dash-bear">原油＞均衡油価→増産余地</span></div>
+      </div>
+      <div class="dash-item">
+        <div class="dash-name">🌍 IEA/OPEC需給バランス</div>
+        <div class="dash-what">月報で世界の需給見通しを発表。</div>
+        <div class="dash-read">IEA（消費国寄り）とOPEC（産油国寄り）の需要見通しの差に注目。真実は中間にある</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Shipping indicators -->
+  <div class="tab-content" id="tab-ind_ship">
+    <div class="dash-grid">
+      <div class="dash-item">
+        <div class="dash-name">📊 オーダーブック/船腹比率</div>
+        <div class="dash-what">新造船受注残 ÷ 既存船腹。Clarksons等が発表。</div>
+        <div class="dash-read"><span class="dash-bear">比率高（20%超）＝将来供給増→運賃下落</span><br/><span class="dash-bull">比率低（10%以下）＝供給タイト継続</span></div>
+      </div>
+      <div class="dash-item">
+        <div class="dash-name">🔧 船齢分布＋スクラップ量</div>
+        <div class="dash-what">20年超の老齢船比率。月次スクラップ量。</div>
+        <div class="dash-read"><span class="dash-bull">スクラップ加速＝供給引締め</span><br/>CII/EEXI規制で老齢船の解撤圧力</div>
+      </div>
+      <div class="dash-item">
+        <div class="dash-name">🌊 港湾混雑度</div>
+        <div class="dash-what">待機船舶数。MarineTraffic/Kpler等で把握。</div>
+        <div class="dash-read"><span class="dash-bull">混雑高＝実質船腹減→運賃上昇</span><br/>2021年のLAポート混雑がコンテナバブルの一因</div>
+      </div>
+      <div class="dash-item">
+        <div class="dash-name">📦 コンテナ スロットキャパシティ</div>
+        <div class="dash-what">航路別のスペース余剰/不足。Xeneta等。</div>
+        <div class="dash-read"><span class="dash-bear">空きスペース多い＝運賃下落</span><br/><span class="dash-bull">満船＝運賃上昇</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Paper/Pulp indicators -->
+  <div class="tab-content" id="tab-ind_paper">
+    <div class="dash-grid">
+      <div class="dash-item">
+        <div class="dash-name">🌲 NBKP/LBKP価格</div>
+        <div class="dash-what">Fastmarkets RISIが発表。パルプ国際価格。</div>
+        <div class="dash-read"><span class="dash-bear">パルプ上昇＝製紙コスト増</span><br/><span class="dash-bull">パルプ下落＝マージン改善</span></div>
+      </div>
+      <div class="dash-item">
+        <div class="dash-name">🇨🇳 中国パルプ港湾在庫</div>
+        <div class="dash-what">中国主要港のパルプ在庫。月次。</div>
+        <div class="dash-read"><span class="dash-bear">在庫積増（200万t超）＝価格下落圧力</span><br/><span class="dash-bull">在庫減少＝需要回復</span></div>
+      </div>
+      <div class="dash-item">
+        <div class="dash-name">📦 段ボール生産量</div>
+        <div class="dash-what">段ボール工業会が月次発表。</div>
+        <div class="dash-read"><span class="dash-bull">前年比増＝EC/物流活発</span><br/><span class="dash-bear">前年比減＝景気減速シグナル</span></div>
+      </div>
+      <div class="dash-item">
+        <div class="dash-name">♻️ 古紙価格</div>
+        <div class="dash-what">関東製紙原料直納問屋協同組合が月次。</div>
+        <div class="dash-read"><span class="dash-bull">古紙安＝段ボール原紙メーカーに有利</span><br/><span class="dash-bear">古紙高＝コスト増</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 5. China as the master signal -->
+<div class="section">
+  <div class="section-title"><div class="icon" style="background:#fee2e2;">🇨🇳</div>中国シグナル — サイクルの支配者</div>
+
+  <div class="china-box">
+    <h3>🇨🇳 素材サイクルの7割は中国が決める</h3>
+    <p>
+      世界の鉄鋼54%、アルミ60%、セメント55%、銅需要55%、原油輸入世界最大 — すべて中国。
+      中国経済が加速すればコモディティは上がり、減速すれば下がる。
+      日本の素材アナリストが最もウォッチすべきは、日本の経済指標ではなく<strong>中国のマクロデータ</strong>。
+    </p>
+  </div>
+
+  <div class="card" style="padding:0;overflow:hidden;">
+    <table class="sig-table">
+      <thead><tr><th>中国指標</th><th>発表タイミング</th><th>何がわかるか</th></tr></thead>
+      <tbody>
+        <tr><td><strong>製造業PMI</strong></td><td>毎月1日</td><td>製造業の拡大/縮小。50超＝拡大。素材需要の最速シグナル</td></tr>
+        <tr><td><strong>Caixin PMI</strong></td><td>毎月1-3日</td><td>民間版PMI。中小企業の実態をよりよく反映。公式との乖離に注目</td></tr>
+        <tr><td><strong>固定資産投資</strong></td><td>毎月15日頃</td><td>インフラ＋不動産投資。鉄鋼/セメント需要の代理変数</td></tr>
+        <tr><td><strong>不動産販売面積</strong></td><td>毎月15日頃</td><td>不動産セクターの健全性。鉄鋼/ガラス/セメントに直結</td></tr>
+        <tr><td><strong>社会融資総量</strong></td><td>毎月10-15日</td><td>信用サイクル。融資拡大→投資活発→コモディティ需要増</td></tr>
+        <tr><td><strong>貿易統計（輸出入）</strong></td><td>毎月7-10日</td><td>鉄鋼/銅精鉱/原油の輸入量。鉄鋼の輸出量</td></tr>
+        <tr><td><strong>Li Keqiang Index</strong></td><td>月次</td><td>電力消費＋鉄道貨物＋融資で構成。GDP統計より信頼度高いとされる</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="tip-box">
+    <div class="tip-title">💡 「クレジット・インパルス」に注目</div>
+    <div class="tip-body">
+      中国の<strong>信用創造の加速度（クレジット・インパルス）</strong>は、コモディティ需要に6-12ヶ月先行する。
+      社会融資総量の前年比増減率が加速→半年後にコモディティ価格が上昇、減速→半年後に下落、というパターン。
+      Bloomberg上では「China Credit Impulse」で検索可能。
+    </div>
+  </div>
+</div>
+
+<!-- 6. Inventory Cycle -->
+<div class="section">
+  <div class="section-title"><div class="icon" style="background:#dbeafe;">📦</div>在庫サイクルの読み方</div>
+  <div class="card">
+    <p>
+      コモディティの在庫水準は<strong>需給バランスの「結果」</strong>であり、最も直接的なシグナル。<br/><br/>
+      <strong>在庫の4つの局面：</strong><br/>
+      ① <strong>意図せざる在庫積増</strong>：需要が突然落ちて在庫が溜まる → 価格下落の始まり<br/>
+      ② <strong>意図的な在庫削減</strong>：減産して在庫を減らす → 価格は底打ち圏<br/>
+      ③ <strong>意図せざる在庫減少</strong>：需要が急回復して在庫が消える → 価格上昇の始まり<br/>
+      ④ <strong>意図的な在庫積増</strong>：先高観で積み増し → 価格はピーク圏<br/><br/>
+      <strong>→ 在庫の「水準」だけでなく「変化率」と「意図性」を見る。</strong>
+      在庫が多くても減り始めていればPhase 4→1への転換を示唆。
+    </p>
+  </div>
+
+  <details>
+    <summary>在庫データの入手先</summary>
+    <div class="detail-body">
+      <strong>鉄鋼：</strong>中国社会在庫（Mysteel、SteelHome）、中国鉄鋼メーカー在庫<br/>
+      <strong>銅/アルミ/亜鉛：</strong>LME倉庫在庫（LME公式）、上海SHFE在庫、中国保税区在庫<br/>
+      <strong>原油：</strong>米国EIA在庫（週次）、OECD商業在庫（IEA月報）、中国SPR<br/>
+      <strong>パルプ：</strong>中国港湾パルプ在庫、欧州UTIPULP在庫<br/>
+      <strong>海運：</strong>LMEの概念はないが、船腹稼働率＝在庫の逆概念
+    </div>
+  </details>
+</div>
+
+<!-- 7. Putting it together -->
+<div class="section">
+  <div class="section-title"><div class="icon" style="background:#d1fae5;">🧩</div>実践：今どのフェーズにいるか判定する手順</div>
+
+  <div class="card">
+    <p><strong>Step 1：価格トレンドを確認</strong><br/>
+    対象コモディティの1年/3年チャートを見る。上昇基調？下落基調？横ばい？</p>
+  </div>
+  <div class="card">
+    <p><strong>Step 2：在庫水準と変化方向をチェック</strong><br/>
+    LME在庫/中国社会在庫が増加中か減少中か。在庫の変化率が最も重要。</p>
+  </div>
+  <div class="card">
+    <p><strong>Step 3：Capex動向を確認</strong><br/>
+    業界の設備投資は増加中か凍結中か。大手の年次報告書のCapexガイダンスをチェック。</p>
+  </div>
+  <div class="card">
+    <p><strong>Step 4：供給側のニュースを収集</strong><br/>
+    新規鉱山/プラント/造船の計画は活発か停滞か。鉱山事故/ストライキ/規制で供給ディスラプションは？</p>
+  </div>
+  <div class="card">
+    <p><strong>Step 5：中国のマクロシグナルを統合</strong><br/>
+    PMI、信用サイクル、不動産着工、貿易統計を組み合わせて需要の方向を判断。</p>
+  </div>
+  <div class="card">
+    <p><strong>Step 6：フェーズ判定 → 投資アクション</strong><br/>
+    Phase 4（悲観/投資停止）なら「そろそろ仕込み」。Phase 2（楽観/投資ラッシュ）なら「利益確定の準備」。</p>
+  </div>
+
+  <div class="tip-box">
+    <div class="tip-title">💡 全コモディティが同じフェーズにいるわけではない</div>
+    <div class="tip-body">
+      銅はPhase 1（供給不足・価格上昇）にいても、ニッケルはPhase 3（供給過剰・暴落）にいることもある。
+      セクター全体を一括りにせず、<strong>コモディティごとにフェーズを判定</strong>する必要がある。
+      カバレッジ45銘柄のうち、どの銘柄がどのコモディティに紐づいているかを入門編のマインドマップで確認し、
+      各コモディティのフェーズに応じた投資判断をする。これがクロスセクター分析の真骨頂。
+    </div>
+  </div>
+</div>
+
+<!-- 8. Common mistakes -->
+<div class="section">
+  <div class="section-title"><div class="icon" style="background:#fee2e2;">⚠️</div>よくある判断ミス</div>
+
+  <details>
+    <summary>❌ 「スーパーサイクルだ！今回は違う」</summary>
+    <div class="detail-body">
+      Phase 1-2で必ず出てくるナラティブ。「中国の構造的需要で今回は下がらない」「脱炭素で銅は永遠に不足」。
+      確かに構造変化はあるが、Capexサイクルの力学は変わらない。高価格は必ず供給を呼ぶ。
+      <strong>→ 「今回は違う」と感じたら、それ自体がPhase 2のシグナル。</strong>
+    </div>
+  </details>
+  <details>
+    <summary>❌ PERが低いから買い</summary>
+    <div class="detail-body">
+      前述の通り、シクリカル銘柄はPERが低い時がピーク（利益が最大）。
+      <strong>代わりにP/Bまたはミッドサイクル利益ベースのPERを使う。</strong>
+      ミッドサイクルPER＝過去10年の平均利益に基づくPER。これならサイクルの位置に騙されない。
+    </div>
+  </details>
+  <details>
+    <summary>❌ 中国の単月データで一喜一憂</summary>
+    <div class="detail-body">
+      中国のPMIや生産データは春節の時期ズレ、統計改定、天候要因でブレが大きい。
+      <strong>→ 3ヶ月移動平均で見るのが正解。</strong>単月の数字に飛びつかない。トレンドの方向と加速度を重視。
+    </div>
+  </details>
+  <details>
+    <summary>❌ 供給側だけ見て需要側を無視（またはその逆）</summary>
+    <div class="detail-body">
+      「新鉱山が稼働するから供給過剰で下がる」→ でも中国の需要が急回復すれば吸収される。
+      「中国の需要が強いから上がる」→ でもCapexラッシュで3年後に供給過剰になるかも。
+      <strong>→ 常に需要と供給の両面を見る。需給バランスの変化率がサイクルを決める。</strong>
+    </div>
+  </details>
+</div>
+
+<!-- 9. Bloomberg -->
+<div class="section">
+  <div class="section-title"><div class="icon" style="background:#e8f4fd;">💻</div>Bloomberg活用テクニック</div>
+  <div class="bbg-box">
+    <div class="bbg-title">サイクル判定に使えるBloombergコマンド</div>
+    <span class="bbg-cmd">ECST &lt;GO&gt;</span> <span class="bbg-comment">← 中国経済統計ダッシュボード（PMI/GDP/投資）</span><br/>
+    <span class="bbg-cmd">CMMF &lt;GO&gt;</span> <span class="bbg-comment">← コモディティ先物カーブ（バックワード/コンタンゴ確認）</span><br/>
+    <span class="bbg-cmd">GLCO &lt;GO&gt;</span> <span class="bbg-comment">← コモディティ横断ダッシュボード</span><br/>
+    <span class="bbg-cmd">BRIG &lt;GO&gt;</span> <span class="bbg-comment">← Baker Hughes リグカウント</span><br/>
+    <span class="bbg-cmd">LMEX &lt;GO&gt;</span> <span class="bbg-comment">← LME金属横断（価格/在庫/カーブ）</span><br/>
+    <span class="bbg-cmd">MOST &lt;GO&gt;</span> <span class="bbg-comment">← 最も読まれているリサーチ（市場のセンチメント把握）</span><br/>
+    <span class="bbg-cmd">SHFE HRC1 &lt;GO&gt;</span> <span class="bbg-comment">← 中国HRC先物</span><br/>
+    <span class="bbg-comment">-- China Credit Impulse: 「China credit impulse」でSRCH検索</span>
+  </div>
+</div>
+
+<!-- Summary -->
+<div class="section">
+  <div class="section-title"><div class="icon" style="background:#d3f9d8;">✅</div>まとめ：サイクル判定チェックリスト</div>
+  <div class="card">
+    <p>
+      <strong>□ 価格トレンド：</strong>上昇/下落/横ばい？ 1年/3年の方向は？<br/>
+      <strong>□ 在庫：</strong>増加中/減少中？ 変化率は加速/鈍化？<br/>
+      <strong>□ Capex：</strong>業界の設備投資は増加/凍結？ オーダーブックは？<br/>
+      <strong>□ 中国マクロ：</strong>PMI、信用サイクル、不動産、貿易統計の方向は？<br/>
+      <strong>□ センチメント：</strong>「スーパーサイクル」論が出てるか？ 悲観一色か？<br/>
+      <strong>□ コスト曲線：</strong>限界生産者は黒字？赤字？ シャットダウンが始まったか？<br/><br/>
+      → これらを統合して<strong>Phase 1〜4のどこにいるか</strong>を判断。
+      そして<strong>「次のフェーズへの転換シグナル」</strong>を常に探す。
+      転換点を早期に検知できるアナリストが市場で価値を持つ。
+    </p>
+  </div>
+</div>
+
+<div class="footnote">
+  素材セクター中級編 #2 / 7<br/>
+  次回：#3 決算分析テクニック
+</div>
+
+<script>
+function switchTab(id){
+  document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('tab-'+id).classList.add('active');
+  event.target.classList.add('active');
+}
+</script>
+</body>
+</html>
