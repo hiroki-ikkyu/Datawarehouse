@@ -4,7 +4,7 @@ import os
 from datetime import datetime, timezone, timedelta
 
 JST = timezone(timedelta(hours=9))
-OUTPUT_DIR = os.path.join(os.path.dirname(__file__), "..", "Data", "Sentiment")
+OUTPUT_DIR = os.path.join(os.path.dirname(__file__), "..", "..", "data", "sentiment")
 OUTPUT_FILE = os.path.join(OUTPUT_DIR, "crypto-fear-greed.json")
 
 HEADERS = {
