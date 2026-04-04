@@ -183,8 +183,13 @@ def main() -> None:
     }
 
     OUT_DIR.mkdir(parents=True, exist_ok=True)
-    with OUT_FILE.open("w", encoding="utf-8") as f:
-        json.dump(payload, f, ensure_ascii=False, indent=2)
+    with OUT_FILE.open(mode="w", encoding="utf-8") as f:
+        json.dump(
+            payload,
+            f,
+            ensure_ascii=False,
+            indent=2,
+        )
 
 
 if __name__ == "__main__":
