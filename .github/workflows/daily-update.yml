@@ -36,11 +36,7 @@ jobs:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
         run: python public-relations/morning-brief/generate_comment.py
       - name: Commit and push if changed
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git pull --rebase origin main
-          git add -A
-          git diff --cached --quiet && echo "No changes" && exit 0
-          git commit -m "data: update $(date -u +%Y-%m-%d)"
-          git push
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "data: update ${{ github.run_id }}"
+          branch: main
