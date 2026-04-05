@@ -14,6 +14,7 @@ from typing import Any
 from zoneinfo import ZoneInfo
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
+PROFILES_DIR = REPO_ROOT / "analysts" / "materials" / "profiles"
 COMMODITIES_FILE = REPO_ROOT / "data" / "commodities" / "daily-prices.json"
 ALERTS_FILE = REPO_ROOT / "data" / "alerts" / "daily-alerts.json"
 SPREADS_FILE = REPO_ROOT / "data" / "spreads" / "daily-spreads.json"
@@ -31,6 +32,52 @@ def _load_json(path: Path) -> dict[str, Any]:
         return {}
     with path.open(encoding="utf-8") as f:
         return json.load(f)
+
+
+def load_all_profiles() -> list[dict[str, Any]]:
+    if not PROFILES_DIR.is_dir():
+        return []
+    out: list[dict[str, Any]] = []
+    for path in sorted(PROFILES_DIR.glob("*/profile.json")):
+        try:
+            with path.open(encoding="utf-8") as f:
+                out.append(json.load(f))
+        except (OSError, json.JSONDecodeError):
+            continue
+    return out
+
+
+def format_profiles_summary(profiles: list[dict[str, Any]]) -> str:
+    if not profiles:
+        return ""
+    blocks: list[str] = []
+    for p in profiles:
+        name = p.get("name") or p.get("code") or ""
+        sens = p.get("sensitivity")
+        ca = p.get("company_assumptions")
+        kp = p.get("key_points_for_comment")
+        sens_s = (
+            json.dumps(sens, ensure_ascii=False, indent=2)
+            if isinstance(sens, dict)
+            else str(sens)
+        )
+        ca_s = (
+            json.dumps(ca, ensure_ascii=False, indent=2)
+            if isinstance(ca, dict)
+            else str(ca)
+        )
+        if isinstance(kp, list):
+            kp_s = "\n".join(f"  - {item}" for item in kp)
+        else:
+            kp_s = str(kp)
+        blocks.append(
+            f"【{name}】\n"
+            f"name: {p.get('name', '')}\n"
+            f"sensitivity:\n{sens_s}\n"
+            f"company_assumptions:\n{ca_s}\n"
+            f"key_points_for_comment:\n{kp_s}"
+        )
+    return "\n\n".join(blocks)
 
 
 def format_commodities_summary(data: dict[str, Any]) -> str:
@@ -110,7 +157,21 @@ def build_prompt(
     commodities_summary: str,
     alerts_summary: str,
     spreads_summary: str,
+    profiles_summary: str = "",
 ) -> str:
+    profile_rule = ""
+    profile_section = ""
+    if profiles_summary.strip():
+        profile_rule = (
+            "- 会社プロファイルが提供されている場合、感応度の数字や会社前提との比較を使って\n"
+            "  より具体的なコメントを生成してください。\n"
+            "  例：'ブレント$XX（会社前提$63比+$YY）→INPEXに年間+¥ZZ億の上振れ要因' のように。\n"
+        )
+        profile_section = f"""
+会社プロファイル:
+{profiles_summary}
+"""
+
     return f"""あなたは素材セクター（鉄鋼・非鉄・石油・ガラス・紙・海運）を担当するバイサイドアナリストの
 AIアシスタントです。毎朝のMorning Briefの「Today's Call」を1段落（3-5文）で生成してください。
 
@@ -120,7 +181,7 @@ AIアシスタントです。毎朝のMorning Briefの「Today's Call」を1段�
 - 「なぜ上がったか」は推測しない。「何が起きて、何に影響するか」だけ述べる
 - 日本語で書く
 - 最も重要な変動を最初に述べる（severity highがあればそれ）
-
+{profile_rule}
 本日の市況データ:
 {commodities_summary}
 
@@ -128,7 +189,7 @@ AIアシスタントです。毎朝のMorning Briefの「Today's Call」を1段�
 {alerts_summary}
 
 スプレッド・シグナル:
-{spreads_summary}
+{spreads_summary}{profile_section}
 """
 
 
@@ -152,6 +213,8 @@ def main() -> None:
     commodities = _load_json(COMMODITIES_FILE)
     alerts = _load_json(ALERTS_FILE)
     spreads = _load_json(SPREADS_FILE)
+    profiles = load_all_profiles()
+    profiles_summary = format_profiles_summary(profiles)
 
     commodities_summary = format_commodities_summary(commodities)
     alerts_summary = format_alerts_summary(alerts)
@@ -171,7 +234,12 @@ def main() -> None:
         todays_call = NO_API_KEY_MSG
     else:
         try:
-            prompt = build_prompt(commodities_summary, alerts_summary, spreads_summary)
+            prompt = build_prompt(
+                commodities_summary,
+                alerts_summary,
+                spreads_summary,
+                profiles_summary,
+            )
             todays_call = call_claude(prompt)
         except Exception:
             todays_call = (alerts.get("summary") or "").strip()
